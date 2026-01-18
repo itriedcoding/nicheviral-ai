@@ -46,7 +46,7 @@ import { StatsCards } from "@/components/StatsCards";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { getSession } from "@/lib/auth";
 
-function NicheCard({ niche, currentUser }: { niche: any; currentUser: any }) {
+function NicheCard({ niche, userId }: { niche: any; userId: string }) {
   const [open, setOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [title, setTitle] = useState("");
@@ -85,7 +85,7 @@ function NicheCard({ niche, currentUser }: { niche: any; currentUser: any }) {
       return;
     }
 
-    if (!currentUser) {
+    if (!userId) {
       toast.error("Please sign in to create videos");
       return;
     }
@@ -93,7 +93,7 @@ function NicheCard({ niche, currentUser }: { niche: any; currentUser: any }) {
     setIsGenerating(true);
     try {
       const result = await createVideo({
-        userId: currentUser._id,
+        userId: userId as any,
         title,
         prompt,
         nicheId: niche._id,
@@ -363,7 +363,7 @@ function VideoCard({ video }: { video: any }) {
 }
 
 // AI Studio Components
-function AIStudioSection() {
+function AIStudioSection({ userId }: { userId: string }) {
   const [activeSubTab, setActiveSubTab] = useState("video");
 
   return (
@@ -407,16 +407,16 @@ function AIStudioSection() {
       </div>
 
       <AnimatePresence mode="wait">
-        {activeSubTab === "video" && <VideoGenerationSection key="video" />}
-        {activeSubTab === "thumbnail" && <ThumbnailGenerationSection key="thumbnail" />}
-        {activeSubTab === "voiceover" && <VoiceoverGenerationSection key="voiceover" />}
-        {activeSubTab === "script" && <ScriptGenerationSection key="script" />}
+        {activeSubTab === "video" && <VideoGenerationSection key="video" userId={userId} />}
+        {activeSubTab === "thumbnail" && <ThumbnailGenerationSection key="thumbnail" userId={userId} />}
+        {activeSubTab === "voiceover" && <VoiceoverGenerationSection key="voiceover" userId={userId} />}
+        {activeSubTab === "script" && <ScriptGenerationSection key="script" userId={userId} />}
       </AnimatePresence>
     </div>
   );
 }
 
-function VideoGenerationSection() {
+function VideoGenerationSection({ userId }: { userId: string }) {
   const [model, setModel] = useState("sora");
   const [prompt, setPrompt] = useState("");
   const [duration, setDuration] = useState([5]);
@@ -425,7 +425,6 @@ function VideoGenerationSection() {
   const [generatedVideo, setGeneratedVideo] = useState<any>(null);
 
   const createVideo = useAction(api.aiGeneration.createVideo);
-  const currentUser = useQuery(api.users.currentUser);
 
   const handleGenerate = async () => {
     if (!prompt) {
@@ -433,7 +432,7 @@ function VideoGenerationSection() {
       return;
     }
 
-    if (!currentUser) {
+    if (!userId) {
       toast.error("Please sign in");
       return;
     }
@@ -441,7 +440,7 @@ function VideoGenerationSection() {
     setIsGenerating(true);
     try {
       const result = await createVideo({
-        userId: currentUser._id,
+        userId: userId as any,
         title: prompt.substring(0, 50),
         prompt,
         aiModel: model,
@@ -619,7 +618,7 @@ function VideoGenerationSection() {
   );
 }
 
-function ThumbnailGenerationSection() {
+function ThumbnailGenerationSection({ userId }: { userId: string }) {
   const [model, setModel] = useState("midjourney");
   const [prompt, setPrompt] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -635,6 +634,11 @@ function ThumbnailGenerationSection() {
   const handleGenerate = async () => {
     if (!prompt) {
       toast.error("Please enter a prompt");
+      return;
+    }
+
+    if (!userId) {
+      toast.error("Please sign in");
       return;
     }
 
@@ -782,7 +786,7 @@ function ThumbnailGenerationSection() {
   );
 }
 
-function VoiceoverGenerationSection() {
+function VoiceoverGenerationSection({ userId }: { userId: string }) {
   const [model, setModel] = useState("elevenlabs");
   const [text, setText] = useState("");
   const [voice, setVoice] = useState("rachel");
@@ -801,6 +805,11 @@ function VoiceoverGenerationSection() {
   const handleGenerate = async () => {
     if (!text) {
       toast.error("Please enter text");
+      return;
+    }
+
+    if (!userId) {
+      toast.error("Please sign in");
       return;
     }
 
@@ -968,7 +977,7 @@ function VoiceoverGenerationSection() {
   );
 }
 
-function ScriptGenerationSection() {
+function ScriptGenerationSection({ userId }: { userId: string }) {
   const [prompt, setPrompt] = useState("");
   const [duration, setDuration] = useState([60]);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -980,6 +989,11 @@ function ScriptGenerationSection() {
   const handleGenerate = async () => {
     if (!prompt) {
       toast.error("Please enter a prompt");
+      return;
+    }
+
+    if (!userId) {
+      toast.error("Please sign in");
       return;
     }
 
@@ -1146,12 +1160,12 @@ function ScriptGenerationSection() {
 }
 
 // My Videos Section
-function MyVideosSection({ currentUser }: { currentUser: any }) {
+function MyVideosSection({ userId }: { userId: string }) {
   const [filterType, setFilterType] = useState("all");
 
   const userVideos = useQuery(
     api.videos.getUserVideos,
-    currentUser ? { userId: currentUser._id } : "skip"
+    userId ? { userId: userId as any } : "skip"
   );
 
   const deleteVideo = useMutation(api.videos.deleteVideo);
@@ -1316,6 +1330,7 @@ export default function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [userId, setUserId] = useState("");
 
   // Check authentication
   useEffect(() => {
@@ -1325,10 +1340,9 @@ export default function Dashboard() {
     } else {
       setIsAuthenticated(true);
       setUserEmail(session.userEmail);
+      setUserId(session.userId);
     }
   }, [navigate]);
-
-  const currentUser = useQuery(api.users.currentUser);
   const fetchTrending = useAction(api.youtube.fetchTrendingVideos);
   const searchNiches = useAction(api.youtube.searchNiches);
 
@@ -1339,7 +1353,7 @@ export default function Dashboard() {
 
   const userCredits = useQuery(
     api.videos.getUserCredits,
-    currentUser ? { userId: currentUser._id } : "skip"
+    userId ? { userId: userId as any } : "skip"
   );
 
   const [isLoadingTrending, setIsLoadingTrending] = useState(false);
@@ -1511,18 +1525,18 @@ export default function Dashboard() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {niches.map((niche: any) => (
-                  <NicheCard key={niche._id} niche={niche} currentUser={currentUser} />
+                  <NicheCard key={niche._id} niche={niche} userId={userId} />
                 ))}
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="studio" className="space-y-6">
-            <AIStudioSection />
+            <AIStudioSection userId={userId} />
           </TabsContent>
 
           <TabsContent value="videos" className="space-y-6">
-            <MyVideosSection currentUser={currentUser} />
+            <MyVideosSection userId={userId} />
           </TabsContent>
         </Tabs>
       </div>

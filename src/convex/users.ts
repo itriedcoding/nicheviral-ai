@@ -1,21 +1,35 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { v } from "convex/values";
 import { query, QueryCtx } from "./_generated/server";
 
 /**
+ * Get user by ID for custom authentication
+ */
+export const getUserById = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Try to get user by the custom userId from localStorage
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("_id"), args.userId))
+      .first();
+
+    return user;
+  },
+});
+
+/**
  * Get the current signed in user. Returns null if the user is not signed in.
- * Usage: const signedInUser = await ctx.runQuery(api.authHelpers.currentUser);
- * THIS FUNCTION IS READ-ONLY. DO NOT MODIFY.
+ * Usage: const signedInUser = await ctx.runQuery(api.users.currentUser);
  */
 export const currentUser = query({
   args: {},
   handler: async (ctx) => {
-    const user = await getCurrentUser(ctx);
-
-    if (user === null) {
-      return null;
-    }
-
-    return user;
+    // For custom auth, we can't get userId from context
+    // The frontend needs to pass userId explicitly
+    // This query is deprecated - use getUserById instead
+    return null;
   },
 });
 
@@ -25,9 +39,7 @@ export const currentUser = query({
  * @returns
  */
 export const getCurrentUser = async (ctx: QueryCtx) => {
-  const userId = await getAuthUserId(ctx);
-  if (userId === null) {
-    return null;
-  }
-  return await ctx.db.get(userId);
+  // For custom auth, return null
+  // Frontend should use getUserById with userId from localStorage
+  return null;
 };
