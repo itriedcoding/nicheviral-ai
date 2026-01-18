@@ -2,10 +2,24 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
+import { copyFileSync } from "fs";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    {
+      name: 'copy-redirects',
+      writeBundle() {
+        try {
+          copyFileSync('public/_redirects', 'dist/_redirects');
+        } catch (e) {
+          console.warn('Could not copy _redirects file');
+        }
+      }
+    }
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
