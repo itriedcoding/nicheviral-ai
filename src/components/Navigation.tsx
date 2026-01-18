@@ -1,14 +1,22 @@
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
-import { Sparkles, LogIn, LogOut } from "lucide-react";
+import { Sparkles, LogIn, LogOut, Shield } from "lucide-react";
 import { getSession, clearSession } from "@/lib/auth";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export function Navigation() {
   const location = useLocation();
   const navigate = useNavigate();
   const isLanding = location.pathname === "/";
   const session = getSession();
+
+  // Check if user is admin
+  const isAdmin = useQuery(
+    api.admin.isAdmin,
+    session ? { userId: session.userId } : "skip"
+  );
 
   const handleSignOut = () => {
     clearSession();
@@ -58,6 +66,14 @@ export function Navigation() {
                   <Link to="/dashboard">
                     <Button variant="outline" size="sm" className="glass hover:glass-strong">
                       Dashboard
+                    </Button>
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="outline" size="sm" className="glass hover:glass-strong">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Admin
                     </Button>
                   </Link>
                 )}

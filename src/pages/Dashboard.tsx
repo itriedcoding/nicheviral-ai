@@ -53,7 +53,7 @@ function NicheCard({ niche, userId }: { niche: any; userId: string }) {
   const [aiModel, setAiModel] = useState("sora");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const createVideo = useAction(api.aiGeneration.createVideo);
+  const createVideo = useAction(api.fastGeneration.generateVideoFast);
   const generateIdeas = useAction(api.aiGeneration.generateVideoIdeas);
   const [ideas, setIdeas] = useState<any[]>([]);
   const [loadingIdeas, setLoadingIdeas] = useState(false);
@@ -93,21 +93,19 @@ function NicheCard({ niche, userId }: { niche: any; userId: string }) {
     setIsGenerating(true);
     try {
       const result = await createVideo({
-        userId: userId as any,
-        title,
+        userId: userId,
         prompt,
-        nicheId: niche._id,
-        aiModel,
-        includeVoiceover: true,
+        model: aiModel,
+        duration: 10,
       });
 
       if (result.success) {
-        toast.success("Video generation started! Check your videos tab.");
+        toast.success("Video generated in seconds!");
         setOpen(false);
         setPrompt("");
         setTitle("");
       } else {
-        toast.error(result.error || "Failed to start video generation");
+        toast.error(result.error || "Failed to generate video");
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -424,7 +422,7 @@ function VideoGenerationSection({ userId }: { userId: string }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedVideo, setGeneratedVideo] = useState<any>(null);
 
-  const createVideo = useAction(api.aiGeneration.createVideo);
+  const createVideo = useAction(api.fastGeneration.generateVideoFast);
 
   const handleGenerate = async () => {
     if (!prompt) {
@@ -440,15 +438,14 @@ function VideoGenerationSection({ userId }: { userId: string }) {
     setIsGenerating(true);
     try {
       const result = await createVideo({
-        userId: userId as any,
-        title: prompt.substring(0, 50),
+        userId: userId,
         prompt,
-        aiModel: model,
-        includeVoiceover: false,
+        model: model,
+        duration: duration[0],
       });
 
       if (result.success) {
-        toast.success("Video generation started!");
+        toast.success("Video generated in seconds!");
         setGeneratedVideo(result);
       } else {
         toast.error(result.error || "Failed to generate video");
@@ -623,6 +620,9 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
   const [prompt, setPrompt] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState("16:9");
+
+  const generateThumbnail = useAction(api.fastGeneration.generateThumbnailFast);
 
   const modelCredits = {
     midjourney: 25,
@@ -644,9 +644,18 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
 
     setIsGenerating(true);
     try {
-      // Simulate generation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success("Thumbnail generation started!");
+      const result = await generateThumbnail({
+        userId,
+        prompt,
+        model,
+        aspectRatio,
+      });
+
+      if (result.success) {
+        toast.success("Thumbnail generated in seconds!");
+      } else {
+        toast.error(result.error || "Failed to generate thumbnail");
+      }
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -749,7 +758,7 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
           >
             <div>
               <Label className="text-sm font-medium mb-2 block">Aspect Ratio</Label>
-              <Select defaultValue="16:9">
+              <Select value={aspectRatio} onValueChange={setAspectRatio}>
                 <SelectTrigger className="glass">
                   <SelectValue />
                 </SelectTrigger>
@@ -793,7 +802,7 @@ function VoiceoverGenerationSection({ userId }: { userId: string }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateVoiceover = useAction(api.aiGeneration.generateVoiceover);
+  const generateVoiceover = useAction(api.fastGeneration.generateVoiceoverFast);
 
   const modelCredits = {
     elevenlabs: 10,
@@ -816,12 +825,14 @@ function VoiceoverGenerationSection({ userId }: { userId: string }) {
     setIsGenerating(true);
     try {
       const result = await generateVoiceover({
+        userId,
         text,
-        voiceId: voice,
+        model,
+        voice,
       });
 
       if (result.success) {
-        toast.success("Voiceover generated successfully!");
+        toast.success("Voiceover generated in seconds!");
       } else {
         toast.error(result.error || "Failed to generate voiceover");
       }
@@ -980,11 +991,12 @@ function VoiceoverGenerationSection({ userId }: { userId: string }) {
 function ScriptGenerationSection({ userId }: { userId: string }) {
   const [prompt, setPrompt] = useState("");
   const [duration, setDuration] = useState([60]);
+  const [tone, setTone] = useState("engaging");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedScript, setGeneratedScript] = useState("");
 
-  const generateScript = useAction(api.aiGeneration.generateScript);
+  const generateScript = useAction(api.fastGeneration.generateScriptFast);
 
   const handleGenerate = async () => {
     if (!prompt) {
@@ -1002,11 +1014,12 @@ function ScriptGenerationSection({ userId }: { userId: string }) {
       const result = await generateScript({
         prompt,
         duration: duration[0],
+        tone,
       });
 
       if (result.success) {
         setGeneratedScript(result.script || "");
-        toast.success("Script generated successfully!");
+        toast.success("Script generated in seconds!");
       } else {
         toast.error(result.error || "Failed to generate script");
       }
@@ -1097,7 +1110,7 @@ function ScriptGenerationSection({ userId }: { userId: string }) {
           >
             <div>
               <Label className="text-sm font-medium mb-2 block">Tone</Label>
-              <Select defaultValue="engaging">
+              <Select value={tone} onValueChange={setTone}>
                 <SelectTrigger className="glass">
                   <SelectValue />
                 </SelectTrigger>
@@ -1431,9 +1444,9 @@ export default function Dashboard() {
                   <div className="text-xs text-muted-foreground">Credits Remaining</div>
                 </div>
               </div>
-              <Button className="red-glow">
+              <Button className="red-glow" onClick={() => navigate("/billing")}>
                 <Zap className="w-4 h-4 mr-2" />
-                Upgrade to Pro
+                Buy Credits
               </Button>
             </div>
           </div>

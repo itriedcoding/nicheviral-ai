@@ -8,13 +8,17 @@
  * @module
  */
 
+import type * as admin from "../admin.js";
 import type * as aiGeneration from "../aiGeneration.js";
 import type * as aiModels from "../aiModels.js";
 import type * as auth from "../auth.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
+import type * as billing from "../billing.js";
 import type * as checkOTPCodes from "../checkOTPCodes.js";
 import type * as debugAuth from "../debugAuth.js";
+import type * as fastGeneration from "../fastGeneration.js";
 import type * as http from "../http.js";
+import type * as initAdmin from "../initAdmin.js";
 import type * as passwordAuth from "../passwordAuth.js";
 import type * as seedData from "../seedData.js";
 import type * as simpleAuth from "../simpleAuth.js";
@@ -32,13 +36,17 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  admin: typeof admin;
   aiGeneration: typeof aiGeneration;
   aiModels: typeof aiModels;
   auth: typeof auth;
   "auth/emailOtp": typeof auth_emailOtp;
+  billing: typeof billing;
   checkOTPCodes: typeof checkOTPCodes;
   debugAuth: typeof debugAuth;
+  fastGeneration: typeof fastGeneration;
   http: typeof http;
+  initAdmin: typeof initAdmin;
   passwordAuth: typeof passwordAuth;
   seedData: typeof seedData;
   simpleAuth: typeof simpleAuth;

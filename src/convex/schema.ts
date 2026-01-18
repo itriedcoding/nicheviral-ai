@@ -60,7 +60,7 @@ const schema = defineSchema(
 
     // AI-generated videos
     videos: defineTable({
-      userId: v.id("users"),
+      userId: v.string(),
       nicheId: v.optional(v.id("niches")),
       title: v.string(),
       description: v.string(),
@@ -85,7 +85,7 @@ const schema = defineSchema(
 
     // User generations history
     generations: defineTable({
-      userId: v.id("users"),
+      userId: v.string(),
       videoId: v.id("videos"),
       generationType: v.string(), // "video", "voiceover", "script"
       creditsUsed: v.number(),
@@ -94,7 +94,7 @@ const schema = defineSchema(
 
     // User credits/subscriptions
     userCredits: defineTable({
-      userId: v.id("users"),
+      userId: v.string(),
       credits: v.number(),
       subscriptionTier: v.union(
         v.literal("free"),
@@ -103,7 +103,59 @@ const schema = defineSchema(
       ),
       subscriptionStatus: v.string(),
       renewalDate: v.optional(v.number()),
-    }).index("by_user", ["userId"])
+    }).index("by_user", ["userId"]),
+
+    // Purchases (custom billing)
+    purchases: defineTable({
+      userId: v.string(),
+      packageId: v.string(),
+      amount: v.number(),
+      credits: v.number(),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("completed"),
+        v.literal("failed"),
+        v.literal("refunded")
+      ),
+      paymentMethod: v.string(),
+      transactionId: v.optional(v.string()),
+      completedAt: v.optional(v.number()),
+    }).index("by_user", ["userId"]),
+
+    // Admin actions log
+    adminActions: defineTable({
+      adminUserId: v.string(),
+      action: v.string(),
+      targetUserId: v.optional(v.string()),
+      metadata: v.any(),
+    }).index("by_admin", ["adminUserId"]),
+
+    // Transactions (credits history)
+    transactions: defineTable({
+      userId: v.id("users"),
+      type: v.union(v.literal("credit"), v.literal("debit")),
+      amount: v.number(),
+      reason: v.string(),
+      balanceBefore: v.number(),
+      balanceAfter: v.number(),
+      metadata: v.optional(v.any()),
+    }).index("by_user", ["userId"]),
+
+    // Payments (custom billing system)
+    payments: defineTable({
+      userId: v.id("users"),
+      amount: v.number(),
+      credits: v.number(),
+      packageType: v.string(),
+      paymentMethod: v.string(),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("completed"),
+        v.literal("failed"),
+        v.literal("refunded")
+      ),
+      paymentDetails: v.any(),
+    }).index("by_user", ["userId"]),
   },
   {
     schemaValidation: false,
