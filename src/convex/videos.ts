@@ -101,14 +101,23 @@ export const getVideosByStatus = query({
 export const deleteVideo = mutation({
   args: { id: v.id("videos") },
   handler: async (ctx, args) => {
-    const userId = await ctx.auth.getUserIdentity();
-    if (!userId) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
 
     const video = await ctx.db.get(args.id);
     if (!video) throw new Error("Video not found");
 
-    // Check if user owns the video
-    if (video.userId !== userId.subject) {
+    // Get user from database to check if admin or owner
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("_id"), video.userId))
+      .first();
+
+    // Check if user owns the video or is admin
+    const isOwner = video.userId === identity.subject;
+    const isAdmin = user?.role === "admin";
+
+    if (!isOwner && !isAdmin) {
       throw new Error("Not authorized to delete this video");
     }
 
