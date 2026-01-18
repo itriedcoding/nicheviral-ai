@@ -1,3 +1,5 @@
+"use node";
+
 import { Email } from "@convex-dev/auth/providers/Email";
 import { RandomReader, generateRandomString } from "@oslojs/crypto/random";
 import { Resend } from "resend";
