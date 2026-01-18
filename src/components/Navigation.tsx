@@ -104,14 +104,6 @@ export function Navigation() {
                     </Button>
                   </Link>
                 )}
-                {isAdmin && (
-                  <Link to="/admin">
-                    <Button variant="outline" size="sm" className="glass hover:glass-strong">
-                      <Shield className="w-4 h-4 mr-2" />
-                      Admin
-                    </Button>
-                  </Link>
-                )}
                 <Button
                   onClick={handleSignOut}
                   variant="outline"
@@ -192,14 +184,6 @@ export function Navigation() {
                       <Link to="/billing" onClick={() => setMobileMenuOpen(false)}>
                         <Button variant="outline" size="sm" className="w-full glass hover:glass-strong">
                           Billing
-                        </Button>
-                      </Link>
-                    )}
-                    {isAdmin && (
-                      <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="outline" size="sm" className="w-full glass hover:glass-strong">
-                          <Shield className="w-4 h-4 mr-2" />
-                          Admin
                         </Button>
                       </Link>
                     )}
