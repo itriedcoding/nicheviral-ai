@@ -15,6 +15,13 @@ const AuthPage = lazy(() => import("./pages/Auth.tsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
 const Billing = lazy(() => import("./pages/Billing.tsx"));
 const Admin = lazy(() => import("./pages/Admin.tsx"));
+const About = lazy(() => import("./pages/About.tsx"));
+const Features = lazy(() => import("./pages/Features.tsx"));
+const Integrations = lazy(() => import("./pages/Integrations.tsx"));
+const Pricing = lazy(() => import("./pages/Pricing.tsx"));
+const Contact = lazy(() => import("./pages/Contact.tsx"));
+const Terms = lazy(() => import("./pages/Terms.tsx"));
+const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 // Simple loading fallback for route transitions
@@ -68,6 +75,13 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/billing" element={<Billing />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/integrations" element={<Integrations />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
