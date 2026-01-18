@@ -138,6 +138,18 @@ export default function Billing() {
 
       toast.info("Initializing payment form...");
 
+      // Show the card container first
+      setPaymentFormReady(true);
+
+      // Wait for DOM to update
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Check if card container exists
+      const cardContainer = document.getElementById('card-container');
+      if (!cardContainer) {
+        throw new Error("Card container not found. Please try again.");
+      }
+
       // Initialize Square Payments
       // @ts-ignore
       const payments = window.Square.payments(squareConfig.applicationId);
@@ -148,11 +160,11 @@ export default function Billing() {
 
       // Store card instance for cleanup
       (window as any).squareCard = card;
-      setPaymentFormReady(true);
       setIsProcessing(false);
 
     } catch (error: any) {
       toast.error(error.message || "Failed to initialize payment form");
+      setPaymentFormReady(false);
       setIsProcessing(false);
     }
   };
