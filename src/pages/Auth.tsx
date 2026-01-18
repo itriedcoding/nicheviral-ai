@@ -15,11 +15,11 @@ import {
 } from "@/components/ui/input-otp";
 
 import { ArrowRight, Loader2, Mail, Sparkles } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { getSession, setSession } from "@/lib/auth";
+import { setSession } from "@/lib/auth";
 
 interface AuthProps {
   redirectAfterAuth?: string;
@@ -36,16 +36,6 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const verifyOTP = useMutation(api.simpleAuthMutations.verifyOTP);
   const signUpWithPassword = useAction(api.passwordAuth.signUpWithPassword);
   const signInWithPassword = useAction(api.passwordAuth.signInWithPassword);
-
-  // Check for existing session on mount
-  useEffect(() => {
-    const session = getSession();
-    if (session) {
-      console.log("✅ Existing session found for:", session.userEmail);
-      const redirect = redirectAfterAuth || "/dashboard";
-      navigate(redirect);
-    }
-  }, [navigate, redirectAfterAuth]);
 
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
