@@ -1035,6 +1035,17 @@ function ScriptGenerationSection({ userId }: { userId: string }) {
     toast.success("Script copied to clipboard!");
   };
 
+  const downloadScript = () => {
+    const blob = new Blob([generatedScript], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `script_${Date.now()}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Script downloaded!");
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -1153,15 +1164,26 @@ function ScriptGenerationSection({ userId }: { userId: string }) {
         >
           <div className="flex items-center justify-between">
             <h4 className="font-semibold">Generated Script</h4>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={copyToClipboard}
-              className="glass"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Copy
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={copyToClipboard}
+                className="glass"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Copy
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={downloadScript}
+                className="glass"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+            </div>
           </div>
           <ScrollArea className="h-[300px] w-full rounded-md glass p-4">
             <pre className="text-sm whitespace-pre-wrap font-mono">{generatedScript}</pre>
@@ -1305,8 +1327,27 @@ function MyVideosSection({ userId }: { userId: string }) {
                 </div>
 
                 <div className="flex gap-2">
-                  {video.status === "completed" && (
-                    <Button size="sm" className="flex-1" variant="outline">
+                  {video.status === "completed" && video.videoUrl && (
+                    <Button
+                      size="sm"
+                      className="flex-1"
+                      variant="outline"
+                      onClick={() => {
+                        // Handle different types of content
+                        if (video.videoUrl.startsWith('data:')) {
+                          // For data URLs (text content), create downloadable file
+                          const link = document.createElement('a');
+                          link.href = video.videoUrl;
+                          link.download = `${video.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+                          link.click();
+                          toast.success("Content downloaded!");
+                        } else if (video.videoUrl.startsWith('http')) {
+                          // For external URLs, open in new tab
+                          window.open(video.videoUrl, '_blank');
+                          toast.success("Opening content in new tab!");
+                        }
+                      }}
+                    >
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
