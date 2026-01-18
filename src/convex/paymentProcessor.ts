@@ -40,12 +40,21 @@ export const processCreditCardPayment = action({
       // Get Square API key from environment
       const squareAccessToken = process.env.SQUARE_ACCESS_TOKEN;
       const squareEnvironment = process.env.SQUARE_ENVIRONMENT;
+      const squareLocationId = process.env.SQUARE_LOCATION_ID;
 
       if (!squareAccessToken) {
         console.error("❌ SQUARE_ACCESS_TOKEN not configured");
         return {
           success: false,
           error: "Payment system not configured. Please contact support.",
+        };
+      }
+
+      if (!squareLocationId) {
+        console.error("❌ SQUARE_LOCATION_ID not configured");
+        return {
+          success: false,
+          error: "Payment location not configured. Please contact support.",
         };
       }
 
@@ -68,16 +77,17 @@ export const processCreditCardPayment = action({
       const paymentRequest = {
         source_id: args.cardNonce,
         idempotency_key: idempotencyKey,
+        location_id: squareLocationId,
         amount_money: {
           amount: amountInCents,
           currency: "USD",
         },
         autocomplete: true,
         note: `Neura AI ${args.packageId} package - ${pkg.credits} credits`,
-        buyer_email_address: undefined, // Optional: can add user email
       };
 
       console.log("🔄 Sending payment request to Square...");
+      console.log("Request payload:", JSON.stringify(paymentRequest, null, 2));
 
       const response = await fetch(squareApiUrl, {
         method: "POST",
@@ -90,6 +100,8 @@ export const processCreditCardPayment = action({
       });
 
       const result = await response.json();
+      console.log("Square API Response:", JSON.stringify(result, null, 2));
+      console.log("Response status:", response.status);
 
       // Check if payment was successful
       if (!response.ok || !result.payment) {
@@ -161,9 +173,14 @@ export const getSquareApplicationId = action({
   handler: async (ctx, args) => {
     const applicationId = process.env.SQUARE_APPLICATION_ID;
     const environment = process.env.SQUARE_ENVIRONMENT;
+    const locationId = process.env.SQUARE_LOCATION_ID;
 
     if (!applicationId) {
       throw new Error("Square not configured");
+    }
+
+    if (!locationId) {
+      throw new Error("Square location not configured");
     }
 
     // PRODUCTION ONLY - NO SANDBOX/TEST ALLOWED
@@ -174,6 +191,7 @@ export const getSquareApplicationId = action({
     return {
       applicationId,
       environment,
+      locationId,
     };
   },
 });
