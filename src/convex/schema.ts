@@ -34,6 +34,14 @@ const schema = defineSchema(
 
     // add other tables here
 
+    // OTP codes for email verification
+    otpCodes: defineTable({
+      email: v.string(),
+      code: v.string(),
+      expiresAt: v.number(),
+      used: v.boolean(),
+    }).index("by_email", ["email"]),
+
     // Trending niches discovered from YouTube API
     niches: defineTable({
       title: v.string(),

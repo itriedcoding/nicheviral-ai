@@ -15,6 +15,8 @@ import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as debugAuth from "../debugAuth.js";
 import type * as http from "../http.js";
 import type * as seedData from "../seedData.js";
+import type * as simpleAuth from "../simpleAuth.js";
+import type * as simpleAuthMutations from "../simpleAuthMutations.js";
 import type * as testResend from "../testResend.js";
 import type * as users from "../users.js";
 import type * as videos from "../videos.js";
@@ -35,6 +37,8 @@ declare const fullApi: ApiFromModules<{
   debugAuth: typeof debugAuth;
   http: typeof http;
   seedData: typeof seedData;
+  simpleAuth: typeof simpleAuth;
+  simpleAuthMutations: typeof simpleAuthMutations;
   testResend: typeof testResend;
   users: typeof users;
   videos: typeof videos;
