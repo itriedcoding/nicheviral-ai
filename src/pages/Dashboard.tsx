@@ -53,7 +53,7 @@ function NicheCard({ niche, userId }: { niche: any; userId: string }) {
   const [aiModel, setAiModel] = useState("sora");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const createVideo = useAction(api.fastGeneration.generateVideoFast);
+  const createVideo = useAction(api.realAIGeneration.generateCompleteVideo);
   const generateIdeas = useAction(api.aiGeneration.generateVideoIdeas);
   const [ideas, setIdeas] = useState<any[]>([]);
   const [loadingIdeas, setLoadingIdeas] = useState(false);
@@ -97,6 +97,7 @@ function NicheCard({ niche, userId }: { niche: any; userId: string }) {
         prompt,
         model: aiModel,
         duration: 10,
+        includeAudio: true,
       });
 
       if (result.success) {
@@ -422,7 +423,7 @@ function VideoGenerationSection({ userId }: { userId: string }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedVideo, setGeneratedVideo] = useState<any>(null);
 
-  const createVideo = useAction(api.fastGeneration.generateVideoFast);
+  const createVideo = useAction(api.realAIGeneration.generateCompleteVideo);
 
   const handleGenerate = async () => {
     if (!prompt) {
@@ -442,6 +443,7 @@ function VideoGenerationSection({ userId }: { userId: string }) {
         prompt,
         model: model,
         duration: duration[0],
+        includeAudio: true,
       });
 
       if (result.success) {
@@ -622,7 +624,7 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [aspectRatio, setAspectRatio] = useState("16:9");
 
-  const generateThumbnail = useAction(api.fastGeneration.generateThumbnailFast);
+  const generateThumbnail = useAction(api.realAIGeneration.generateRealThumbnail);
 
   const modelCredits = {
     midjourney: 25,
@@ -647,12 +649,11 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
       const result = await generateThumbnail({
         userId,
         prompt,
-        model,
         aspectRatio,
       });
 
       if (result.success) {
-        toast.success("Thumbnail generated in seconds!");
+        toast.success("Real AI thumbnail generated! Using Stable Diffusion.");
       } else {
         toast.error(result.error || "Failed to generate thumbnail");
       }
@@ -798,11 +799,11 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
 function VoiceoverGenerationSection({ userId }: { userId: string }) {
   const [model, setModel] = useState("elevenlabs");
   const [text, setText] = useState("");
-  const [voice, setVoice] = useState("rachel");
+  const [voice, setVoice] = useState("Brian");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateVoiceover = useAction(api.fastGeneration.generateVoiceoverFast);
+  const generateVoiceover = useAction(api.realAIGeneration.generateRealVoiceover);
 
   const modelCredits = {
     elevenlabs: 10,
@@ -832,7 +833,7 @@ function VoiceoverGenerationSection({ userId }: { userId: string }) {
       });
 
       if (result.success) {
-        toast.success("Voiceover generated in seconds!");
+        toast.success("Real AI voiceover generated! Listen and download below.");
       } else {
         toast.error(result.error || "Failed to generate voiceover");
       }
@@ -1292,12 +1293,21 @@ function MyVideosSection({ userId }: { userId: string }) {
               animate={{ opacity: 1, scale: 1 }}
               className="glass-card rounded-xl overflow-hidden group"
             >
-              <div className="relative h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+              <div className="relative h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center overflow-hidden">
                 {video.status === "generating" && (
                   <Loader2 className="w-12 h-12 text-primary animate-spin" />
                 )}
                 {video.status === "completed" && video.thumbnailUrl && (
-                  <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover" />
+                  <img
+                    src={video.thumbnailUrl}
+                    alt={video.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      // Fallback to placeholder if image fails to load
+                      (e.target as HTMLImageElement).src = `https://image.pollinations.ai/prompt/${encodeURIComponent(video.title)}?width=400&height=300&nologo=true`;
+                    }}
+                  />
                 )}
                 {video.status === "queued" && (
                   <Clock className="w-12 h-12 text-primary" />
