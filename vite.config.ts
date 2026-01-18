@@ -76,6 +76,8 @@ export default defineConfig({
       'react-router',
       'convex',
       '@convex-dev/auth/react',
+      'use-sync-external-store/shim',
+      'use-sync-external-store/shim/with-selector',
     ],
     // Exclude heavy optional dependencies for faster dev server start
     exclude: ['three', '@react-three/fiber', '@react-three/drei'],

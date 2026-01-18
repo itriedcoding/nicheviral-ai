@@ -1,6 +1,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Navigation } from "@/components/Navigation";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { Button } from "@/components/ui/button";
 import {
   Sparkles,
@@ -67,6 +68,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
+      <AnimatedBackground />
       <Navigation />
 
       {/* Hero Section */}
