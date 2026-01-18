@@ -12,6 +12,7 @@ import type * as aiGeneration from "../aiGeneration.js";
 import type * as aiModels from "../aiModels.js";
 import type * as auth from "../auth.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
+import type * as checkOTPCodes from "../checkOTPCodes.js";
 import type * as debugAuth from "../debugAuth.js";
 import type * as http from "../http.js";
 import type * as seedData from "../seedData.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   aiModels: typeof aiModels;
   auth: typeof auth;
   "auth/emailOtp": typeof auth_emailOtp;
+  checkOTPCodes: typeof checkOTPCodes;
   debugAuth: typeof debugAuth;
   http: typeof http;
   seedData: typeof seedData;
