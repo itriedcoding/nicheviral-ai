@@ -22,6 +22,14 @@ const Pricing = lazy(() => import("./pages/Pricing.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
 const Terms = lazy(() => import("./pages/Terms.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
+const ApiDocs = lazy(() => import("./pages/ApiDocs.tsx"));
+const Changelog = lazy(() => import("./pages/Changelog.tsx"));
+const Careers = lazy(() => import("./pages/Careers.tsx"));
+const Blog = lazy(() => import("./pages/Blog.tsx"));
+const PressKit = lazy(() => import("./pages/PressKit.tsx"));
+const Partners = lazy(() => import("./pages/Partners.tsx"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy.tsx"));
+const GDPR = lazy(() => import("./pages/GDPR.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 // Simple loading fallback for route transitions
@@ -82,6 +90,14 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/contact" element={<Contact />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/api-docs" element={<ApiDocs />} />
+              <Route path="/changelog" element={<Changelog />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/press-kit" element={<PressKit />} />
+              <Route path="/partners" element={<Partners />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+              <Route path="/gdpr" element={<GDPR />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

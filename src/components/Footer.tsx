@@ -61,14 +61,14 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link to="/api-docs" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     API Documentation
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link to="/changelog" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Changelog
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -83,14 +83,14 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link to="/careers" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Careers
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Blog
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -98,14 +98,14 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link to="/press-kit" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Press Kit
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link to="/partners" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Partners
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -125,14 +125,14 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link to="/cookie-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Cookie Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  <Link to="/gdpr" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     GDPR
-                  </a>
+                  </Link>
                 </li>
               </ul>
 

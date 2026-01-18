@@ -1210,6 +1210,7 @@ function MyVideosSection({ userId }: { userId: string }) {
   );
 
   const deleteVideo = useMutation(api.videos.deleteVideo);
+  const regenerateContent = useAction(api.unifiedAIModel.generateWithUnifiedAI);
 
   const handleDelete = async (videoId: Id<"videos">) => {
     try {
@@ -1221,7 +1222,26 @@ function MyVideosSection({ userId }: { userId: string }) {
   };
 
   const handleRegenerate = async (video: any) => {
-    toast.info("Regeneration feature coming soon!");
+    try {
+      toast.info("Regenerating content with unified AI model...");
+
+      const result = await regenerateContent({
+        userId: video.userId,
+        prompt: video.prompt,
+        type: "complete",
+        model: video.aiModel,
+        duration: video.duration || 10,
+        voice: video.voiceModel || "Brian",
+      });
+
+      if (result.success) {
+        toast.success(`✨ Content regenerated! ${result.metadata?.frameCount || 0} frames created in ${(result.metadata?.processingTime || 0) / 1000}s`);
+      } else {
+        toast.error(result.error || "Failed to regenerate content");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   return (

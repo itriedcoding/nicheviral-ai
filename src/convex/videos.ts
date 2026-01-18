@@ -221,3 +221,29 @@ export const deductCredits = mutation({
     return { success: true, remainingCredits: userCredits.credits - args.amount };
   },
 });
+
+// Get video metadata for regeneration
+export const getVideoForRegeneration = query({
+  args: { id: v.id("videos") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const video = await ctx.db.get(args.id);
+    if (!video) throw new Error("Video not found");
+
+    // Check ownership
+    if (video.userId !== identity.subject) {
+      throw new Error("Not authorized to regenerate this video");
+    }
+
+    return {
+      prompt: video.prompt,
+      title: video.title,
+      description: video.description,
+      aiModel: video.aiModel,
+      voiceModel: video.voiceModel,
+      duration: video.duration,
+    };
+  },
+});
