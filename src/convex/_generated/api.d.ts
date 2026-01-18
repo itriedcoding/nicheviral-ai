@@ -27,6 +27,7 @@ import type * as seedData from "../seedData.js";
 import type * as simpleAuth from "../simpleAuth.js";
 import type * as simpleAuthMutations from "../simpleAuthMutations.js";
 import type * as testResend from "../testResend.js";
+import type * as unifiedAIModel from "../unifiedAIModel.js";
 import type * as users from "../users.js";
 import type * as videos from "../videos.js";
 import type * as youtube from "../youtube.js";
@@ -58,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   simpleAuth: typeof simpleAuth;
   simpleAuthMutations: typeof simpleAuthMutations;
   testResend: typeof testResend;
+  unifiedAIModel: typeof unifiedAIModel;
   users: typeof users;
   videos: typeof videos;
   youtube: typeof youtube;

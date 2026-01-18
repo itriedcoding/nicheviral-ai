@@ -53,7 +53,7 @@ function NicheCard({ niche, userId }: { niche: any; userId: string }) {
   const [aiModel, setAiModel] = useState("sora");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const createVideo = useAction(api.realAIGeneration.generateCompleteVideo);
+  const createVideo = useAction(api.unifiedAIModel.generateWithUnifiedAI);
   const generateIdeas = useAction(api.aiGeneration.generateVideoIdeas);
   const [ideas, setIdeas] = useState<any[]>([]);
   const [loadingIdeas, setLoadingIdeas] = useState(false);
@@ -95,13 +95,14 @@ function NicheCard({ niche, userId }: { niche: any; userId: string }) {
       const result = await createVideo({
         userId: userId,
         prompt,
+        type: "complete",
         model: aiModel,
         duration: 10,
-        includeAudio: true,
+        voice: "Brian",
       });
 
       if (result.success) {
-        toast.success("Video generated in seconds!");
+        toast.success(`✨ Unified AI Model: Generated ${result.outputs?.images?.length || 0} frames with audio!`);
         setOpen(false);
         setPrompt("");
         setTitle("");
@@ -423,7 +424,7 @@ function VideoGenerationSection({ userId }: { userId: string }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedVideo, setGeneratedVideo] = useState<any>(null);
 
-  const createVideo = useAction(api.realAIGeneration.generateCompleteVideo);
+  const createVideo = useAction(api.unifiedAIModel.generateWithUnifiedAI);
 
   const handleGenerate = async () => {
     if (!prompt) {
@@ -441,13 +442,14 @@ function VideoGenerationSection({ userId }: { userId: string }) {
       const result = await createVideo({
         userId: userId,
         prompt,
+        type: "video",
         model: model,
         duration: duration[0],
-        includeAudio: true,
+        voice: "Brian",
       });
 
       if (result.success) {
-        toast.success("Video generated in seconds!");
+        toast.success(`✨ Unified AI: ${result.metadata?.frameCount || 0} AI frames + narration in ${(result.metadata?.processingTime || 0) / 1000}s!`);
         setGeneratedVideo(result);
       } else {
         toast.error(result.error || "Failed to generate video");
@@ -624,7 +626,7 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [aspectRatio, setAspectRatio] = useState("16:9");
 
-  const generateThumbnail = useAction(api.realAIGeneration.generateRealThumbnail);
+  const generateThumbnail = useAction(api.unifiedAIModel.generateWithUnifiedAI);
 
   const modelCredits = {
     midjourney: 25,
@@ -649,11 +651,13 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
       const result = await generateThumbnail({
         userId,
         prompt,
+        type: "thumbnail",
         aspectRatio,
+        model,
       });
 
       if (result.success) {
-        toast.success("Real AI thumbnail generated! Using Stable Diffusion.");
+        toast.success(`✨ Unified AI Model: Thumbnail generated in ${(result.metadata?.processingTime || 0) / 1000}s!`);
       } else {
         toast.error(result.error || "Failed to generate thumbnail");
       }
@@ -803,7 +807,7 @@ function VoiceoverGenerationSection({ userId }: { userId: string }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateVoiceover = useAction(api.realAIGeneration.generateRealVoiceover);
+  const generateVoiceover = useAction(api.unifiedAIModel.generateWithUnifiedAI);
 
   const modelCredits = {
     elevenlabs: 10,
@@ -827,13 +831,14 @@ function VoiceoverGenerationSection({ userId }: { userId: string }) {
     try {
       const result = await generateVoiceover({
         userId,
-        text,
+        prompt: text,
+        type: "voiceover",
         model,
         voice,
       });
 
       if (result.success) {
-        toast.success("Real AI voiceover generated! Listen and download below.");
+        toast.success(`✨ Unified AI Model: Voiceover ready in ${(result.metadata?.processingTime || 0) / 1000}s! ${result.outputs?.audio ? 'Audio ready!' : ''}`);
       } else {
         toast.error(result.error || "Failed to generate voiceover");
       }
