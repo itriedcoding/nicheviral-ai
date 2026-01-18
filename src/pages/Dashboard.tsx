@@ -25,13 +25,12 @@ import {
   Zap,
   Coins
 } from "lucide-react";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { Authenticated, Unauthenticated, useConvexAuth } from "convex/react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Id } from "@/convex/_generated/dataModel";
 import { Navigation } from "@/components/Navigation";
 import { StatsCards } from "@/components/StatsCards";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
+import { getSession } from "@/lib/auth";
 
 function NicheCard({ niche, currentUser }: { niche: any; currentUser: any }) {
   const [open, setOpen] = useState(false);
@@ -350,8 +349,22 @@ function VideoCard({ video }: { video: any }) {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  // Check authentication
+  useEffect(() => {
+    const session = getSession();
+    if (!session) {
+      navigate("/auth");
+    } else {
+      setIsAuthenticated(true);
+      setUserEmail(session.userEmail);
+    }
+  }, [navigate]);
 
   const currentUser = useQuery(api.users.currentUser);
   const fetchTrending = useAction(api.youtube.fetchTrendingVideos);
@@ -371,6 +384,11 @@ export default function Dashboard() {
       handleFetchTrending();
     }
   }, [niches]);
+
+  // Show nothing while checking auth
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleFetchTrending = async () => {
     setIsLoadingTrending(true);
@@ -410,9 +428,8 @@ export default function Dashboard() {
     <div className="min-h-screen relative">
       <AnimatedBackground />
       <Navigation />
-      <Authenticated>
-        {/* Main Content */}
-        <div className="pt-20 pb-8">
+      {/* Main Content */}
+      <div className="pt-20 pb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -421,7 +438,7 @@ export default function Dashboard() {
                   Dashboard
                 </h1>
                 <p className="text-muted-foreground">
-                  Welcome back! Here's your creative analytics.
+                  Welcome back, {userEmail.split('@')[0]}! Here's your creative analytics.
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -539,23 +556,6 @@ export default function Dashboard() {
             </TabsContent>
           </Tabs>
         </div>
-      </Authenticated>
-
-      <Unauthenticated>
-        <div className="min-h-screen flex items-center justify-center px-4">
-          <div className="glass-card rounded-xl p-12 text-center max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Sign In Required</h2>
-            <p className="text-muted-foreground mb-6">
-              Please sign in to access the dashboard
-            </p>
-            <Link to="/auth">
-              <Button className="red-glow">
-                Sign In
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </Unauthenticated>
     </div>
   );
 }

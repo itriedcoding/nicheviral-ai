@@ -1,14 +1,19 @@
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
-import { Sparkles, LogIn } from "lucide-react";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { Authenticated, Unauthenticated } from "convex/react";
+import { Sparkles, LogIn, LogOut } from "lucide-react";
+import { getSession, clearSession } from "@/lib/auth";
 
 export function Navigation() {
   const location = useLocation();
-  const { signOut } = useAuthActions();
+  const navigate = useNavigate();
   const isLanding = location.pathname === "/";
+  const session = getSession();
+
+  const handleSignOut = () => {
+    clearSession();
+    navigate("/");
+  };
 
   return (
     <motion.nav
@@ -33,37 +38,40 @@ export function Navigation() {
           </Link>
 
           <div className="flex items-center gap-4">
-            <Unauthenticated>
-              <Link to="/auth">
-                <Button variant="outline" size="sm" className="glass hover:glass-strong">
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Sign In
-                </Button>
-              </Link>
-              <Link to="/auth">
-                <Button size="sm" className="red-glow">
-                  Get Started
-                </Button>
-              </Link>
-            </Unauthenticated>
-
-            <Authenticated>
-              {location.pathname !== "/dashboard" && (
-                <Link to="/dashboard">
+            {!session ? (
+              <>
+                <Link to="/auth">
                   <Button variant="outline" size="sm" className="glass hover:glass-strong">
-                    Dashboard
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Sign In
                   </Button>
                 </Link>
-              )}
-              <Button
-                onClick={() => void signOut()}
-                variant="outline"
-                size="sm"
-                className="glass hover:glass-strong"
-              >
-                Sign Out
-              </Button>
-            </Authenticated>
+                <Link to="/auth">
+                  <Button size="sm" className="red-glow">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                {location.pathname !== "/dashboard" && (
+                  <Link to="/dashboard">
+                    <Button variant="outline" size="sm" className="glass hover:glass-strong">
+                      Dashboard
+                    </Button>
+                  </Link>
+                )}
+                <Button
+                  onClick={handleSignOut}
+                  variant="outline"
+                  size="sm"
+                  className="glass hover:glass-strong"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
