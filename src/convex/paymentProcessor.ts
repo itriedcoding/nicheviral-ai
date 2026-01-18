@@ -2,50 +2,21 @@
 
 import { v } from "convex/values";
 import { action } from "./_generated/server";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 
-// Custom credit card payment processor
-// This processes payments WITHOUT Stripe, PayPal, or any third-party
+// REAL Credit Card Payment Processor using Square Payment Gateway
+// This processes REAL payments through Square's Payment API
 export const processCreditCardPayment = action({
   args: {
     userId: v.string(),
     packageId: v.string(),
-    cardNumber: v.string(),
-    cardExpiry: v.string(),
-    cardCVV: v.string(),
+    cardNonce: v.string(), // Square card nonce (tokenized card)
     cardholderName: v.string(),
     billingAddress: v.optional(v.any()),
   },
-  handler: async (ctx, args): Promise<{ success: boolean; transactionId?: string; error?: string }> => {
+  handler: async (ctx, args): Promise<{ success: boolean; transactionId?: string; error?: string; purchaseId?: string }> => {
     try {
-      console.log("💳 Processing custom credit card payment...");
-
-      // Validate card number (Luhn algorithm)
-      const isValidCard = validateCardNumber(args.cardNumber);
-      if (!isValidCard) {
-        return {
-          success: false,
-          error: "Invalid card number",
-        };
-      }
-
-      // Validate expiry date
-      const isValidExpiry = validateExpiry(args.cardExpiry);
-      if (!isValidExpiry) {
-        return {
-          success: false,
-          error: "Card expired or invalid expiry date",
-        };
-      }
-
-      // Validate CVV
-      const isValidCVV = /^\d{3,4}$/.test(args.cardCVV);
-      if (!isValidCVV) {
-        return {
-          success: false,
-          error: "Invalid CVV code",
-        };
-      }
+      console.log("💳 Processing REAL credit card payment via Square...");
 
       // Get package details
       const packages: Record<string, { credits: number; price: number }> = {
@@ -63,295 +34,166 @@ export const processCreditCardPayment = action({
         };
       }
 
-      // Generate transaction ID
-      const transactionId = `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+      // Convert amount to cents for Square API
+      const amountInCents = Math.round(pkg.price * 100);
 
-      // In production, here you would:
-      // 1. Encrypt card details
-      // 2. Contact payment gateway/bank API
-      // 3. Process authorization
-      // 4. Handle 3D Secure if required
-      // 5. Settle transaction
+      // Get Square API key from environment
+      const squareAccessToken = process.env.SQUARE_ACCESS_TOKEN;
+      const squareEnvironment = process.env.SQUARE_ENVIRONMENT || "sandbox";
 
-      // For now, simulate successful payment processing
-      // In production, this would be replaced with real payment gateway integration
-      const paymentDetails = {
-        cardLast4: args.cardNumber.slice(-4),
-        cardType: detectCardType(args.cardNumber),
-        transactionId,
-        timestamp: Date.now(),
-        amount: pkg.price,
-        currency: "USD",
+      if (!squareAccessToken) {
+        console.error("❌ SQUARE_ACCESS_TOKEN not configured");
+        return {
+          success: false,
+          error: "Payment system not configured. Please contact support.",
+        };
+      }
+
+      // Square API endpoint
+      const squareApiUrl = squareEnvironment === "production"
+        ? "https://connect.squareup.com/v2/payments"
+        : "https://connect.squareupsandbox.com/v2/payments";
+
+      // Generate idempotency key (prevents duplicate charges)
+      const idempotencyKey = `${args.userId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Make REAL payment request to Square
+      const paymentRequest = {
+        source_id: args.cardNonce,
+        idempotency_key: idempotencyKey,
+        amount_money: {
+          amount: amountInCents,
+          currency: "USD",
+        },
+        autocomplete: true,
+        note: `Neura AI ${args.packageId} package - ${pkg.credits} credits`,
+        buyer_email_address: undefined, // Optional: can add user email
       };
 
-      // Create purchase record
+      console.log("🔄 Sending payment request to Square...");
+
+      const response = await fetch(squareApiUrl, {
+        method: "POST",
+        headers: {
+          "Square-Version": "2024-01-18",
+          "Authorization": `Bearer ${squareAccessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(paymentRequest),
+      });
+
+      const result = await response.json();
+
+      // Check if payment was successful
+      if (!response.ok || !result.payment) {
+        console.error("❌ Square payment failed:", result);
+
+        const errorMessage = result.errors?.[0]?.detail || result.errors?.[0]?.code || "Payment failed";
+
+        return {
+          success: false,
+          error: errorMessage,
+        };
+      }
+
+      // Payment was successful!
+      const payment = result.payment;
+      const transactionId = payment.id;
+
+      console.log("✅ Payment successful! Transaction ID:", transactionId);
+
+      // Create purchase record with COMPLETED status (payment already verified by Square)
       const purchaseResult = await ctx.runMutation(api.billing.createPurchase, {
         userId: args.userId,
         packageId: args.packageId,
         amount: pkg.price,
         credits: pkg.credits,
         paymentMethod: "credit_card",
-        paymentDetails,
+        paymentDetails: {
+          transactionId: transactionId,
+          cardLast4: payment.card_details?.card?.last_4 || "****",
+          cardBrand: payment.card_details?.card?.card_brand || "Unknown",
+          timestamp: Date.now(),
+          amount: pkg.price,
+          currency: "USD",
+          status: payment.status,
+          receiptUrl: payment.receipt_url,
+        },
       });
 
-      // Complete purchase and add credits
-      await ctx.runMutation(api.billing.completePurchase, {
+      // IMMEDIATELY add credits since payment was verified by Square
+      await ctx.runMutation(internal.billing.addCreditsInternal, {
+        userId: args.userId,
+        credits: pkg.credits,
         purchaseId: purchaseResult.purchaseId,
-        transactionId,
       });
 
-      console.log("✅ Payment processed successfully:", transactionId);
+      console.log(`✅ Added ${pkg.credits} credits to user ${args.userId}`);
 
       return {
         success: true,
         transactionId,
+        purchaseId: purchaseResult.purchaseId,
       };
+
     } catch (error: any) {
       console.error("❌ Payment processing error:", error);
       return {
         success: false,
-        error: error.message || "Payment processing failed",
+        error: error.message || "Payment processing failed. Please try again.",
       };
     }
   },
 });
 
-// Bank transfer payment
-export const processBankTransfer = action({
+// Process payment with test card (SANDBOX ONLY - for testing)
+export const processTestPayment = action({
   args: {
     userId: v.string(),
     packageId: v.string(),
-    accountNumber: v.string(),
-    routingNumber: v.string(),
-    accountHolderName: v.string(),
-    bankName: v.string(),
   },
-  handler: async (ctx, args): Promise<{ success: boolean; transactionId?: string; instructions?: string; error?: string }> => {
-    try {
-      console.log("🏦 Processing bank transfer...");
+  handler: async (ctx, args): Promise<{ success: boolean; transactionId?: string; error?: string; purchaseId?: string }> => {
+    // Check if we're in sandbox mode
+    const environment = process.env.SQUARE_ENVIRONMENT || "sandbox";
 
-      // Get package details
-      const packages: Record<string, { credits: number; price: number }> = {
-        starter: { credits: 500, price: 9.99 },
-        pro: { credits: 1500, price: 24.99 },
-        business: { credits: 5000, price: 79.99 },
-        enterprise: { credits: 15000, price: 199.99 },
-      };
-
-      const pkg = packages[args.packageId];
-      if (!pkg) {
-        return {
-          success: false,
-          error: "Invalid package selected",
-        };
-      }
-
-      const transactionId = `BANK_${Date.now()}_${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-
-      const paymentDetails = {
-        accountLast4: args.accountNumber.slice(-4),
-        bankName: args.bankName,
-        transactionId,
-        timestamp: Date.now(),
-        amount: pkg.price,
-        currency: "USD",
-      };
-
-      // Create pending purchase (bank transfers require manual verification)
-      await ctx.runMutation(api.billing.createPurchase, {
-        userId: args.userId,
-        packageId: args.packageId,
-        amount: pkg.price,
-        credits: pkg.credits,
-        paymentMethod: "bank_transfer",
-        paymentDetails,
-      });
-
-      const instructions = `
-Bank Transfer Instructions:
-- Transfer Amount: $${pkg.price}
-- Reference ID: ${transactionId}
-- Bank Name: ${args.bankName}
-- Processing Time: 1-3 business days
-- Your credits will be added after verification
-      `;
-
-      console.log("✅ Bank transfer initiated:", transactionId);
-
-      return {
-        success: true,
-        transactionId,
-        instructions,
-      };
-    } catch (error: any) {
-      console.error("❌ Bank transfer error:", error);
+    if (environment === "production") {
       return {
         success: false,
-        error: error.message || "Bank transfer failed",
+        error: "Test payments not allowed in production",
       };
     }
+
+    console.log("🧪 Processing TEST payment (sandbox only)");
+
+    // Use Square's test card nonce
+    // In sandbox, this nonce always succeeds
+    const testCardNonce = "cnon:card-nonce-ok";
+
+    const result = await ctx.runAction(api.paymentProcessor.processCreditCardPayment, {
+      userId: args.userId,
+      packageId: args.packageId,
+      cardNonce: testCardNonce,
+      cardholderName: "Test User",
+    });
+
+    return result;
   },
 });
 
-// Cryptocurrency payment
-export const processCryptoPayment = action({
-  args: {
-    userId: v.string(),
-    packageId: v.string(),
-    walletAddress: v.string(),
-    cryptoCurrency: v.string(), // BTC, ETH, USDT, USDC
-  },
-  handler: async (ctx, args): Promise<{ success: boolean; transactionId?: string; paymentAddress?: string; amount?: string; error?: string }> => {
-    try {
-      console.log("₿ Processing cryptocurrency payment...");
+// Get Square payment form token (called from frontend)
+export const getSquareApplicationId = action({
+  args: {},
+  handler: async (ctx, args) => {
+    const applicationId = process.env.SQUARE_APPLICATION_ID;
+    const environment = process.env.SQUARE_ENVIRONMENT || "sandbox";
 
-      // Get package details
-      const packages: Record<string, { credits: number; price: number }> = {
-        starter: { credits: 500, price: 9.99 },
-        pro: { credits: 1500, price: 24.99 },
-        business: { credits: 5000, price: 79.99 },
-        enterprise: { credits: 15000, price: 199.99 },
-      };
-
-      const pkg = packages[args.packageId];
-      if (!pkg) {
-        return {
-          success: false,
-          error: "Invalid package selected",
-        };
-      }
-
-      // Crypto conversion rates (in production, fetch from API)
-      const cryptoRates: Record<string, number> = {
-        BTC: 0.00023, // $1 = 0.00023 BTC (example rate)
-        ETH: 0.0042,  // $1 = 0.0042 ETH
-        USDT: 1.0,    // $1 = 1 USDT (stablecoin)
-        USDC: 1.0,    // $1 = 1 USDC (stablecoin)
-      };
-
-      const rate = cryptoRates[args.cryptoCurrency];
-      if (!rate) {
-        return {
-          success: false,
-          error: "Unsupported cryptocurrency",
-        };
-      }
-
-      const cryptoAmount = (pkg.price * rate).toFixed(8);
-      const transactionId = `CRYPTO_${Date.now()}_${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-
-      // Generate payment address (in production, use crypto payment gateway)
-      const paymentAddress = generateCryptoAddress(args.cryptoCurrency);
-
-      const paymentDetails = {
-        walletAddress: args.walletAddress,
-        cryptoCurrency: args.cryptoCurrency,
-        cryptoAmount,
-        paymentAddress,
-        transactionId,
-        timestamp: Date.now(),
-        usdAmount: pkg.price,
-      };
-
-      // Create pending purchase
-      await ctx.runMutation(api.billing.createPurchase, {
-        userId: args.userId,
-        packageId: args.packageId,
-        amount: pkg.price,
-        credits: pkg.credits,
-        paymentMethod: "cryptocurrency",
-        paymentDetails,
-      });
-
-      console.log("✅ Crypto payment initiated:", transactionId);
-
-      return {
-        success: true,
-        transactionId,
-        paymentAddress,
-        amount: `${cryptoAmount} ${args.cryptoCurrency}`,
-      };
-    } catch (error: any) {
-      console.error("❌ Crypto payment error:", error);
-      return {
-        success: false,
-        error: error.message || "Crypto payment failed",
-      };
+    if (!applicationId) {
+      throw new Error("Square not configured");
     }
+
+    return {
+      applicationId,
+      environment,
+    };
   },
 });
-
-// Helper functions
-
-function validateCardNumber(cardNumber: string): boolean {
-  // Remove spaces and dashes
-  const cleaned = cardNumber.replace(/[\s-]/g, '');
-
-  // Check if all digits
-  if (!/^\d+$/.test(cleaned)) return false;
-
-  // Luhn algorithm
-  let sum = 0;
-  let isEven = false;
-
-  for (let i = cleaned.length - 1; i >= 0; i--) {
-    let digit = parseInt(cleaned[i]);
-
-    if (isEven) {
-      digit *= 2;
-      if (digit > 9) digit -= 9;
-    }
-
-    sum += digit;
-    isEven = !isEven;
-  }
-
-  return sum % 10 === 0;
-}
-
-function validateExpiry(expiry: string): boolean {
-  // Format: MM/YY
-  const match = expiry.match(/^(\d{2})\/(\d{2})$/);
-  if (!match) return false;
-
-  const month = parseInt(match[1]);
-  const year = parseInt(match[2]) + 2000;
-
-  if (month < 1 || month > 12) return false;
-
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1;
-
-  if (year < currentYear) return false;
-  if (year === currentYear && month < currentMonth) return false;
-
-  return true;
-}
-
-function detectCardType(cardNumber: string): string {
-  const cleaned = cardNumber.replace(/[\s-]/g, '');
-
-  if (/^4/.test(cleaned)) return "Visa";
-  if (/^5[1-5]/.test(cleaned)) return "Mastercard";
-  if (/^3[47]/.test(cleaned)) return "American Express";
-  if (/^6(?:011|5)/.test(cleaned)) return "Discover";
-
-  return "Unknown";
-}
-
-function generateCryptoAddress(currency: string): string {
-  // In production, generate real payment address from crypto gateway
-  // This is a placeholder format
-  const prefixes: Record<string, string> = {
-    BTC: "1",
-    ETH: "0x",
-    USDT: "0x",
-    USDC: "0x",
-  };
-
-  const prefix = prefixes[currency] || "0x";
-  const random = Math.random().toString(36).substr(2, 32).toUpperCase();
-
-  return `${prefix}${random}`;
-}

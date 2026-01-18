@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 
 // Credit packages
 export const CREDIT_PACKAGES = {
@@ -141,5 +141,42 @@ export const getRevenueStats = query({
       totalPurchases: allPurchases.length,
       revenueByPackage,
     };
+  },
+});
+
+// Internal mutation to add credits (called from payment processor after successful payment)
+export const addCreditsInternal = internalMutation({
+  args: {
+    userId: v.string(),
+    credits: v.number(),
+    purchaseId: v.id("purchases"),
+  },
+  handler: async (ctx, args) => {
+    // Add credits to user
+    const userCredits = await ctx.db
+      .query("userCredits")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+
+    if (userCredits) {
+      await ctx.db.patch(userCredits._id, {
+        credits: userCredits.credits + args.credits,
+      });
+    } else {
+      await ctx.db.insert("userCredits", {
+        userId: args.userId,
+        credits: args.credits,
+        subscriptionTier: "free",
+        subscriptionStatus: "active",
+      });
+    }
+
+    // Mark purchase as completed
+    await ctx.db.patch(args.purchaseId, {
+      status: "completed",
+      completedAt: Date.now(),
+    });
+
+    return { success: true, creditsAdded: args.credits };
   },
 });

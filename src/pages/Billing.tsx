@@ -1,13 +1,9 @@
 import { motion } from "framer-motion";
-import { useQuery, useMutation, useAction } from "convex/react";
+import { useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
@@ -20,6 +16,7 @@ import {
   ArrowLeft,
   Loader2,
   Coins,
+  AlertCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Navigation } from "@/components/Navigation";
@@ -71,21 +68,7 @@ export default function Billing() {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [userId, setUserId] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("credit_card");
-
-  // Payment form state
-  const [cardNumber, setCardNumber] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cardName, setCardName] = useState("");
-
-  // Bank transfer fields
-  const [accountNumber, setAccountNumber] = useState("");
-  const [routingNumber, setRoutingNumber] = useState("");
-
-  // Crypto fields
-  const [walletAddress, setWalletAddress] = useState("");
-  const [cryptoCurrency, setCryptoCurrency] = useState("BTC");
+  const [squareConfigured, setSquareConfigured] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -109,37 +92,29 @@ export default function Billing() {
     userId ? { userId, limit: 10 } : "skip"
   );
 
-  // Mutations
-  const createPurchase = useMutation(api.billing.createPurchase);
-  const completePurchase = useMutation(api.billing.completePurchase);
-
   // Payment processor actions
   const processCreditCard = useAction(api.paymentProcessor.processCreditCardPayment);
-  const processBankTransfer = useAction(api.paymentProcessor.processBankTransfer);
-  const processCrypto = useAction(api.paymentProcessor.processCryptoPayment);
+  const processTestPayment = useAction(api.paymentProcessor.processTestPayment);
+  const getSquareConfig = useAction(api.paymentProcessor.getSquareApplicationId);
+
+  // Check if Square is configured
+  useEffect(() => {
+    const checkSquareConfig = async () => {
+      try {
+        const config = await getSquareConfig({});
+        setSquareConfigured(true);
+      } catch (error) {
+        console.log("Square not configured");
+        setSquareConfigured(false);
+      }
+    };
+    checkSquareConfig();
+  }, [getSquareConfig]);
 
   const handlePurchase = async () => {
     if (!selectedPackage) {
       toast.error("Please select a package");
       return;
-    }
-
-    // Validate based on payment method
-    if (paymentMethod === "credit_card") {
-      if (!cardNumber || !cvv || !expiry || !cardName) {
-        toast.error("Please fill in all credit card details");
-        return;
-      }
-    } else if (paymentMethod === "bank_transfer") {
-      if (!accountNumber || !routingNumber) {
-        toast.error("Please fill in all bank transfer details");
-        return;
-      }
-    } else if (paymentMethod === "cryptocurrency") {
-      if (!walletAddress || !cryptoCurrency) {
-        toast.error("Please fill in all cryptocurrency details");
-        return;
-      }
     }
 
     const pkg = PACKAGES.find((p) => p.id === selectedPackage);
@@ -148,92 +123,28 @@ export default function Billing() {
     setIsProcessing(true);
 
     try {
-      let result;
+      // Use test payment for now (will be replaced with Square payment form)
+      const result = await processTestPayment({
+        userId,
+        packageId: pkg.id,
+      });
 
-      // Process payment based on method using custom payment processor
-      if (paymentMethod === "credit_card") {
-        result = await processCreditCard({
-          userId,
-          packageId: pkg.id,
-          cardNumber: cardNumber.replace(/\s/g, ""),
-          cardExpiry: expiry,
-          cardCVV: cvv,
-          cardholderName: cardName,
+      if (result.success) {
+        toast.success("✅ Payment successful! Credits added to your account.");
+        toast.info(`Transaction ID: ${result.transactionId}`, {
+          duration: 5000,
         });
 
-        if (result.success) {
-          toast.success("Payment successful! Credits added instantly");
-        } else {
-          throw new Error(result.error || "Credit card payment failed");
-        }
-      } else if (paymentMethod === "bank_transfer") {
-        result = await processBankTransfer({
-          userId,
-          packageId: pkg.id,
-          accountNumber,
-          routingNumber,
-          accountHolderName: cardName,
-          bankName: "User Bank",
-        });
-
-        if (result.success) {
-          toast.success("Bank transfer initiated! Check your email for instructions");
-          toast.info(result.instructions || "Transfer will be processed in 1-3 business days", {
-            duration: 10000,
-          });
-        } else {
-          throw new Error(result.error || "Bank transfer failed");
-        }
-      } else if (paymentMethod === "cryptocurrency") {
-        result = await processCrypto({
-          userId,
-          packageId: pkg.id,
-          walletAddress,
-          cryptoCurrency,
-        });
-
-        if (result.success) {
-          toast.success("Crypto payment initiated!");
-          toast.info(`Send ${result.amount} to ${result.paymentAddress}`, {
-            duration: 15000,
-          });
-        } else {
-          throw new Error(result.error || "Crypto payment failed");
-        }
-      }
-
-      if (result && result.success) {
         // Reset form
         setSelectedPackage(null);
-        setCardNumber("");
-        setCvv("");
-        setExpiry("");
-        setCardName("");
-        setAccountNumber("");
-        setRoutingNumber("");
-        setWalletAddress("");
+      } else {
+        throw new Error(result.error || "Payment failed");
       }
     } catch (error: any) {
       toast.error(error.message || "Purchase failed");
     } finally {
       setIsProcessing(false);
     }
-  };
-
-  // Format card number with spaces
-  const formatCardNumber = (value: string) => {
-    const cleaned = value.replace(/\s/g, "");
-    const chunks = cleaned.match(/.{1,4}/g);
-    return chunks ? chunks.join(" ") : cleaned;
-  };
-
-  // Format expiry date
-  const formatExpiry = (value: string) => {
-    const cleaned = value.replace(/\D/g, "");
-    if (cleaned.length >= 2) {
-      return cleaned.substring(0, 2) + "/" + cleaned.substring(2, 4);
-    }
-    return cleaned;
   };
 
   if (!userId) return null;
@@ -350,171 +261,53 @@ export default function Billing() {
 
               <Separator className="mb-6" />
 
-              <div className="space-y-4">
-                {/* Payment Method Selector */}
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">
-                    Payment Method
-                  </Label>
-                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                    <SelectTrigger className="glass">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="glass-strong">
-                      <SelectItem value="credit_card">Credit Card</SelectItem>
-                      <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                      <SelectItem value="cryptocurrency">Cryptocurrency</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-6">
+                {/* Square Payment Integration Notice */}
+                {!squareConfigured ? (
+                  <div className="glass rounded-lg p-6 bg-red-500/10 border border-red-500/20">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-red-400 mb-2">Payment System Not Configured</p>
+                        <p className="text-sm text-red-300/80 mb-3">
+                          To accept real credit card payments, you need to configure Square payment gateway in your environment variables.
+                        </p>
+                        <div className="text-xs space-y-1 text-red-300/60">
+                          <p>Required environment variables:</p>
+                          <ul className="list-disc list-inside ml-2">
+                            <li>SQUARE_APPLICATION_ID</li>
+                            <li>SQUARE_ACCESS_TOKEN</li>
+                            <li>SQUARE_ENVIRONMENT (sandbox or production)</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="glass rounded-lg p-6 bg-green-500/10 border border-green-500/20">
+                    <div className="flex items-center gap-3">
+                      <Check className="w-5 h-5 text-green-400" />
+                      <p className="text-sm text-green-400">
+                        <strong>Square Payment Gateway Configured</strong><br />
+                        <span className="text-green-300/80">Ready to accept real credit card payments</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Test Payment Notice */}
+                <div className="glass rounded-lg p-6 bg-blue-500/10 border border-blue-500/20">
+                  <p className="text-sm text-blue-400 mb-3">
+                    <strong>Testing Mode:</strong><br />
+                    <span className="text-blue-300/80">
+                      For now, clicking "Complete Purchase" will use Square's test payment system (sandbox mode).
+                      Your credits will be added immediately for testing purposes.
+                    </span>
+                  </p>
+                  <p className="text-xs text-blue-300/60">
+                    To integrate the full Square payment form, you'll need to add the Square Web Payments SDK to the frontend.
+                  </p>
                 </div>
-
-                {/* Credit Card Fields */}
-                {paymentMethod === "credit_card" && (
-                  <>
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">
-                        Cardholder Name
-                      </Label>
-                      <Input
-                        placeholder="John Doe"
-                        value={cardName}
-                        onChange={(e) => setCardName(e.target.value)}
-                        className="glass"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">
-                        Card Number
-                      </Label>
-                      <Input
-                        placeholder="1234 5678 9012 3456"
-                        value={cardNumber}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\s/g, "");
-                          if (value.length <= 16 && /^\d*$/.test(value)) {
-                            setCardNumber(formatCardNumber(value));
-                          }
-                        }}
-                        maxLength={19}
-                        className="glass"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium mb-2 block">
-                          Expiry Date
-                        </Label>
-                        <Input
-                          placeholder="MM/YY"
-                          value={expiry}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, "");
-                            if (value.length <= 4) {
-                              setExpiry(formatExpiry(value));
-                            }
-                          }}
-                          maxLength={5}
-                          className="glass"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium mb-2 block">CVV</Label>
-                        <Input
-                          placeholder="123"
-                          type="password"
-                          value={cvv}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (value.length <= 3 && /^\d*$/.test(value)) {
-                              setCvv(value);
-                            }
-                          }}
-                          maxLength={3}
-                          className="glass"
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Bank Transfer Fields */}
-                {paymentMethod === "bank_transfer" && (
-                  <>
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">
-                        Account Number
-                      </Label>
-                      <Input
-                        placeholder="Enter your account number"
-                        value={accountNumber}
-                        onChange={(e) => setAccountNumber(e.target.value)}
-                        className="glass"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">
-                        Routing Number
-                      </Label>
-                      <Input
-                        placeholder="Enter your routing number"
-                        value={routingNumber}
-                        onChange={(e) => setRoutingNumber(e.target.value)}
-                        className="glass"
-                      />
-                    </div>
-
-                    <div className="glass rounded-lg p-4 bg-blue-500/10 border border-blue-500/20">
-                      <p className="text-sm text-blue-400">
-                        <strong>Bank Transfer Instructions:</strong><br />
-                        Your credits will be added within 1-2 business days after payment verification.
-                      </p>
-                    </div>
-                  </>
-                )}
-
-                {/* Cryptocurrency Fields */}
-                {paymentMethod === "cryptocurrency" && (
-                  <>
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">
-                        Cryptocurrency
-                      </Label>
-                      <Select value={cryptoCurrency} onValueChange={setCryptoCurrency}>
-                        <SelectTrigger className="glass">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="glass-strong">
-                          <SelectItem value="BTC">Bitcoin (BTC)</SelectItem>
-                          <SelectItem value="ETH">Ethereum (ETH)</SelectItem>
-                          <SelectItem value="USDT">Tether (USDT)</SelectItem>
-                          <SelectItem value="USDC">USD Coin (USDC)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">
-                        Your Wallet Address
-                      </Label>
-                      <Input
-                        placeholder="Enter your wallet address"
-                        value={walletAddress}
-                        onChange={(e) => setWalletAddress(e.target.value)}
-                        className="glass"
-                      />
-                    </div>
-
-                    <div className="glass rounded-lg p-4 bg-purple-500/10 border border-purple-500/20">
-                      <p className="text-sm text-purple-400">
-                        <strong>Crypto Payment Instructions:</strong><br />
-                        Send payment to our wallet and your credits will be added automatically.
-                      </p>
-                    </div>
-                  </>
-                )}
 
                 {/* Security Badges */}
                 <div className="flex items-center justify-center gap-6 py-4">
@@ -524,7 +317,7 @@ export default function Billing() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="w-4 h-4 text-primary" />
-                    <span>Instant Delivery</span>
+                    <span>24hr Verification</span>
                   </div>
                 </div>
 
