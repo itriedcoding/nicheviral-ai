@@ -1,6 +1,9 @@
 {
   "buildCommand": "npm run build",
+  "startCommand": "npm run start",
   "outputDirectory": "dist",
   "framework": "react",
-  "nodeVersion": "20"
+  "nodeVersion": "20",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev"
 }
