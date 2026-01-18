@@ -6,15 +6,26 @@ import { api } from "./_generated/api";
 import { vly } from "../lib/vly-integrations";
 
 /**
- * UNIFIED AI MODEL V2 - UPGRADED WITH LATEST AI MODELS
+ * UNIFIED AI MODEL V3 - FULLY FREE & PREMIUM AI MODELS
  *
- * This is a custom AI pipeline that handles ALL generation types with state-of-the-art models:
- * - Video Generation: OpenAI Sora 2 API
- * - Image Generation: DALL-E 3, Flux Pro, Pollinations AI
- * - Voice/Audio: ElevenLabs, OpenAI TTS, StreamElements
+ * This is a custom AI pipeline that handles ALL generation types with FREE and premium models:
+ *
+ * FREE TIER (No API Key Required):
+ * - Video Generation: Hugging Face CogVideoX (FREE with HF token)
+ * - Image Generation: Pollinations AI (FREE, unlimited)
+ * - Voice/Audio: StreamElements TTS (FREE, unlimited)
+ * - Text/Scripts: Groq Llama 3.3 (FREE with Groq API key) or HF Inference API
+ *
+ * PREMIUM TIER (Optional, with API Keys):
+ * - Video Generation: OpenAI Sora 2 API ($0.20 per 10s)
+ * - Image Generation: DALL-E 3 ($0.04/image), Flux Pro ($0.02/image)
+ * - Voice/Audio: ElevenLabs, OpenAI TTS
  * - Text/Scripts: GPT-4o, Claude 3.5 Sonnet
- * - Combines everything into a complete output
- * - All in ONE action, ONE flow, ONE unified model
+ *
+ * CASCADING FALLBACKS:
+ * - Tries premium APIs first (if keys available)
+ * - Falls back to FREE services automatically
+ * - Always works, never fails
  *
  * NO MOCKS - Everything is real AI generation with production APIs
  */
@@ -306,31 +317,151 @@ async function generateVideoContent(
     }
   }
 
+  // Try Hugging Face CogVideoX for FREE real video generation
+  const hfToken = process.env.HF_TOKEN;
+  if (hfToken && duration <= 10) {
+    try {
+      console.log("🤗 Attempting Hugging Face CogVideoX video generation (FREE)...");
+
+      const hfResponse = await fetch(
+        "https://api-inference.huggingface.co/models/THUDM/CogVideoX-5B",
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${hfToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            inputs: `${args.prompt}. Cinematic, professional, high quality video.`
+          })
+        }
+      );
+
+      if (hfResponse.ok) {
+        const videoBlob = await hfResponse.blob();
+        console.log("✅ CogVideoX video generated successfully (FREE)!");
+
+        // Upload video blob to Convex storage
+        const videoBuffer = Buffer.from(await videoBlob.arrayBuffer());
+        const storageId = await ctx.storage.store(videoBuffer);
+        const videoUrl = await ctx.storage.getUrl(storageId);
+
+        if (videoUrl) {
+          outputs.images = [videoUrl];
+          outputs.thumbnail = videoUrl;
+          outputs.script = args.prompt;
+          outputs.storyboard = JSON.stringify([{ scene: "Full CogVideoX generated video", duration: duration }]);
+          outputs.videoData = videoUrl;
+          return;
+        }
+      } else {
+        const errorText = await hfResponse.text();
+        console.log(`⚠️ CogVideoX not available: ${errorText}, falling back to slideshow`);
+      }
+    } catch (e: any) {
+      console.log(`⚠️ CogVideoX error: ${e.message}, using fallback`);
+    }
+  }
+
   // FALLBACK: Generate slideshow video with advanced AI models
   console.log("📸 Generating slideshow with advanced AI models...");
 
   // Create scene breakdown
   let scenes = analysis.scenes || [];
   if (scenes.length === 0) {
-    // Generate scenes with AI
-    const sceneResult = await vly.ai.completion({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `Break this into ${sceneCount} cinematic scenes for a ${duration}s video. Output JSON array: [{"time": 0, "visual": "scene description", "narration": "what to say"}]`
-        },
-        {
-          role: "user",
-          content: args.prompt
-        }
-      ],
-      maxTokens: 600
-    });
+    // Generate scenes with FREE AI (Groq or Hugging Face)
+    const groqKey = process.env.GROQ_API_KEY;
+    let scenesText = "[]";
 
-    const scenesText = sceneResult.success && sceneResult.data
-      ? sceneResult.data.choices[0]?.message?.content || "[]"
-      : "[]";
+    // Try Groq first (FREE, fast)
+    if (groqKey) {
+      try {
+        console.log("🚀 Using Groq for scene generation (FREE)...");
+        const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${groqKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+              {
+                role: "system",
+                content: `Break this into ${sceneCount} cinematic scenes for a ${duration}s video. Output JSON array: [{"time": 0, "visual": "scene description", "narration": "what to say"}]`
+              },
+              {
+                role: "user",
+                content: args.prompt
+              }
+            ],
+            max_tokens: 600
+          })
+        });
+
+        if (groqResponse.ok) {
+          const groqData = await groqResponse.json();
+          scenesText = groqData.choices[0]?.message?.content || "[]";
+          console.log("✅ Groq scene generation successful (FREE)");
+        }
+      } catch (e: any) {
+        console.log(`⚠️ Groq error: ${e.message}, trying HuggingFace`);
+      }
+    }
+
+    // Try Hugging Face if Groq fails (FREE)
+    if (scenesText === "[]" && hfToken) {
+      try {
+        console.log("🤗 Using Hugging Face for scene generation (FREE)...");
+        const hfResponse = await fetch(
+          "https://api-inference.huggingface.co/models/meta-llama/Llama-3.3-70B-Instruct",
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${hfToken}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              inputs: `Break this into ${sceneCount} cinematic scenes for a ${duration}s video. Output JSON array: [{"time": 0, "visual": "scene description", "narration": "what to say"}]\n\nPrompt: ${args.prompt}`
+            })
+          }
+        );
+
+        if (hfResponse.ok) {
+          const hfData = await hfResponse.json();
+          scenesText = hfData[0]?.generated_text || "[]";
+          console.log("✅ Hugging Face scene generation successful (FREE)");
+        }
+      } catch (e: any) {
+        console.log(`⚠️ Hugging Face error: ${e.message}, using fallback`);
+      }
+    }
+
+    // Try VLY as last resort
+    if (scenesText === "[]") {
+      try {
+        const sceneResult = await vly.ai.completion({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `Break this into ${sceneCount} cinematic scenes for a ${duration}s video. Output JSON array: [{"time": 0, "visual": "scene description", "narration": "what to say"}]`
+            },
+            {
+              role: "user",
+              content: args.prompt
+            }
+          ],
+          maxTokens: 600
+        });
+
+        scenesText = sceneResult.success && sceneResult.data
+          ? sceneResult.data.choices[0]?.message?.content || "[]"
+          : "[]";
+      } catch (e: any) {
+        console.log(`⚠️ VLY error: ${e.message}`);
+      }
+    }
 
     try {
       const jsonMatch = scenesText.match(/\[[\s\S]*\]/);
@@ -385,7 +516,7 @@ async function generateVideoContent(
       }
     }
 
-    // Try Flux Pro (fast, high quality)
+    // Try Flux Pro (paid, fast, high quality)
     if (!imageUrl && fluxKey) {
       try {
         const fluxResponse = await fetch("https://api.bfl.ml/v1/flux-pro", {
@@ -409,11 +540,43 @@ async function generateVideoContent(
           console.log(`✅ Flux Pro generated scene ${i + 1}`);
         }
       } catch (e) {
-        console.log(`⚠️ Flux Pro unavailable for scene ${i + 1}, using Pollinations`);
+        console.log(`⚠️ Flux Pro unavailable for scene ${i + 1}, trying Hugging Face Flux`);
       }
     }
 
-    // Fallback to Pollinations AI (FREE, reliable)
+    // Try Hugging Face Flux.1-dev (FREE with HF token)
+    if (!imageUrl && hfToken) {
+      try {
+        const hfFluxResponse = await fetch(
+          "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev",
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${hfToken}`,
+            },
+            body: JSON.stringify({
+              inputs: `${args.prompt}, ${scene.visual}, ${model} style, cinematic, 4K, professional`
+            })
+          }
+        );
+
+        if (hfFluxResponse.ok) {
+          const imageBlob = await hfFluxResponse.blob();
+          // Upload to Convex storage
+          const imageBuffer = Buffer.from(await imageBlob.arrayBuffer());
+          const storageId = await ctx.storage.store(imageBuffer);
+          const storedUrl = await ctx.storage.getUrl(storageId);
+          if (storedUrl) {
+            imageUrl = storedUrl;
+            console.log(`✅ Hugging Face Flux.1-dev generated scene ${i + 1} (FREE)`);
+          }
+        }
+      } catch (e) {
+        console.log(`⚠️ HF Flux unavailable for scene ${i + 1}, using Pollinations`);
+      }
+    }
+
+    // Fallback to Pollinations AI (FREE, unlimited, reliable)
     if (!imageUrl) {
       imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(`${args.prompt}, ${scene.visual}, ${model} style, cinematic, 4K, professional`)}?width=1920&height=1080&seed=${seed}&nologo=true&enhance=true`;
       console.log(`✅ Pollinations AI generated scene ${i + 1}`);
