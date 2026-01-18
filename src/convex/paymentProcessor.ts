@@ -39,7 +39,7 @@ export const processCreditCardPayment = action({
 
       // Get Square API key from environment
       const squareAccessToken = process.env.SQUARE_ACCESS_TOKEN;
-      const squareEnvironment = process.env.SQUARE_ENVIRONMENT || "sandbox";
+      const squareEnvironment = process.env.SQUARE_ENVIRONMENT;
 
       if (!squareAccessToken) {
         console.error("❌ SQUARE_ACCESS_TOKEN not configured");
@@ -49,10 +49,17 @@ export const processCreditCardPayment = action({
         };
       }
 
-      // Square API endpoint
-      const squareApiUrl = squareEnvironment === "production"
-        ? "https://connect.squareup.com/v2/payments"
-        : "https://connect.squareupsandbox.com/v2/payments";
+      // PRODUCTION ONLY - NO SANDBOX/TEST PAYMENTS ALLOWED
+      if (squareEnvironment !== "production") {
+        console.error("❌ Only production payments allowed");
+        return {
+          success: false,
+          error: "Payment system must be in production mode. Contact support.",
+        };
+      }
+
+      // Square API endpoint - PRODUCTION ONLY
+      const squareApiUrl = "https://connect.squareup.com/v2/payments";
 
       // Generate idempotency key (prevents duplicate charges)
       const idempotencyKey = `${args.userId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -146,49 +153,22 @@ export const processCreditCardPayment = action({
   },
 });
 
-// Process payment with test card (SANDBOX ONLY - for testing)
-export const processTestPayment = action({
-  args: {
-    userId: v.string(),
-    packageId: v.string(),
-  },
-  handler: async (ctx, args): Promise<{ success: boolean; transactionId?: string; error?: string; purchaseId?: string }> => {
-    // Check if we're in sandbox mode
-    const environment = process.env.SQUARE_ENVIRONMENT || "sandbox";
-
-    if (environment === "production") {
-      return {
-        success: false,
-        error: "Test payments not allowed in production",
-      };
-    }
-
-    console.log("🧪 Processing TEST payment (sandbox only)");
-
-    // Use Square's test card nonce
-    // In sandbox, this nonce always succeeds
-    const testCardNonce = "cnon:card-nonce-ok";
-
-    const result = await ctx.runAction(api.paymentProcessor.processCreditCardPayment, {
-      userId: args.userId,
-      packageId: args.packageId,
-      cardNonce: testCardNonce,
-      cardholderName: "Test User",
-    });
-
-    return result;
-  },
-});
+// REMOVED: Test payment function - PRODUCTION ONLY, NO TESTS OR MOCKS
 
 // Get Square payment form token (called from frontend)
 export const getSquareApplicationId = action({
   args: {},
   handler: async (ctx, args) => {
     const applicationId = process.env.SQUARE_APPLICATION_ID;
-    const environment = process.env.SQUARE_ENVIRONMENT || "sandbox";
+    const environment = process.env.SQUARE_ENVIRONMENT;
 
     if (!applicationId) {
       throw new Error("Square not configured");
+    }
+
+    // PRODUCTION ONLY - NO SANDBOX/TEST ALLOWED
+    if (environment !== "production") {
+      throw new Error("Only production payments allowed");
     }
 
     return {

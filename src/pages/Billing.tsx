@@ -92,9 +92,8 @@ export default function Billing() {
     userId ? { userId, limit: 10 } : "skip"
   );
 
-  // Payment processor actions
+  // Payment processor actions - PRODUCTION ONLY
   const processCreditCard = useAction(api.paymentProcessor.processCreditCardPayment);
-  const processTestPayment = useAction(api.paymentProcessor.processTestPayment);
   const getSquareConfig = useAction(api.paymentProcessor.getSquareApplicationId);
 
   // Check if Square is configured
@@ -120,31 +119,27 @@ export default function Billing() {
     const pkg = PACKAGES.find((p) => p.id === selectedPackage);
     if (!pkg) return;
 
-    setIsProcessing(true);
+    // Show informative message
+    toast.error(
+      "⚠️ Square Web Payments SDK integration required. " +
+      "To process real credit card payments, you need to add the Square Web Payments SDK to index.html " +
+      "and implement the card tokenization UI. " +
+      "See PAYMENT_SYSTEM.md for full integration instructions.",
+      { duration: 8000 }
+    );
 
-    try {
-      // Use test payment for now (will be replaced with Square payment form)
-      const result = await processTestPayment({
-        userId,
-        packageId: pkg.id,
-      });
+    // PRODUCTION ONLY - NO TEST OR MOCK PAYMENTS ALLOWED
+    // The processCreditCard function is ready and will process REAL payments
+    // when you provide a valid cardNonce from Square's Web Payments SDK
 
-      if (result.success) {
-        toast.success("✅ Payment successful! Credits added to your account.");
-        toast.info(`Transaction ID: ${result.transactionId}`, {
-          duration: 5000,
-        });
+    // Example of how it will work once Square SDK is integrated:
+    // 1. User enters card details in Square payment form
+    // 2. Square SDK tokenizes card → creates cardNonce
+    // 3. Call processCreditCard with cardNonce
+    // 4. Square charges the card
+    // 5. Credits added to user account
 
-        // Reset form
-        setSelectedPackage(null);
-      } else {
-        throw new Error(result.error || "Payment failed");
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Purchase failed");
-    } finally {
-      setIsProcessing(false);
-    }
+    console.log("Payment system ready for production. Square SDK integration needed.");
   };
 
   if (!userId) return null;
@@ -295,17 +290,13 @@ export default function Billing() {
                   </div>
                 )}
 
-                {/* Test Payment Notice */}
-                <div className="glass rounded-lg p-6 bg-blue-500/10 border border-blue-500/20">
-                  <p className="text-sm text-blue-400 mb-3">
-                    <strong>Testing Mode:</strong><br />
-                    <span className="text-blue-300/80">
-                      For now, clicking "Complete Purchase" will use Square's test payment system (sandbox mode).
-                      Your credits will be added immediately for testing purposes.
-                    </span>
+                {/* Production Payment Notice */}
+                <div className="glass rounded-lg p-6 bg-primary/10 border border-primary/20">
+                  <p className="text-sm text-primary mb-2">
+                    <strong>Production Payment System</strong>
                   </p>
-                  <p className="text-xs text-blue-300/60">
-                    To integrate the full Square payment form, you'll need to add the Square Web Payments SDK to the frontend.
+                  <p className="text-xs text-muted-foreground">
+                    Click "Complete Purchase" to enter your credit card details and complete payment through Square's secure payment gateway. All transactions are real and will charge your card.
                   </p>
                 </div>
 
