@@ -69,6 +69,7 @@ export default function Billing() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [userId, setUserId] = useState("");
   const [squareConfigured, setSquareConfigured] = useState(false);
+  const [paymentFormReady, setPaymentFormReady] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -119,27 +120,100 @@ export default function Billing() {
     const pkg = PACKAGES.find((p) => p.id === selectedPackage);
     if (!pkg) return;
 
-    // Show informative message
-    toast.error(
-      "⚠️ Square Web Payments SDK integration required. " +
-      "To process real credit card payments, you need to add the Square Web Payments SDK to index.html " +
-      "and implement the card tokenization UI. " +
-      "See PAYMENT_SYSTEM.md for full integration instructions.",
-      { duration: 8000 }
-    );
+    setIsProcessing(true);
 
-    // PRODUCTION ONLY - NO TEST OR MOCK PAYMENTS ALLOWED
-    // The processCreditCard function is ready and will process REAL payments
-    // when you provide a valid cardNonce from Square's Web Payments SDK
+    try {
+      // Get Square configuration
+      const squareConfig = await getSquareConfig({});
 
-    // Example of how it will work once Square SDK is integrated:
-    // 1. User enters card details in Square payment form
-    // 2. Square SDK tokenizes card → creates cardNonce
-    // 3. Call processCreditCard with cardNonce
-    // 4. Square charges the card
-    // 5. Credits added to user account
+      if (!squareConfig.applicationId) {
+        throw new Error("Payment system not configured");
+      }
 
-    console.log("Payment system ready for production. Square SDK integration needed.");
+      // Check if Square SDK is loaded
+      // @ts-ignore
+      if (!window.Square) {
+        throw new Error("Square Payment SDK not loaded. Please refresh the page.");
+      }
+
+      toast.info("Initializing payment form...");
+
+      // Initialize Square Payments
+      // @ts-ignore
+      const payments = window.Square.payments(squareConfig.applicationId);
+      const card = await payments.card();
+      await card.attach('#card-container');
+
+      toast.success("Payment form ready! Enter your card details and click Pay.");
+
+      // Store card instance for cleanup
+      (window as any).squareCard = card;
+      setPaymentFormReady(true);
+      setIsProcessing(false);
+
+    } catch (error: any) {
+      toast.error(error.message || "Failed to initialize payment form");
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle actual payment when Pay button is clicked
+  const handlePayment = async () => {
+    if (!selectedPackage) return;
+
+    const pkg = PACKAGES.find((p) => p.id === selectedPackage);
+    if (!pkg) return;
+
+    // @ts-ignore
+    const card = (window as any).squareCard;
+    if (!card) {
+      toast.error("Payment form not initialized");
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      toast.info("Processing payment...");
+
+      // Tokenize card details
+      const result = await card.tokenize();
+
+      if (result.status === 'OK') {
+        // Process REAL payment with Square
+        const paymentResult = await processCreditCard({
+          userId,
+          packageId: pkg.id,
+          cardNonce: result.token,
+          cardholderName: "Customer",
+        });
+
+        if (paymentResult.success) {
+          toast.success("✅ Payment successful! Credits added to your account.");
+          toast.info(`Transaction ID: ${paymentResult.transactionId}`, {
+            duration: 5000,
+          });
+
+          // Clean up
+          await card.destroy();
+          (window as any).squareCard = null;
+          setPaymentFormReady(false);
+          setSelectedPackage(null);
+          setIsProcessing(false);
+        } else {
+          throw new Error(paymentResult.error || "Payment failed");
+        }
+      } else {
+        let errorMessage = `Tokenization failed: ${result.status}`;
+        if (result.errors) {
+          errorMessage += ` - ${JSON.stringify(result.errors)}`;
+        }
+        throw new Error(errorMessage);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Payment failed");
+      setIsProcessing(false);
+    }
   };
 
   if (!userId) return null;
@@ -296,9 +370,17 @@ export default function Billing() {
                     <strong>Production Payment System</strong>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Click "Complete Purchase" to enter your credit card details and complete payment through Square's secure payment gateway. All transactions are real and will charge your card.
+                    Click "Initialize Payment Form" to load the card form, then enter your details and click "Pay Now" to complete. All transactions are REAL and will charge your card.
                   </p>
                 </div>
+
+                {/* Square Card Container - PRODUCTION */}
+                {paymentFormReady && (
+                  <div
+                    id="card-container"
+                    className="glass rounded-lg p-4 min-h-[100px] border border-primary/20"
+                  ></div>
+                )}
 
                 {/* Security Badges */}
                 <div className="flex items-center justify-center gap-6 py-4">
@@ -308,28 +390,54 @@ export default function Billing() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="w-4 h-4 text-primary" />
-                    <span>24hr Verification</span>
+                    <span>Instant Credits</span>
                   </div>
                 </div>
 
-                <Button
-                  onClick={handlePurchase}
-                  disabled={isProcessing}
-                  className="w-full red-glow"
-                  size="lg"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="w-5 h-5 mr-2" />
-                      Complete Purchase - ${PACKAGES.find((p) => p.id === selectedPackage)?.price}
-                    </>
-                  )}
-                </Button>
+                {/* Initialize Payment Form Button */}
+                {!paymentFormReady && (
+                  <Button
+                    onClick={handlePurchase}
+                    disabled={isProcessing || !squareConfigured}
+                    className="w-full red-glow"
+                    size="lg"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Initializing...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-5 h-5 mr-2" />
+                        Initialize Payment Form - ${PACKAGES.find((p) => p.id === selectedPackage)?.price}
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {/* Pay Now Button (shown after form is initialized) */}
+                {paymentFormReady && (
+                  <Button
+                    id="card-button"
+                    onClick={handlePayment}
+                    disabled={isProcessing}
+                    className="w-full red-glow"
+                    size="lg"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Processing Payment...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-5 h-5 mr-2" />
+                        Pay Now - ${PACKAGES.find((p) => p.id === selectedPackage)?.price}
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </motion.div>
           )}
