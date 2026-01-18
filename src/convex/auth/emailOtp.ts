@@ -23,7 +23,7 @@ export const emailOtp = Email({
       const resend = new Resend(process.env.RESEND_API_KEY);
 
       const result = await resend.emails.send({
-        from: "Neura AI <onboarding@resend.dev>",
+        from: "Neura AI <noreply@neuraai.cyou>",
         to: email,
         subject: "Your Neura AI verification code",
         html: `

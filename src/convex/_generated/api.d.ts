@@ -14,6 +14,7 @@ import type * as auth from "../auth.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as http from "../http.js";
 import type * as seedData from "../seedData.js";
+import type * as testResend from "../testResend.js";
 import type * as users from "../users.js";
 import type * as videos from "../videos.js";
 import type * as youtube from "../youtube.js";
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   "auth/emailOtp": typeof auth_emailOtp;
   http: typeof http;
   seedData: typeof seedData;
+  testResend: typeof testResend;
   users: typeof users;
   videos: typeof videos;
   youtube: typeof youtube;
