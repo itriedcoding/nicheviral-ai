@@ -26,11 +26,12 @@ import {
   Coins
 } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { Authenticated, Unauthenticated } from "convex/react";
+import { Authenticated, Unauthenticated, useConvexAuth } from "convex/react";
 import { Link } from "react-router";
 import { Id } from "@/convex/_generated/dataModel";
+import { Navigation } from "@/components/Navigation";
 
-function NicheCard({ niche }: { niche: any }) {
+function NicheCard({ niche, currentUser }: { niche: any; currentUser: any }) {
   const [open, setOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [title, setTitle] = useState("");
@@ -69,11 +70,15 @@ function NicheCard({ niche }: { niche: any }) {
       return;
     }
 
+    if (!currentUser) {
+      toast.error("Please sign in to create videos");
+      return;
+    }
+
     setIsGenerating(true);
     try {
-      // Note: In a real app, you'd get the actual userId from auth
       const result = await createVideo({
-        userId: "placeholder" as Id<"users">, // This needs to be replaced with actual userId
+        userId: currentUser._id,
         title,
         prompt,
         nicheId: niche._id,
@@ -346,6 +351,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
+  const currentUser = useQuery(api.users.currentUser);
   const fetchTrending = useAction(api.youtube.fetchTrendingVideos);
   const searchNiches = useAction(api.youtube.searchNiches);
 
@@ -400,14 +406,13 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen">
+      <Navigation />
       <Authenticated>
-        {/* Header */}
-        <div className="glass-strong border-b border-white/10 sticky top-0 z-50">
+        {/* Main Content */}
+        <div className="pt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-primary to-red-500 bg-clip-text text-transparent">
-                Neura AI
-              </Link>
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-3xl font-bold">Dashboard</h1>
               <div className="flex items-center gap-4">
                 <div className="glass rounded-lg px-4 py-2 flex items-center gap-2">
                   <Coins className="w-4 h-4 text-primary" />
@@ -498,7 +503,7 @@ export default function Dashboard() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {niches.map((niche: any) => (
-                    <NicheCard key={niche._id} niche={niche} />
+                    <NicheCard key={niche._id} niche={niche} currentUser={currentUser} />
                   ))}
                 </div>
               )}

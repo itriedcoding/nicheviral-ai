@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { FloatingOrbs } from "@/components/FloatingOrbs";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import {
   Sparkles,
@@ -67,7 +67,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <FloatingOrbs />
+      <Navigation />
 
       {/* Hero Section */}
       <motion.section
