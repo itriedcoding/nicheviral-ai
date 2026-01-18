@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
@@ -23,7 +27,17 @@ import {
   MessageSquare,
   Clock,
   Zap,
-  Coins
+  Coins,
+  Image,
+  Mic,
+  FileText,
+  Download,
+  Trash2,
+  RefreshCw,
+  Settings,
+  Wand2,
+  Film,
+  ChevronDown
 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { Id } from "@/convex/_generated/dataModel";
@@ -264,10 +278,10 @@ function NicheCard({ niche, currentUser }: { niche: any; currentUser: any }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="glass-strong">
-                  <SelectItem value="sora">Sora (OpenAI)</SelectItem>
-                  <SelectItem value="runway">Runway Gen-3</SelectItem>
-                  <SelectItem value="pika">Pika Labs</SelectItem>
-                  <SelectItem value="stable">Stable Diffusion Video</SelectItem>
+                  <SelectItem value="sora">Sora Turbo (20s, 1080p)</SelectItem>
+                  <SelectItem value="runway">Runway Gen-3 (10s, 4K)</SelectItem>
+                  <SelectItem value="pika">Pika 1.5 (3s, 720p)</SelectItem>
+                  <SelectItem value="luma">Luma Dream Machine (5s, 1080p)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -348,6 +362,954 @@ function VideoCard({ video }: { video: any }) {
   );
 }
 
+// AI Studio Components
+function AIStudioSection() {
+  const [activeSubTab, setActiveSubTab] = useState("video");
+
+  return (
+    <div className="space-y-6">
+      {/* Sub-navigation */}
+      <div className="glass-card rounded-xl p-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <Button
+            variant={activeSubTab === "video" ? "default" : "ghost"}
+            onClick={() => setActiveSubTab("video")}
+            className={activeSubTab === "video" ? "red-glow" : ""}
+          >
+            <Video className="w-4 h-4 mr-2" />
+            Video
+          </Button>
+          <Button
+            variant={activeSubTab === "thumbnail" ? "default" : "ghost"}
+            onClick={() => setActiveSubTab("thumbnail")}
+            className={activeSubTab === "thumbnail" ? "red-glow" : ""}
+          >
+            <Image className="w-4 h-4 mr-2" />
+            Thumbnail
+          </Button>
+          <Button
+            variant={activeSubTab === "voiceover" ? "default" : "ghost"}
+            onClick={() => setActiveSubTab("voiceover")}
+            className={activeSubTab === "voiceover" ? "red-glow" : ""}
+          >
+            <Mic className="w-4 h-4 mr-2" />
+            Voiceover
+          </Button>
+          <Button
+            variant={activeSubTab === "script" ? "default" : "ghost"}
+            onClick={() => setActiveSubTab("script")}
+            className={activeSubTab === "script" ? "red-glow" : ""}
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Script
+          </Button>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {activeSubTab === "video" && <VideoGenerationSection key="video" />}
+        {activeSubTab === "thumbnail" && <ThumbnailGenerationSection key="thumbnail" />}
+        {activeSubTab === "voiceover" && <VoiceoverGenerationSection key="voiceover" />}
+        {activeSubTab === "script" && <ScriptGenerationSection key="script" />}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function VideoGenerationSection() {
+  const [model, setModel] = useState("sora");
+  const [prompt, setPrompt] = useState("");
+  const [duration, setDuration] = useState([5]);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedVideo, setGeneratedVideo] = useState<any>(null);
+
+  const createVideo = useAction(api.aiGeneration.createVideo);
+  const currentUser = useQuery(api.users.currentUser);
+
+  const handleGenerate = async () => {
+    if (!prompt) {
+      toast.error("Please enter a prompt");
+      return;
+    }
+
+    if (!currentUser) {
+      toast.error("Please sign in");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const result = await createVideo({
+        userId: currentUser._id,
+        title: prompt.substring(0, 50),
+        prompt,
+        aiModel: model,
+        includeVoiceover: false,
+      });
+
+      if (result.success) {
+        toast.success("Video generation started!");
+        setGeneratedVideo(result);
+      } else {
+        toast.error(result.error || "Failed to generate video");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const modelCredits = {
+    sora: 50,
+    runway: 60,
+    pika: 30,
+    luma: 45
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="glass-card rounded-xl p-6 space-y-6"
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-2xl font-bold flex items-center gap-2">
+            <Video className="w-6 h-6 text-primary" />
+            Video Generation
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Create stunning videos with AI
+          </p>
+        </div>
+        <Badge className="bg-primary/20 text-primary border-primary/30">
+          {modelCredits[model as keyof typeof modelCredits]} Credits
+        </Badge>
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div>
+          <Label className="text-sm font-medium mb-2 block">AI Model</Label>
+          <Select value={model} onValueChange={setModel}>
+            <SelectTrigger className="glass">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="glass-strong">
+              <SelectItem value="sora">
+                <div className="flex items-center justify-between w-full">
+                  <span>OpenAI Sora Turbo</span>
+                  <span className="text-xs text-muted-foreground ml-4">20s, 1080p</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="runway">
+                <div className="flex items-center justify-between w-full">
+                  <span>Runway Gen-3 Alpha</span>
+                  <span className="text-xs text-muted-foreground ml-4">10s, 4K</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="pika">
+                <div className="flex items-center justify-between w-full">
+                  <span>Pika 1.5</span>
+                  <span className="text-xs text-muted-foreground ml-4">3s, 720p</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="luma">
+                <div className="flex items-center justify-between w-full">
+                  <span>Luma Dream Machine</span>
+                  <span className="text-xs text-muted-foreground ml-4">5s, 1080p</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Prompt</Label>
+          <Textarea
+            placeholder="A cinematic shot of a sunset over the ocean with flying birds..."
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows={4}
+            className="glass"
+          />
+        </div>
+
+        <div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full justify-between glass"
+          >
+            <span className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Advanced Settings
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+          </Button>
+        </div>
+
+        {showAdvanced && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="space-y-4 glass rounded-lg p-4"
+          >
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Duration (seconds)</Label>
+              <div className="flex items-center gap-4">
+                <Slider
+                  value={duration}
+                  onValueChange={setDuration}
+                  min={3}
+                  max={20}
+                  step={1}
+                  className="flex-1"
+                />
+                <span className="text-sm font-medium w-12">{duration[0]}s</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        <Button
+          onClick={handleGenerate}
+          disabled={isGenerating || !prompt}
+          className="w-full red-glow"
+          size="lg"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Generating Video...
+            </>
+          ) : (
+            <>
+              <Wand2 className="w-4 h-4 mr-2" />
+              Generate Video
+            </>
+          )}
+        </Button>
+      </div>
+
+      {generatedVideo && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass rounded-lg p-4"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold">Generation Started</h4>
+            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+              Processing
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Your video is being generated. Check the "My Videos" tab to view progress.
+          </p>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+function ThumbnailGenerationSection() {
+  const [model, setModel] = useState("midjourney");
+  const [prompt, setPrompt] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const modelCredits = {
+    midjourney: 25,
+    dalle: 20,
+    sdxl: 15,
+    leonardo: 18
+  };
+
+  const handleGenerate = async () => {
+    if (!prompt) {
+      toast.error("Please enter a prompt");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      // Simulate generation
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast.success("Thumbnail generation started!");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="glass-card rounded-xl p-6 space-y-6"
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-2xl font-bold flex items-center gap-2">
+            <Image className="w-6 h-6 text-primary" />
+            Thumbnail Generation
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Create eye-catching thumbnails for your videos
+          </p>
+        </div>
+        <Badge className="bg-primary/20 text-primary border-primary/30">
+          {modelCredits[model as keyof typeof modelCredits]} Credits
+        </Badge>
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div>
+          <Label className="text-sm font-medium mb-2 block">AI Model</Label>
+          <Select value={model} onValueChange={setModel}>
+            <SelectTrigger className="glass">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="glass-strong">
+              <SelectItem value="midjourney">
+                <div className="flex items-center justify-between w-full">
+                  <span>Midjourney V6</span>
+                  <span className="text-xs text-muted-foreground ml-4">8K</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="dalle">
+                <div className="flex items-center justify-between w-full">
+                  <span>DALL-E 3</span>
+                  <span className="text-xs text-muted-foreground ml-4">1024x1792</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="sdxl">
+                <div className="flex items-center justify-between w-full">
+                  <span>Stable Diffusion XL</span>
+                  <span className="text-xs text-muted-foreground ml-4">1024x1024</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="leonardo">
+                <div className="flex items-center justify-between w-full">
+                  <span>Leonardo.AI</span>
+                  <span className="text-xs text-muted-foreground ml-4">1920x1080</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Prompt</Label>
+          <Textarea
+            placeholder="A dramatic YouTube thumbnail showing a surprised person with text 'YOU WON'T BELIEVE THIS!'"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows={4}
+            className="glass"
+          />
+        </div>
+
+        <div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full justify-between glass"
+          >
+            <span className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Advanced Settings
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+          </Button>
+        </div>
+
+        {showAdvanced && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="space-y-4 glass rounded-lg p-4"
+          >
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Aspect Ratio</Label>
+              <Select defaultValue="16:9">
+                <SelectTrigger className="glass">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="glass-strong">
+                  <SelectItem value="16:9">16:9 (YouTube)</SelectItem>
+                  <SelectItem value="9:16">9:16 (Vertical)</SelectItem>
+                  <SelectItem value="1:1">1:1 (Square)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </motion.div>
+        )}
+
+        <Button
+          onClick={handleGenerate}
+          disabled={isGenerating || !prompt}
+          className="w-full red-glow"
+          size="lg"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Generating Thumbnail...
+            </>
+          ) : (
+            <>
+              <Wand2 className="w-4 h-4 mr-2" />
+              Generate Thumbnail
+            </>
+          )}
+        </Button>
+      </div>
+    </motion.div>
+  );
+}
+
+function VoiceoverGenerationSection() {
+  const [model, setModel] = useState("elevenlabs");
+  const [text, setText] = useState("");
+  const [voice, setVoice] = useState("rachel");
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generateVoiceover = useAction(api.aiGeneration.generateVoiceover);
+
+  const modelCredits = {
+    elevenlabs: 10,
+    playht: 12,
+    openai: 8,
+    murf: 9
+  };
+
+  const handleGenerate = async () => {
+    if (!text) {
+      toast.error("Please enter text");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const result = await generateVoiceover({
+        text,
+        voiceId: voice,
+      });
+
+      if (result.success) {
+        toast.success("Voiceover generated successfully!");
+      } else {
+        toast.error(result.error || "Failed to generate voiceover");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="glass-card rounded-xl p-6 space-y-6"
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-2xl font-bold flex items-center gap-2">
+            <Mic className="w-6 h-6 text-primary" />
+            Voiceover Generation
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Generate realistic AI voiceovers
+          </p>
+        </div>
+        <Badge className="bg-primary/20 text-primary border-primary/30">
+          {modelCredits[model as keyof typeof modelCredits]} Credits
+        </Badge>
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div>
+          <Label className="text-sm font-medium mb-2 block">AI Model</Label>
+          <Select value={model} onValueChange={setModel}>
+            <SelectTrigger className="glass">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="glass-strong">
+              <SelectItem value="elevenlabs">
+                <div className="flex items-center justify-between w-full">
+                  <span>ElevenLabs Turbo V2</span>
+                  <span className="text-xs text-muted-foreground ml-4">29 languages</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="playht">
+                <div className="flex items-center justify-between w-full">
+                  <span>PlayHT 3.0</span>
+                  <span className="text-xs text-muted-foreground ml-4">Multi-lingual</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="openai">
+                <div className="flex items-center justify-between w-full">
+                  <span>OpenAI TTS HD</span>
+                  <span className="text-xs text-muted-foreground ml-4">6 voices</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="murf">
+                <div className="flex items-center justify-between w-full">
+                  <span>Murf AI Studio</span>
+                  <span className="text-xs text-muted-foreground ml-4">120+ voices</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Voice</Label>
+          <Select value={voice} onValueChange={setVoice}>
+            <SelectTrigger className="glass">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="glass-strong">
+              <SelectItem value="rachel">Rachel - Professional Female</SelectItem>
+              <SelectItem value="adam">Adam - Deep Male</SelectItem>
+              <SelectItem value="bella">Bella - Young Female</SelectItem>
+              <SelectItem value="josh">Josh - Casual Male</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Text</Label>
+          <Textarea
+            placeholder="Enter the text you want to convert to speech..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={6}
+            className="glass"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Character count: {text.length} | Estimated duration: {Math.ceil(text.length / 15)}s
+          </p>
+        </div>
+
+        <div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full justify-between glass"
+          >
+            <span className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Advanced Settings
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+          </Button>
+        </div>
+
+        {showAdvanced && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="space-y-4 glass rounded-lg p-4"
+          >
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Stability</Label>
+              <Slider defaultValue={[50]} min={0} max={100} step={5} />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Similarity</Label>
+              <Slider defaultValue={[75]} min={0} max={100} step={5} />
+            </div>
+          </motion.div>
+        )}
+
+        <Button
+          onClick={handleGenerate}
+          disabled={isGenerating || !text}
+          className="w-full red-glow"
+          size="lg"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Generating Voiceover...
+            </>
+          ) : (
+            <>
+              <Wand2 className="w-4 h-4 mr-2" />
+              Generate Voiceover
+            </>
+          )}
+        </Button>
+      </div>
+    </motion.div>
+  );
+}
+
+function ScriptGenerationSection() {
+  const [prompt, setPrompt] = useState("");
+  const [duration, setDuration] = useState([60]);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedScript, setGeneratedScript] = useState("");
+
+  const generateScript = useAction(api.aiGeneration.generateScript);
+
+  const handleGenerate = async () => {
+    if (!prompt) {
+      toast.error("Please enter a prompt");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const result = await generateScript({
+        prompt,
+        duration: duration[0],
+      });
+
+      if (result.success) {
+        setGeneratedScript(result.script || "");
+        toast.success("Script generated successfully!");
+      } else {
+        toast.error(result.error || "Failed to generate script");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(generatedScript);
+    toast.success("Script copied to clipboard!");
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="glass-card rounded-xl p-6 space-y-6"
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-2xl font-bold flex items-center gap-2">
+            <FileText className="w-6 h-6 text-primary" />
+            Script Generation
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Generate viral video scripts with AI
+          </p>
+        </div>
+        <Badge className="bg-primary/20 text-primary border-primary/30">
+          5 Credits
+        </Badge>
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Topic / Prompt</Label>
+          <Textarea
+            placeholder="What's your video about? (e.g., 'How to grow on YouTube in 2026')"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows={3}
+            className="glass"
+          />
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Duration (seconds)</Label>
+          <div className="flex items-center gap-4">
+            <Slider
+              value={duration}
+              onValueChange={setDuration}
+              min={30}
+              max={300}
+              step={30}
+              className="flex-1"
+            />
+            <span className="text-sm font-medium w-16">{duration[0]}s</span>
+          </div>
+        </div>
+
+        <div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full justify-between glass"
+          >
+            <span className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Advanced Settings
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+          </Button>
+        </div>
+
+        {showAdvanced && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="space-y-4 glass rounded-lg p-4"
+          >
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Tone</Label>
+              <Select defaultValue="engaging">
+                <SelectTrigger className="glass">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="glass-strong">
+                  <SelectItem value="engaging">Engaging & Energetic</SelectItem>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="casual">Casual & Friendly</SelectItem>
+                  <SelectItem value="dramatic">Dramatic</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </motion.div>
+        )}
+
+        <Button
+          onClick={handleGenerate}
+          disabled={isGenerating || !prompt}
+          className="w-full red-glow"
+          size="lg"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Generating Script...
+            </>
+          ) : (
+            <>
+              <Wand2 className="w-4 h-4 mr-2" />
+              Generate Script
+            </>
+          )}
+        </Button>
+      </div>
+
+      {generatedScript && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass rounded-lg p-4 space-y-3"
+        >
+          <div className="flex items-center justify-between">
+            <h4 className="font-semibold">Generated Script</h4>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={copyToClipboard}
+              className="glass"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Copy
+            </Button>
+          </div>
+          <ScrollArea className="h-[300px] w-full rounded-md glass p-4">
+            <pre className="text-sm whitespace-pre-wrap font-mono">{generatedScript}</pre>
+          </ScrollArea>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+// My Videos Section
+function MyVideosSection({ currentUser }: { currentUser: any }) {
+  const [filterType, setFilterType] = useState("all");
+
+  const userVideos = useQuery(
+    api.videos.getUserVideos,
+    currentUser ? { userId: currentUser._id } : "skip"
+  );
+
+  const deleteVideo = useMutation(api.videos.deleteVideo);
+
+  const handleDelete = async (videoId: Id<"videos">) => {
+    try {
+      await deleteVideo({ id: videoId });
+      toast.success("Video deleted successfully");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleRegenerate = async (video: any) => {
+    toast.info("Regeneration feature coming soon!");
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Filter Bar */}
+      <div className="glass-card rounded-xl p-4">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={filterType === "all" ? "default" : "ghost"}
+            onClick={() => setFilterType("all")}
+            size="sm"
+            className={filterType === "all" ? "red-glow" : ""}
+          >
+            All Content
+          </Button>
+          <Button
+            variant={filterType === "video" ? "default" : "ghost"}
+            onClick={() => setFilterType("video")}
+            size="sm"
+            className={filterType === "video" ? "red-glow" : ""}
+          >
+            <Video className="w-4 h-4 mr-2" />
+            Videos
+          </Button>
+          <Button
+            variant={filterType === "thumbnail" ? "default" : "ghost"}
+            onClick={() => setFilterType("thumbnail")}
+            size="sm"
+            className={filterType === "thumbnail" ? "red-glow" : ""}
+          >
+            <Image className="w-4 h-4 mr-2" />
+            Thumbnails
+          </Button>
+          <Button
+            variant={filterType === "voiceover" ? "default" : "ghost"}
+            onClick={() => setFilterType("voiceover")}
+            size="sm"
+            className={filterType === "voiceover" ? "red-glow" : ""}
+          >
+            <Mic className="w-4 h-4 mr-2" />
+            Voiceovers
+          </Button>
+          <Button
+            variant={filterType === "script" ? "default" : "ghost"}
+            onClick={() => setFilterType("script")}
+            size="sm"
+            className={filterType === "script" ? "red-glow" : ""}
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Scripts
+          </Button>
+        </div>
+      </div>
+
+      {/* Content Grid */}
+      {!userVideos ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+      ) : userVideos.length === 0 ? (
+        <div className="glass-card rounded-xl p-12 text-center">
+          <Video className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="text-xl font-bold mb-2">No Content Yet</h3>
+          <p className="text-muted-foreground mb-6">
+            Start creating with AI Studio to see your content here
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {userVideos.map((video: any) => (
+            <motion.div
+              key={video._id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="glass-card rounded-xl overflow-hidden group"
+            >
+              <div className="relative h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                {video.status === "generating" && (
+                  <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                )}
+                {video.status === "completed" && video.thumbnailUrl && (
+                  <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover" />
+                )}
+                {video.status === "queued" && (
+                  <Clock className="w-12 h-12 text-primary" />
+                )}
+                <div className="absolute top-3 right-3">
+                  <Badge className={
+                    video.status === "completed" ? "bg-green-500/20 text-green-400 border-green-500/30" :
+                    video.status === "generating" ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" :
+                    video.status === "failed" ? "bg-red-500/20 text-red-400 border-red-500/30" :
+                    "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                  }>
+                    {video.status}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <h3 className="font-bold text-lg mb-2 line-clamp-1">{video.title}</h3>
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{video.description}</p>
+
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
+                  <span className="flex items-center gap-1">
+                    <Wand2 className="w-3 h-3" />
+                    {video.aiModel}
+                  </span>
+                  <span>{new Date(video._creationTime).toLocaleDateString()}</span>
+                </div>
+
+                <div className="flex gap-2">
+                  {video.status === "completed" && (
+                    <Button size="sm" className="flex-1" variant="outline">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleRegenerate(video)}
+                    className="glass"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDelete(video._id)}
+                    className="glass hover:bg-red-500/20"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -374,6 +1336,11 @@ export default function Dashboard() {
     limit: 50,
     category: selectedCategory,
   });
+
+  const userCredits = useQuery(
+    api.videos.getUserCredits,
+    currentUser ? { userId: currentUser._id } : "skip"
+  );
 
   const [isLoadingTrending, setIsLoadingTrending] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -428,134 +1395,137 @@ export default function Dashboard() {
     <div className="min-h-screen relative">
       <AnimatedBackground />
       <Navigation />
+
       {/* Main Content */}
       <div className="pt-20 pb-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-              <div>
-                <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-red-500 bg-clip-text text-transparent">
-                  Dashboard
-                </h1>
-                <p className="text-muted-foreground">
-                  Welcome back, {userEmail.split('@')[0]}! Here's your creative analytics.
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="glass rounded-xl px-6 py-3 flex items-center gap-3 shimmer">
-                  <Coins className="w-5 h-5 text-primary" />
-                  <div>
-                    <div className="font-bold text-lg">100</div>
-                    <div className="text-xs text-muted-foreground">Credits Remaining</div>
-                  </div>
-                </div>
-                <Button className="red-glow">
-                  <Zap className="w-4 h-4 mr-2" />
-                  Upgrade to Pro
-                </Button>
-              </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-red-500 bg-clip-text text-transparent">
+                Dashboard
+              </h1>
+              <p className="text-muted-foreground">
+                Welcome back, {userEmail.split('@')[0]}! Here's your creative analytics.
+              </p>
             </div>
-
-            {/* Stats Cards */}
-            <StatsCards
-              videosGenerated={niches?.length || 0}
-              trendsAnalyzed={niches?.length || 0}
-            />
+            <div className="flex items-center gap-4">
+              <div className="glass rounded-xl px-6 py-3 flex items-center gap-3 shimmer">
+                <Coins className="w-5 h-5 text-primary" />
+                <div>
+                  <div className="font-bold text-lg">{userCredits?.credits || 100}</div>
+                  <div className="text-xs text-muted-foreground">Credits Remaining</div>
+                </div>
+              </div>
+              <Button className="red-glow">
+                <Zap className="w-4 h-4 mr-2" />
+                Upgrade to Pro
+              </Button>
+            </div>
           </div>
+
+          {/* Stats Cards */}
+          <StatsCards
+            videosGenerated={niches?.length || 0}
+            trendsAnalyzed={niches?.length || 0}
+          />
         </div>
+      </div>
 
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-          <Tabs defaultValue="niches" className="space-y-8">
-            <TabsList className="glass">
-              <TabsTrigger value="niches">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Trending Niches
-              </TabsTrigger>
-              <TabsTrigger value="videos">
-                <Video className="w-4 h-4 mr-2" />
-                My Videos
-              </TabsTrigger>
-            </TabsList>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <Tabs defaultValue="niches" className="space-y-8">
+          <TabsList className="glass">
+            <TabsTrigger value="niches">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Trending Niches
+            </TabsTrigger>
+            <TabsTrigger value="studio">
+              <Sparkles className="w-4 h-4 mr-2" />
+              AI Studio
+            </TabsTrigger>
+            <TabsTrigger value="videos">
+              <Video className="w-4 h-4 mr-2" />
+              My Videos
+            </TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="niches" className="space-y-6">
-              {/* Search & Actions */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-card rounded-xl p-6"
-              >
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1 flex gap-2">
-                    <Input
-                      placeholder="Search niches..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                      className="glass"
-                    />
-                    <Button onClick={handleSearch} disabled={isSearching} className="red-glow">
-                      {isSearching ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Search className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <Button
-                    onClick={handleFetchTrending}
-                    disabled={isLoadingTrending}
-                    variant="outline"
+          <TabsContent value="niches" className="space-y-6">
+            {/* Search & Actions */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-card rounded-xl p-6"
+            >
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 flex gap-2">
+                  <Input
+                    placeholder="Search niches..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     className="glass"
-                  >
-                    {isLoadingTrending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Loading...
-                      </>
+                  />
+                  <Button onClick={handleSearch} disabled={isSearching} className="red-glow">
+                    {isSearching ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      <>
-                        <TrendingUp className="w-4 h-4 mr-2" />
-                        Refresh Trends
-                      </>
+                      <Search className="w-4 h-4" />
                     )}
                   </Button>
                 </div>
-              </motion.div>
+                <Button
+                  onClick={handleFetchTrending}
+                  disabled={isLoadingTrending}
+                  variant="outline"
+                  className="glass"
+                >
+                  {isLoadingTrending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Refresh Trends
+                    </>
+                  )}
+                </Button>
+              </div>
+            </motion.div>
 
-              {/* Niches Grid */}
-              {niches === undefined ? (
-                <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                </div>
-              ) : niches.length === 0 ? (
-                <div className="glass-card rounded-xl p-12 text-center">
-                  <TrendingUp className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-bold mb-2">No Niches Found</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Click "Refresh Trends" to discover trending niches
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {niches.map((niche: any) => (
-                    <NicheCard key={niche._id} niche={niche} currentUser={currentUser} />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="videos" className="space-y-6">
+            {/* Niches Grid */}
+            {niches === undefined ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div>
+            ) : niches.length === 0 ? (
               <div className="glass-card rounded-xl p-12 text-center">
-                <Video className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-xl font-bold mb-2">No Videos Yet</h3>
+                <TrendingUp className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-xl font-bold mb-2">No Niches Found</h3>
                 <p className="text-muted-foreground mb-6">
-                  Start creating AI-powered videos from trending niches
+                  Click "Refresh Trends" to discover trending niches
                 </p>
               </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {niches.map((niche: any) => (
+                  <NicheCard key={niche._id} niche={niche} currentUser={currentUser} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="studio" className="space-y-6">
+            <AIStudioSection />
+          </TabsContent>
+
+          <TabsContent value="videos" className="space-y-6">
+            <MyVideosSection currentUser={currentUser} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
