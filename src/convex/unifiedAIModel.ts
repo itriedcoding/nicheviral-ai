@@ -6,28 +6,34 @@ import { api } from "./_generated/api";
 import { vly } from "../lib/vly-integrations";
 
 /**
- * UNIFIED AI MODEL V3 - FULLY FREE & PREMIUM AI MODELS
+ * UNIFIED AI MODEL V4 - SELF-HOSTED + CLOUD AI MODELS
  *
- * This is a custom AI pipeline that handles ALL generation types with FREE and premium models:
+ * This is a custom AI pipeline with SELF-HOSTED models as primary option:
  *
- * FREE TIER (No API Key Required):
+ * SELF-HOSTED TIER (Your Hardware):
+ * - Video Generation: CogVideoX (Local GPU)
+ * - Image Generation: Flux.1-dev, SDXL (Local GPU via ComfyUI)
+ * - Voice/Audio: Coqui TTS (Local)
+ * - Text/Scripts: Llama 3.2/3.3 (Local via Ollama)
+ *
+ * CLOUD FREE TIER (Fallback if self-hosted unavailable):
  * - Video Generation: Hugging Face CogVideoX (FREE with HF token)
  * - Image Generation: Pollinations AI (FREE, unlimited)
  * - Voice/Audio: StreamElements TTS (FREE, unlimited)
- * - Text/Scripts: Groq Llama 3.3 (FREE with Groq API key) or HF Inference API
+ * - Text/Scripts: Groq Llama 3.3 (FREE with Groq API key)
  *
- * PREMIUM TIER (Optional, with API Keys):
+ * CLOUD PREMIUM TIER (Optional, with API Keys):
  * - Video Generation: OpenAI Sora 2 API ($0.20 per 10s)
  * - Image Generation: DALL-E 3 ($0.04/image), Flux Pro ($0.02/image)
  * - Voice/Audio: ElevenLabs, OpenAI TTS
  * - Text/Scripts: GPT-4o, Claude 3.5 Sonnet
  *
- * CASCADING FALLBACKS:
- * - Tries premium APIs first (if keys available)
- * - Falls back to FREE services automatically
- * - Always works, never fails
+ * CASCADING PRIORITY:
+ * 1. SELF-HOSTED (if servers configured)
+ * 2. Cloud Premium APIs (if keys available)
+ * 3. Cloud FREE services (always works)
  *
- * NO MOCKS - Everything is real AI generation with production APIs
+ * NO MOCKS - Everything is real AI generation
  */
 
 interface UnifiedAIRequest {
@@ -83,7 +89,39 @@ export const generateWithUnifiedAI = action({
     const startTime = Date.now();
 
     try {
-      console.log(`🤖 UNIFIED AI MODEL: Processing ${args.type} request`);
+      console.log(`🤖 UNIFIED AI MODEL V4: Processing ${args.type} request`);
+
+      // PRIORITY 1: Try SELF-HOSTED models first
+      const selfHostedEnabled = process.env.LOCAL_AI_SERVER || process.env.COMFYUI_SERVER;
+      if (selfHostedEnabled) {
+        try {
+          console.log("🖥️ Attempting SELF-HOSTED generation (your hardware)...");
+          const selfHostedResult = await ctx.runAction(api.selfHostedAI.generateWithSelfHosted, args);
+
+          if (selfHostedResult) {
+            console.log("✅ SELF-HOSTED generation successful!");
+            return {
+              success: true,
+              outputs: {
+                images: selfHostedResult.images,
+                audio: selfHostedResult.audio,
+                script: selfHostedResult.script,
+                storyboard: selfHostedResult.storyboard,
+                thumbnail: selfHostedResult.thumbnail
+              },
+              metadata: {
+                processingTime: Date.now() - startTime,
+                aiModel: "Self-Hosted (Local GPU)"
+              }
+            };
+          }
+        } catch (e: any) {
+          console.log(`⚠️ Self-hosted unavailable: ${e.message}, falling back to cloud...`);
+        }
+      }
+
+      // PRIORITY 2 & 3: Cloud Premium or Cloud Free (existing code)
+      console.log(`🤖 Using cloud AI models...`);
 
       // PHASE 1: INTELLIGENT PROMPT ANALYSIS
       // The AI analyzes what you want and creates optimal generation parameters

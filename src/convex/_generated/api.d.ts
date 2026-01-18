@@ -24,6 +24,7 @@ import type * as passwordAuth from "../passwordAuth.js";
 import type * as paymentProcessor from "../paymentProcessor.js";
 import type * as realAIGeneration from "../realAIGeneration.js";
 import type * as seedData from "../seedData.js";
+import type * as selfHostedAI from "../selfHostedAI.js";
 import type * as simpleAuth from "../simpleAuth.js";
 import type * as simpleAuthMutations from "../simpleAuthMutations.js";
 import type * as testResend from "../testResend.js";
@@ -56,6 +57,7 @@ declare const fullApi: ApiFromModules<{
   paymentProcessor: typeof paymentProcessor;
   realAIGeneration: typeof realAIGeneration;
   seedData: typeof seedData;
+  selfHostedAI: typeof selfHostedAI;
   simpleAuth: typeof simpleAuth;
   simpleAuthMutations: typeof simpleAuthMutations;
   testResend: typeof testResend;

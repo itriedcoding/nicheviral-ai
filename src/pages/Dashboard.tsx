@@ -362,12 +362,73 @@ function VideoCard({ video }: { video: any }) {
   );
 }
 
+// AI System Status Component
+function AISystemStatus() {
+  const checkStatus = useAction(api.selfHostedAI.checkSelfHostedStatus);
+  const [status, setStatus] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadStatus = async () => {
+      try {
+        const result = await checkStatus({});
+        setStatus(result);
+      } catch (e) {
+        console.log("Could not check self-hosted status");
+      }
+      setLoading(false);
+    };
+    loadStatus();
+  }, []);
+
+  if (loading) return null;
+
+  const selfHostedActive = status?.ollama || status?.comfyui;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="glass-card rounded-xl p-4 mb-6 border-2 border-primary/20"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`w-3 h-3 rounded-full ${selfHostedActive ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
+          <div>
+            <h3 className="font-bold text-sm">AI System Status</h3>
+            <p className="text-xs text-muted-foreground">
+              {selfHostedActive ? (
+                <>
+                  🖥️ <span className="text-green-500 font-semibold">SELF-HOSTED</span> - Running on your hardware
+                  {status.ollama && <span className="ml-2">✅ Ollama ({status.models?.length || 0} models)</span>}
+                  {status.comfyui && <span className="ml-2">✅ ComfyUI</span>}
+                  {status.tts && <span className="ml-2">✅ TTS</span>}
+                </>
+              ) : (
+                <>
+                  ☁️ <span className="text-yellow-500 font-semibold">CLOUD</span> - Using free cloud services (Groq, HuggingFace, Pollinations)
+                </>
+              )}
+            </p>
+          </div>
+        </div>
+        <Badge variant={selfHostedActive ? "default" : "secondary"} className="text-xs">
+          {selfHostedActive ? "Local GPU" : "Cloud Free"}
+        </Badge>
+      </div>
+    </motion.div>
+  );
+}
+
 // AI Studio Components
 function AIStudioSection({ userId }: { userId: string }) {
   const [activeSubTab, setActiveSubTab] = useState("video");
 
   return (
     <div className="space-y-6">
+      {/* AI System Status */}
+      <AISystemStatus />
+
       {/* Sub-navigation */}
       <div className="glass-card rounded-xl p-2">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -462,6 +523,9 @@ function VideoGenerationSection({ userId }: { userId: string }) {
   };
 
   const modelCredits = {
+    selfhosted: 0,
+    cogvideox: 0,
+    flux: 0,
     sora: 50,
     runway: 60,
     pika: 30,
@@ -482,11 +546,11 @@ function VideoGenerationSection({ userId }: { userId: string }) {
             Video Generation
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Create stunning videos with AI
+            Create stunning videos with AI - Self-hosted or Cloud
           </p>
         </div>
-        <Badge className="bg-primary/20 text-primary border-primary/30">
-          {modelCredits[model as keyof typeof modelCredits]} Credits
+        <Badge className={`${model === 'selfhosted' || model === 'cogvideox' || model === 'flux' ? 'bg-green-500/20 text-green-500 border-green-500/30' : 'bg-primary/20 text-primary border-primary/30'}`}>
+          {modelCredits[model as keyof typeof modelCredits] === 0 ? 'FREE' : `${modelCredits[model as keyof typeof modelCredits]} Credits`}
         </Badge>
       </div>
 
@@ -500,6 +564,25 @@ function VideoGenerationSection({ userId }: { userId: string }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="glass-strong">
+              <SelectItem value="selfhosted">
+                <div className="flex items-center justify-between w-full">
+                  <span>🖥️ Self-Hosted (Local GPU)</span>
+                  <span className="text-xs text-green-500 ml-4 font-bold">FREE - Your Hardware</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="cogvideox">
+                <div className="flex items-center justify-between w-full">
+                  <span>🤗 CogVideoX-5B (HuggingFace)</span>
+                  <span className="text-xs text-green-500 ml-4 font-bold">FREE - Cloud</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="flux">
+                <div className="flex items-center justify-between w-full">
+                  <span>⚡ Flux.1-dev Slideshow (HF)</span>
+                  <span className="text-xs text-green-500 ml-4 font-bold">FREE - Cloud</span>
+                </div>
+              </SelectItem>
+              <Separator className="my-2" />
               <SelectItem value="sora">
                 <div className="flex items-center justify-between w-full">
                   <span>OpenAI Sora Turbo</span>
