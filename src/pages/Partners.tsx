@@ -77,14 +77,14 @@ export default function Partners() {
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Let's explore how we can work together. Reach out to discuss partnership opportunities.
             </p>
-            <a href="mailto:partners@neura-ai.com" className="inline-block">
+            <a href="mailto:partners@neuraai.cyou" className="inline-block">
               <Button className="red-glow" size="lg">
                 <Mail className="w-4 h-4 mr-2" />
                 Contact Partnership Team
               </Button>
             </a>
             <p className="text-sm text-muted-foreground mt-6">
-              Email: <span className="text-primary">partners@neura-ai.com</span>
+              Email: <span className="text-primary">partners@neuraai.cyou</span>
             </p>
           </motion.div>
         </div>

@@ -188,7 +188,7 @@ export default function GDPR() {
                     <Mail className="w-5 h-5 text-primary" />
                     <div>
                       <p className="font-bold">Email Our DPO</p>
-                      <p className="text-sm text-primary">dpo@neura-ai.com</p>
+                      <p className="text-sm text-primary">dpo@neuraai.cyou</p>
                     </div>
                   </div>
                 </div>

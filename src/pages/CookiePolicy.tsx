@@ -187,7 +187,7 @@ export default function CookiePolicy() {
                 If you have any questions about our use of cookies, please contact us:
               </p>
               <div className="space-y-2 text-sm">
-                <p><span className="text-muted-foreground">Email:</span> <span className="text-primary">privacy@neura-ai.com</span></p>
+                <p><span className="text-muted-foreground">Email:</span> <span className="text-primary">privacy@neuraai.cyou</span></p>
                 <p><span className="text-muted-foreground">Address:</span> 123 AI Street, San Francisco, CA 94105</p>
               </div>
             </section>

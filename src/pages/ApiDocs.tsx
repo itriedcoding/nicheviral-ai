@@ -57,7 +57,7 @@ export default function ApiDocs() {
                   <span className="text-sm font-medium">Base URL</span>
                   <Badge variant="outline">v1</Badge>
                 </div>
-                <code className="text-primary text-sm">https://api.neura-ai.com/v1</code>
+                <code className="text-primary text-sm">https://api.neuraai.cyou/v1</code>
               </div>
 
               <div className="glass rounded-lg p-4">
@@ -144,7 +144,7 @@ export default function ApiDocs() {
                     <h3 className="font-semibold mb-3">Example cURL</h3>
                     <div className="glass rounded-lg p-4 overflow-x-auto">
                       <pre className="text-sm text-muted-foreground">
-{`curl -X POST https://api.neura-ai.com/v1/generate/video \\
+{`curl -X POST https://api.neuraai.cyou/v1/generate/video \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{

@@ -56,9 +56,9 @@ export default function PressKit() {
               For press inquiries, interviews, or additional information, please contact our team
             </p>
             <div className="space-y-2 mb-6">
-              <div><span className="text-muted-foreground">Email:</span> <span className="text-primary">press@neura-ai.com</span></div>
+              <div><span className="text-muted-foreground">Email:</span> <span className="text-primary">press@neuraai.cyou</span></div>
             </div>
-            <a href="mailto:press@neura-ai.com" className="inline-block">
+            <a href="mailto:press@neuraai.cyou" className="inline-block">
               <Button className="red-glow">
                 <Mail className="w-4 h-4 mr-2" />
                 Contact Press Team

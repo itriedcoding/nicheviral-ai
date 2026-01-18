@@ -84,7 +84,7 @@ export default function Careers() {
               We're looking for talented engineers, designers, and creators to join our growing team.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="mailto:careers@neura-ai.com" className="inline-block">
+              <a href="mailto:careers@neuraai.cyou" className="inline-block">
                 <Button className="red-glow" size="lg">
                   <Mail className="w-4 h-4 mr-2" />
                   Email Us Your Resume
@@ -92,7 +92,7 @@ export default function Careers() {
               </a>
             </div>
             <p className="text-sm text-muted-foreground mt-6">
-              Email: <span className="text-primary">careers@neura-ai.com</span>
+              Email: <span className="text-primary">careers@neuraai.cyou</span>
             </p>
           </motion.div>
         </div>
