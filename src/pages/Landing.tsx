@@ -3,6 +3,7 @@ import { useInView } from "react-intersection-observer";
 import { Navigation } from "@/components/Navigation";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Sparkles,
   Video,
@@ -276,19 +277,289 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 glass-light mt-24">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-red-500 bg-clip-text text-transparent">
-            Neura AI
+      {/* Testimonials Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold mb-4">Trusted by Creators</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Join thousands of content creators who've generated millions of views
+            </p>
           </div>
-          <p className="text-muted-foreground mb-6">
-            Powered by Sora, ElevenLabs, and cutting-edge AI technology
-          </p>
-          <div className="flex gap-6 justify-center text-sm text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors">Privacy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms</a>
-            <a href="#" className="hover:text-primary transition-colors">Contact</a>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: "Sarah Johnson",
+                role: "Content Creator",
+                avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+                content: "Neura AI helped me go from 0 to 100K subscribers in just 3 months. The AI-generated scripts are incredibly engaging!",
+                stats: "2.5M+ views"
+              },
+              {
+                name: "Marcus Chen",
+                role: "YouTube Creator",
+                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+                content: "The trend analysis is spot-on. I've tripled my income by focusing on the niches Neura AI recommended.",
+                stats: "5M+ views"
+              },
+              {
+                name: "Emily Rodriguez",
+                role: "Digital Marketer",
+                avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+                content: "Game changer for our agency. We can now produce 10x more content in the same time. ROI increased by 400%!",
+                stats: "8M+ views"
+              }
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+                className="glass-card rounded-2xl p-8 hover:scale-105 transition-all duration-300"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <img
+                    src={testimonial.avatar}
+                    alt={testimonial.name}
+                    className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/50"
+                  />
+                  <div>
+                    <h4 className="font-bold">{testimonial.name}</h4>
+                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  </div>
+                </div>
+                <p className="text-muted-foreground mb-4 leading-relaxed">"{testimonial.content}"</p>
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 fill-primary text-primary" />
+                  <Star className="w-5 h-5 fill-primary text-primary" />
+                  <Star className="w-5 h-5 fill-primary text-primary" />
+                  <Star className="w-5 h-5 fill-primary text-primary" />
+                  <Star className="w-5 h-5 fill-primary text-primary" />
+                  <span className="ml-2 text-sm text-primary font-semibold">{testimonial.stats}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Choose the plan that's right for you. No hidden fees.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                name: "Starter",
+                price: "$29",
+                period: "/month",
+                features: [
+                  "100 video generations/month",
+                  "AI script generation",
+                  "Trending niche analysis",
+                  "HD video exports",
+                  "Basic voiceover",
+                  "Email support"
+                ],
+                cta: "Start Free Trial",
+                popular: false
+              },
+              {
+                name: "Pro",
+                price: "$79",
+                period: "/month",
+                features: [
+                  "500 video generations/month",
+                  "Advanced AI models (Sora, Runway)",
+                  "Premium voiceovers (ElevenLabs)",
+                  "4K video exports",
+                  "Priority rendering",
+                  "24/7 support",
+                  "Custom branding",
+                  "API access"
+                ],
+                cta: "Start Free Trial",
+                popular: true
+              },
+              {
+                name: "Enterprise",
+                price: "$199",
+                period: "/month",
+                features: [
+                  "Unlimited generations",
+                  "All AI models",
+                  "White-label solution",
+                  "Dedicated account manager",
+                  "Custom integrations",
+                  "Team collaboration",
+                  "Advanced analytics",
+                  "SLA guarantee"
+                ],
+                cta: "Contact Sales",
+                popular: false
+              }
+            ].map((plan, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+                className={`glass-card rounded-2xl p-8 hover:scale-105 transition-all duration-300 ${
+                  plan.popular ? 'ring-2 ring-primary red-glow' : ''
+                } relative`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-primary text-primary-foreground px-4 py-1">
+                      Most Popular
+                    </Badge>
+                  </div>
+                )}
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-5xl font-bold text-primary">{plan.price}</span>
+                    <span className="text-muted-foreground">{plan.period}</span>
+                  </div>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-3">
+                      <Sparkles className="w-5 h-5 text-primary flex-shrink-0" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/auth">
+                  <Button
+                    className={`w-full ${plan.popular ? 'red-glow-strong' : ''}`}
+                    size="lg"
+                  >
+                    {plan.cta}
+                  </Button>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold mb-4">Frequently Asked Questions</h2>
+            <p className="text-xl text-muted-foreground">
+              Everything you need to know about Neura AI
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: "How does the AI video generation work?",
+                a: "Neura AI uses state-of-the-art models like OpenAI's Sora and Runway Gen-3 to create stunning videos from text prompts. Our AI analyzes your niche, generates engaging scripts, and produces professional videos in minutes."
+              },
+              {
+                q: "What AI models are supported?",
+                a: "We support multiple cutting-edge AI models including Sora (OpenAI), Runway Gen-3, Pika Labs, and Stable Diffusion Video. Choose the model that best fits your content style and requirements."
+              },
+              {
+                q: "How accurate is the trending niche analysis?",
+                a: "Our system uses the official YouTube Data API to fetch real-time trending data. We analyze millions of videos daily, calculating trend scores based on views, engagement, and growth velocity to identify opportunities before they peak."
+              },
+              {
+                q: "Can I use the videos commercially?",
+                a: "Yes! All videos generated with Neura AI are yours to use commercially. You retain full ownership and can monetize them on any platform including YouTube, TikTok, Instagram, and more."
+              },
+              {
+                q: "What's included in the free trial?",
+                a: "The free trial includes 10 video generations, access to all AI models, trending niche analysis, and basic support. No credit card required to start."
+              },
+              {
+                q: "How long does video generation take?",
+                a: "Most videos are generated in 2-5 minutes depending on length and complexity. Enterprise users get priority rendering with sub-2-minute generation times."
+              }
+            ].map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="glass-card rounded-xl p-6 hover:glass-strong transition-all duration-300"
+              >
+                <h4 className="font-bold text-lg mb-3">{faq.q}</h4>
+                <p className="text-muted-foreground leading-relaxed">{faq.a}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-16 px-4 sm:px-6 lg:px-8 glass-light mt-24 border-t border-white/10">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div className="col-span-1 md:col-span-2">
+              <div className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-red-500 bg-clip-text text-transparent">
+                Neura AI
+              </div>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                The ultimate AI-powered platform for discovering trending niches and creating viral videos. Join thousands of creators generating millions of views.
+              </p>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 glass rounded-full flex items-center justify-center hover:red-glow transition-all">
+                  <span className="text-lg">𝕏</span>
+                </a>
+                <a href="#" className="w-10 h-10 glass rounded-full flex items-center justify-center hover:red-glow transition-all">
+                  <span className="text-lg">in</span>
+                </a>
+                <a href="#" className="w-10 h-10 glass rounded-full flex items-center justify-center hover:red-glow transition-all">
+                  <span className="text-lg">▶</span>
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4">Product</h4>
+              <ul className="space-y-3 text-muted-foreground">
+                <li><a href="#" className="hover:text-primary transition-colors">Features</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Pricing</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">API</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Integrations</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4">Company</h4>
+              <ul className="space-y-3 text-muted-foreground">
+                <li><a href="#" className="hover:text-primary transition-colors">About</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Blog</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Careers</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              © 2026 Neura AI. All rights reserved.
+            </p>
+            <div className="flex gap-6 text-sm text-muted-foreground">
+              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-primary transition-colors">Cookie Policy</a>
+            </div>
           </div>
         </div>
       </footer>

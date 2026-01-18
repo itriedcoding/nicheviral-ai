@@ -30,6 +30,8 @@ import { Authenticated, Unauthenticated, useConvexAuth } from "convex/react";
 import { Link } from "react-router";
 import { Id } from "@/convex/_generated/dataModel";
 import { Navigation } from "@/components/Navigation";
+import { StatsCards } from "@/components/StatsCards";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 function NicheCard({ niche, currentUser }: { niche: any; currentUser: any }) {
   const [open, setOpen] = useState(false);
@@ -405,31 +407,48 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <AnimatedBackground />
       <Navigation />
       <Authenticated>
         {/* Main Content */}
-        <div className="pt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between mb-8">
-              <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div className="pt-20 pb-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-red-500 bg-clip-text text-transparent">
+                  Dashboard
+                </h1>
+                <p className="text-muted-foreground">
+                  Welcome back! Here's your creative analytics.
+                </p>
+              </div>
               <div className="flex items-center gap-4">
-                <div className="glass rounded-lg px-4 py-2 flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-primary" />
-                  <span className="font-bold">100</span>
-                  <span className="text-sm text-muted-foreground">credits</span>
+                <div className="glass rounded-xl px-6 py-3 flex items-center gap-3 shimmer">
+                  <Coins className="w-5 h-5 text-primary" />
+                  <div>
+                    <div className="font-bold text-lg">100</div>
+                    <div className="text-xs text-muted-foreground">Credits Remaining</div>
+                  </div>
                 </div>
-                <Button variant="outline" className="glass">
+                <Button className="red-glow">
                   <Zap className="w-4 h-4 mr-2" />
-                  Upgrade
+                  Upgrade to Pro
                 </Button>
               </div>
             </div>
+
+            {/* Stats Cards */}
+            <StatsCards
+              videosGenerated={niches?.length || 0}
+              trendsAnalyzed={niches?.length || 0}
+            />
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
           <Tabs defaultValue="niches" className="space-y-8">
             <TabsList className="glass">
               <TabsTrigger value="niches">
