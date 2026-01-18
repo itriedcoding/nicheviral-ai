@@ -9,14 +9,14 @@ import { toast } from "sonner";
 import {
   CreditCard,
   Check,
-  Zap,
   Shield,
-  Clock,
-  Receipt,
+  Lock,
   ArrowLeft,
   Loader2,
   Coins,
   AlertCircle,
+  Receipt,
+  Calendar,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Navigation } from "@/components/Navigation";
@@ -31,7 +31,7 @@ const PACKAGES = [
     credits: 500,
     price: 9.99,
     description: "Perfect for trying out AI generation",
-    features: ["500 Credits", "Video Generation", "Thumbnail Creation", "Email Support"],
+    features: ["500 AI Credits", "Video Generation", "Thumbnail Creation", "Email Support"],
     popular: false,
   },
   {
@@ -40,7 +40,7 @@ const PACKAGES = [
     credits: 1500,
     price: 24.99,
     description: "Best for content creators",
-    features: ["1,500 Credits", "Priority Generation", "All AI Models", "Priority Support"],
+    features: ["1,500 AI Credits", "Priority Generation", "All AI Models", "Priority Support"],
     popular: true,
   },
   {
@@ -49,7 +49,7 @@ const PACKAGES = [
     credits: 5000,
     price: 79.99,
     description: "For professional studios",
-    features: ["5,000 Credits", "Fastest Processing", "Advanced Features", "24/7 Support"],
+    features: ["5,000 AI Credits", "Fastest Processing", "Advanced Features", "24/7 Support"],
     popular: false,
   },
   {
@@ -58,7 +58,7 @@ const PACKAGES = [
     credits: 15000,
     price: 199.99,
     description: "Maximum power and scale",
-    features: ["15,000 Credits", "Dedicated Support", "Custom Integration", "SLA Guarantee"],
+    features: ["15,000 AI Credits", "Dedicated Support", "Custom Integration", "SLA Guarantee"],
     popular: false,
   },
 ];
@@ -230,188 +230,180 @@ export default function Billing() {
 
   if (!userId) return null;
 
+  const selectedPkg = PACKAGES.find((p) => p.id === selectedPackage);
+
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative bg-background">
       <AnimatedBackground />
       <Navigation />
 
-      <div className="pt-20 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/dashboard")}
+            className="mb-8"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+
           {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/dashboard")}
-              className="glass"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold mb-3">Purchase Credits</h1>
+            <p className="text-muted-foreground text-lg">Choose a plan that fits your needs</p>
           </div>
 
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-red-500 to-primary bg-clip-text text-transparent">
-              Purchase Credits
-            </h1>
-            <p className="text-xl text-muted-foreground mb-6">
-              Power your AI creations with our flexible credit packages
-            </p>
-
-            {/* Current Credits Display */}
-            <div className="inline-flex items-center gap-3 glass-card rounded-xl px-8 py-4">
-              <Coins className="w-6 h-6 text-primary" />
-              <div className="text-left">
-                <div className="text-3xl font-bold">{userCredits?.credits || 0}</div>
-                <div className="text-sm text-muted-foreground">Current Credits</div>
+          {/* Current Balance */}
+          <div className="max-w-md mx-auto mb-12">
+            <div className="glass-card rounded-xl p-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Coins className="w-5 h-5 text-primary" />
+                <span className="text-sm text-muted-foreground">Current Balance</span>
               </div>
+              <div className="text-4xl font-bold text-primary">{userCredits?.credits || 0}</div>
+              <div className="text-xs text-muted-foreground mt-1">AI Credits</div>
             </div>
           </div>
 
-          {/* Credit Packages */}
+          {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {PACKAGES.map((pkg) => (
               <motion.div
                 key={pkg.id}
-                whileHover={{ scale: 1.02, y: -5 }}
-                className={`relative glass-card rounded-2xl p-6 cursor-pointer transition-all ${
+                whileHover={{ y: -4 }}
+                className={`relative glass-card rounded-xl p-6 cursor-pointer transition-all border ${
                   selectedPackage === pkg.id
-                    ? "ring-2 ring-primary shadow-xl shadow-primary/20"
-                    : ""
+                    ? "border-primary shadow-lg"
+                    : "border-transparent hover:border-primary/50"
                 }`}
                 onClick={() => setSelectedPackage(pkg.id)}
               >
                 {pkg.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-gradient-to-r from-primary to-red-500 border-0">
-                      <Zap className="w-3 h-3 mr-1" />
+                    <Badge className="bg-primary text-primary-foreground border-0 px-3">
                       Most Popular
                     </Badge>
                   </div>
                 )}
 
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">{pkg.description}</p>
-                  <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-4xl font-bold">${pkg.price}</span>
+                  <h3 className="text-xl font-bold mb-2">{pkg.name}</h3>
+                  <div className="flex items-baseline justify-center gap-1 mb-2">
+                    <span className="text-3xl font-bold">${pkg.price}</span>
                   </div>
-                  <div className="mt-2 text-primary font-semibold">
-                    {pkg.credits} Credits
+                  <div className="text-sm text-primary font-medium mb-3">
+                    {pkg.credits.toLocaleString()} Credits
                   </div>
+                  <p className="text-xs text-muted-foreground">{pkg.description}</p>
                 </div>
 
-                <Separator className="mb-6" />
-
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {pkg.features.map((feature, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                        <Check className="w-3 h-3 text-primary" />
-                      </div>
-                      <span className="text-sm">{feature}</span>
+                    <div key={i} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      <span className="text-xs text-muted-foreground">{feature}</span>
                     </div>
                   ))}
                 </div>
 
                 {selectedPackage === pkg.id && (
-                  <div className="absolute inset-0 rounded-2xl border-2 border-primary pointer-events-none" />
+                  <div className="absolute inset-0 rounded-xl border-2 border-primary pointer-events-none" />
                 )}
               </motion.div>
             ))}
           </div>
 
-          {/* Payment Form */}
+          {/* Payment Section */}
           {selectedPackage && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="max-w-2xl mx-auto glass-card rounded-2xl p-8 mb-12"
+              className="max-w-2xl mx-auto"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-primary" />
+              <div className="glass-card rounded-xl p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold">Checkout</h2>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Shield className="w-4 h-4 text-green-500" />
+                    <span>Secure Payment</span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold">Payment Details</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Complete your purchase securely
-                  </p>
+
+                <Separator className="mb-6" />
+
+                {/* Order Summary */}
+                <div className="bg-muted/30 rounded-lg p-4 mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Package</span>
+                    <span className="font-medium">{selectedPkg?.name}</span>
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Credits</span>
+                    <span className="font-medium">{selectedPkg?.credits.toLocaleString()}</span>
+                  </div>
+                  <Separator className="my-3" />
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold">Total</span>
+                    <span className="text-2xl font-bold text-primary">${selectedPkg?.price}</span>
+                  </div>
                 </div>
-              </div>
 
-              <Separator className="mb-6" />
-
-              <div className="space-y-6">
-                {/* Square Payment Integration Notice */}
+                {/* Payment Status */}
                 {!squareConfigured ? (
-                  <div className="glass rounded-lg p-6 bg-red-500/10 border border-red-500/20">
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
                     <div className="flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-semibold text-red-400 mb-2">Payment System Not Configured</p>
-                        <p className="text-sm text-red-300/80 mb-3">
-                          To accept real credit card payments, you need to configure Square payment gateway in your environment variables.
+                        <p className="font-semibold text-red-400 text-sm mb-1">Payment System Not Configured</p>
+                        <p className="text-xs text-red-300/80">
+                          Please contact support to enable payment processing.
                         </p>
-                        <div className="text-xs space-y-1 text-red-300/60">
-                          <p>Required environment variables:</p>
-                          <ul className="list-disc list-inside ml-2">
-                            <li>SQUARE_APPLICATION_ID</li>
-                            <li>SQUARE_ACCESS_TOKEN</li>
-                            <li>SQUARE_ENVIRONMENT (sandbox or production)</li>
-                          </ul>
-                        </div>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="glass rounded-lg p-6 bg-green-500/10 border border-green-500/20">
+                  <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 mb-6">
                     <div className="flex items-center gap-3">
                       <Check className="w-5 h-5 text-green-400" />
                       <p className="text-sm text-green-400">
-                        <strong>Square Payment Gateway Configured</strong><br />
-                        <span className="text-green-300/80">Ready to accept real credit card payments</span>
+                        <strong>Secure Payment Ready</strong>
                       </p>
                     </div>
                   </div>
                 )}
 
-                {/* Production Payment Notice */}
-                <div className="glass rounded-lg p-6 bg-primary/10 border border-primary/20">
-                  <p className="text-sm text-primary mb-2">
-                    <strong>Production Payment System</strong>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Click "Initialize Payment Form" to load the card form, then enter your details and click "Pay Now" to complete. All transactions are REAL and will charge your card.
-                  </p>
-                </div>
-
-                {/* Square Card Container - PRODUCTION */}
+                {/* Square Card Container */}
                 {paymentFormReady && (
-                  <div
-                    id="card-container"
-                    className="glass rounded-lg p-4 min-h-[100px] border border-primary/20"
-                  ></div>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-3">Card Details</label>
+                    <div
+                      id="card-container"
+                      className="border border-border rounded-lg p-4 bg-background/50"
+                    ></div>
+                  </div>
                 )}
 
-                {/* Security Badges */}
-                <div className="flex items-center justify-center gap-6 py-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Shield className="w-4 h-4 text-green-500" />
-                    <span>Secure Payment</span>
+                {/* Security Badge */}
+                <div className="flex items-center justify-center gap-6 py-4 mb-6 border-t border-b border-border">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Lock className="w-4 h-4" />
+                    <span>256-bit SSL Encryption</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4 text-primary" />
-                    <span>Instant Credits</span>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Shield className="w-4 h-4" />
+                    <span>PCI DSS Compliant</span>
                   </div>
                 </div>
 
-                {/* Initialize Payment Form Button */}
-                {!paymentFormReady && (
+                {/* Action Buttons */}
+                {!paymentFormReady ? (
                   <Button
                     onClick={handlePurchase}
                     disabled={isProcessing || !squareConfigured}
-                    className="w-full red-glow"
+                    className="w-full"
                     size="lg"
                   >
                     {isProcessing ? (
@@ -422,107 +414,76 @@ export default function Billing() {
                     ) : (
                       <>
                         <CreditCard className="w-5 h-5 mr-2" />
-                        Initialize Payment Form - ${PACKAGES.find((p) => p.id === selectedPackage)?.price}
+                        Continue to Payment
                       </>
                     )}
                   </Button>
-                )}
-
-                {/* Pay Now Button (shown after form is initialized) */}
-                {paymentFormReady && (
+                ) : (
                   <Button
-                    id="card-button"
                     onClick={handlePayment}
                     disabled={isProcessing}
-                    className="w-full red-glow"
+                    className="w-full"
                     size="lg"
                   >
                     {isProcessing ? (
                       <>
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Processing Payment...
+                        Processing...
                       </>
                     ) : (
                       <>
-                        <CreditCard className="w-5 h-5 mr-2" />
-                        Pay Now - ${PACKAGES.find((p) => p.id === selectedPackage)?.price}
+                        <Lock className="w-5 h-5 mr-2" />
+                        Pay ${selectedPkg?.price}
                       </>
                     )}
                   </Button>
                 )}
+
+                <p className="text-xs text-center text-muted-foreground mt-4">
+                  By completing this purchase, you agree to our Terms of Service and Privacy Policy.
+                </p>
               </div>
             </motion.div>
           )}
 
           {/* Purchase History */}
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <Receipt className="w-6 h-6 text-primary" />
-              <h2 className="text-2xl font-bold">Purchase History</h2>
-            </div>
+          {purchases && purchases.length > 0 && (
+            <div className="max-w-4xl mx-auto mt-16">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <Receipt className="w-6 h-6 text-primary" />
+                Purchase History
+              </h2>
 
-            <div className="glass-card rounded-2xl p-6">
-              {!purchases ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                </div>
-              ) : purchases.length === 0 ? (
-                <div className="text-center py-12">
-                  <Receipt className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-bold mb-2">No Purchase History</h3>
-                  <p className="text-muted-foreground">
-                    Your purchase history will appear here
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {purchases.map((purchase: any) => {
-                    const pkg = PACKAGES.find((p) => p.id === purchase.packageId);
-                    return (
-                      <div
-                        key={purchase._id}
-                        className="glass rounded-xl p-4 flex items-center justify-between"
-                      >
+              <div className="glass-card rounded-xl overflow-hidden">
+                <div className="divide-y divide-border">
+                  {purchases.map((purchase: any) => (
+                    <div key={purchase._id} className="p-4 hover:bg-muted/30 transition-colors">
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                            <Coins className="w-6 h-6 text-primary" />
+                          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                            <Coins className="w-5 h-5 text-primary" />
                           </div>
                           <div>
-                            <h4 className="font-semibold">
-                              {pkg?.name || purchase.packageId} - {purchase.credits} Credits
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(purchase._creationTime).toLocaleDateString()} at{" "}
-                              {new Date(purchase._creationTime).toLocaleTimeString()}
-                            </p>
-                            {purchase.transactionId && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Transaction: {purchase.transactionId}
-                              </p>
-                            )}
+                            <p className="font-medium">{purchase.credits} Credits</p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Calendar className="w-3 h-3" />
+                              <span>{new Date(purchase._creationTime).toLocaleDateString()}</span>
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-lg">${purchase.amount.toFixed(2)}</div>
-                          <Badge
-                            className={
-                              purchase.status === "completed"
-                                ? "bg-green-500/20 text-green-400 border-green-500/30"
-                                : purchase.status === "pending"
-                                ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
-                                : "bg-red-500/20 text-red-400 border-red-500/30"
-                            }
-                          >
+                          <p className="font-bold">${purchase.amount}</p>
+                          <Badge variant="outline" className="text-xs">
                             {purchase.status}
                           </Badge>
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
