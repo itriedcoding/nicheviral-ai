@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,6 +113,11 @@ export default function Billing() {
   const createPurchase = useMutation(api.billing.createPurchase);
   const completePurchase = useMutation(api.billing.completePurchase);
 
+  // Payment processor actions
+  const processCreditCard = useAction(api.paymentProcessor.processCreditCardPayment);
+  const processBankTransfer = useAction(api.paymentProcessor.processBankTransfer);
+  const processCrypto = useAction(api.paymentProcessor.processCryptoPayment);
+
   const handlePurchase = async () => {
     if (!selectedPackage) {
       toast.error("Please select a package");
@@ -143,41 +148,61 @@ export default function Billing() {
     setIsProcessing(true);
 
     try {
-      // Prepare payment details based on method
-      const paymentDetails =
-        paymentMethod === "credit_card"
-          ? { cardNumber: cardNumber.slice(-4), cardName, expiry }
-          : paymentMethod === "bank_transfer"
-          ? { accountNumber: accountNumber.slice(-4), routingNumber }
-          : { walletAddress: walletAddress.slice(0, 10) + "...", cryptoCurrency };
+      let result;
 
-      // Step 1: Create purchase order
-      const purchaseResult = await createPurchase({
-        userId,
-        packageId: pkg.id,
-        amount: pkg.price,
-        credits: pkg.credits,
-        paymentMethod,
-        paymentDetails,
-      });
+      // Process payment based on method using custom payment processor
+      if (paymentMethod === "credit_card") {
+        result = await processCreditCard({
+          userId,
+          packageId: pkg.id,
+          cardNumber: cardNumber.replace(/\s/g, ""),
+          cardExpiry: expiry,
+          cardCVV: cvv,
+          cardholderName: cardName,
+        });
 
-      if (!purchaseResult.success) {
-        throw new Error("Failed to create purchase");
+        if (result.success) {
+          toast.success("Payment successful! Credits added instantly");
+        } else {
+          throw new Error(result.error || "Credit card payment failed");
+        }
+      } else if (paymentMethod === "bank_transfer") {
+        result = await processBankTransfer({
+          userId,
+          packageId: pkg.id,
+          accountNumber,
+          routingNumber,
+          accountHolderName: cardName,
+          bankName: "User Bank",
+        });
+
+        if (result.success) {
+          toast.success("Bank transfer initiated! Check your email for instructions");
+          toast.info(result.instructions || "Transfer will be processed in 1-3 business days", {
+            duration: 10000,
+          });
+        } else {
+          throw new Error(result.error || "Bank transfer failed");
+        }
+      } else if (paymentMethod === "cryptocurrency") {
+        result = await processCrypto({
+          userId,
+          packageId: pkg.id,
+          walletAddress,
+          cryptoCurrency,
+        });
+
+        if (result.success) {
+          toast.success("Crypto payment initiated!");
+          toast.info(`Send ${result.amount} to ${result.paymentAddress}`, {
+            duration: 15000,
+          });
+        } else {
+          throw new Error(result.error || "Crypto payment failed");
+        }
       }
 
-      // Step 2: Simulate payment processing (1 second)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Step 3: Complete purchase and add credits
-      const transactionId = `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-      const completeResult = await completePurchase({
-        purchaseId: purchaseResult.purchaseId,
-        transactionId,
-      });
-
-      if (completeResult.success) {
-        toast.success(`Successfully purchased ${pkg.credits} credits!`);
-
+      if (result && result.success) {
         // Reset form
         setSelectedPackage(null);
         setCardNumber("");
@@ -187,8 +212,6 @@ export default function Billing() {
         setAccountNumber("");
         setRoutingNumber("");
         setWalletAddress("");
-      } else {
-        throw new Error("Failed to complete purchase");
       }
     } catch (error: any) {
       toast.error(error.message || "Purchase failed");

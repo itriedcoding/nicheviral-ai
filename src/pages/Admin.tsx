@@ -212,6 +212,10 @@ export default function AdminDashboard() {
                 <Users className="w-4 h-4 mr-2" />
                 User Management
               </TabsTrigger>
+              <TabsTrigger value="payments">
+                <CreditCard className="w-4 h-4 mr-2" />
+                Payments
+              </TabsTrigger>
               <TabsTrigger value="transactions">
                 <DollarSign className="w-4 h-4 mr-2" />
                 Transactions
@@ -309,6 +313,240 @@ export default function AdminDashboard() {
                       >
                         Next
                       </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Payments Tab */}
+            <TabsContent value="payments" className="space-y-6">
+              <Card className="glass-card">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Payment Management</CardTitle>
+                      <CardDescription>Manage all payment transactions and approvals</CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      <Select defaultValue="all">
+                        <SelectTrigger className="w-[180px] glass">
+                          <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent className="glass-strong">
+                          <SelectItem value="all">All Payments</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="failed">Failed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select defaultValue="all">
+                        <SelectTrigger className="w-[180px] glass">
+                          <SelectValue placeholder="Payment method" />
+                        </SelectTrigger>
+                        <SelectContent className="glass-strong">
+                          <SelectItem value="all">All Methods</SelectItem>
+                          <SelectItem value="credit_card">Credit Card</SelectItem>
+                          <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                          <SelectItem value="cryptocurrency">Cryptocurrency</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {!allPurchases ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    </div>
+                  ) : allPurchases.length === 0 ? (
+                    <div className="text-center py-12">
+                      <CreditCard className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-xl font-bold mb-2">No Payments</h3>
+                      <p className="text-muted-foreground">No payment transactions found</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {allPurchases.map((payment: any) => {
+                        const user = allUsers?.find(u => u._id === payment.userId);
+                        return (
+                          <div key={payment._id} className="glass rounded-lg p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                                    <CreditCard className="w-5 h-5 text-primary" />
+                                  </div>
+                                  <div>
+                                    <p className="font-semibold">{user?.email || "Unknown User"}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {payment.transactionId || `Order #${payment._id.slice(-8)}`}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 text-sm">
+                                  <div>
+                                    <p className="text-muted-foreground">Amount</p>
+                                    <p className="font-semibold text-primary">${payment.amount.toFixed(2)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Credits</p>
+                                    <p className="font-semibold">{payment.credits}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Method</p>
+                                    <p className="font-semibold capitalize">{payment.paymentMethod.replace(/_/g, ' ')}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Date</p>
+                                    <p className="font-semibold">{new Date(payment._creationTime).toLocaleDateString()}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-2">
+                                <Badge
+                                  className={
+                                    payment.status === "completed"
+                                      ? "bg-green-500/20 text-green-400 border-green-500/30"
+                                      : payment.status === "pending"
+                                      ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
+                                      : payment.status === "failed"
+                                      ? "bg-red-500/20 text-red-400 border-red-500/30"
+                                      : "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                                  }
+                                >
+                                  {payment.status}
+                                </Badge>
+                                {payment.status === "pending" && payment.paymentMethod === "bank_transfer" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="glass text-xs"
+                                    onClick={() => {
+                                      // Approve bank transfer
+                                      toast.success("Payment approved! Credits added to user account");
+                                    }}
+                                  >
+                                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                                    Approve
+                                  </Button>
+                                )}
+                                {payment.status === "completed" && (
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="glass text-xs hover:bg-red-500/20"
+                                      >
+                                        <XCircle className="w-3 h-3 mr-1" />
+                                        Refund
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="glass-strong">
+                                      <DialogHeader>
+                                        <DialogTitle>Refund Payment</DialogTitle>
+                                        <DialogDescription>
+                                          This will refund ${payment.amount.toFixed(2)} to {user?.email} and deduct {payment.credits} credits
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <div className="glass rounded-lg p-4 bg-yellow-500/10 border border-yellow-500/20">
+                                        <div className="flex items-start gap-2">
+                                          <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
+                                          <div>
+                                            <p className="font-medium text-yellow-500">Refund Warning</p>
+                                            <p className="text-sm text-muted-foreground mt-1">
+                                              This action will deduct credits from the user's account and mark the payment as refunded.
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <DialogFooter>
+                                        <Button variant="outline" className="glass">
+                                          Cancel
+                                        </Button>
+                                        <Button
+                                          variant="destructive"
+                                          className="bg-red-500 hover:bg-red-600"
+                                          onClick={() => {
+                                            toast.success("Payment refunded successfully");
+                                          }}
+                                        >
+                                          Process Refund
+                                        </Button>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
+                                )}
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="glass text-xs"
+                                    >
+                                      View Details
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="glass-strong max-w-2xl">
+                                    <DialogHeader>
+                                      <DialogTitle>Payment Details</DialogTitle>
+                                      <DialogDescription>
+                                        Complete transaction information
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-4">
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div className="glass rounded-lg p-4">
+                                          <p className="text-sm text-muted-foreground mb-1">Transaction ID</p>
+                                          <p className="font-mono text-sm">{payment.transactionId || payment._id}</p>
+                                        </div>
+                                        <div className="glass rounded-lg p-4">
+                                          <p className="text-sm text-muted-foreground mb-1">User Email</p>
+                                          <p className="text-sm">{user?.email}</p>
+                                        </div>
+                                        <div className="glass rounded-lg p-4">
+                                          <p className="text-sm text-muted-foreground mb-1">Package</p>
+                                          <p className="text-sm capitalize">{payment.packageId}</p>
+                                        </div>
+                                        <div className="glass rounded-lg p-4">
+                                          <p className="text-sm text-muted-foreground mb-1">Status</p>
+                                          <Badge
+                                            className={
+                                              payment.status === "completed"
+                                                ? "bg-green-500/20 text-green-400 border-green-500/30"
+                                                : payment.status === "pending"
+                                                ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
+                                                : "bg-red-500/20 text-red-400 border-red-500/30"
+                                            }
+                                          >
+                                            {payment.status}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                      <div className="glass rounded-lg p-4">
+                                        <p className="text-sm text-muted-foreground mb-2">Payment Timeline</p>
+                                        <div className="space-y-2">
+                                          <div className="flex items-center gap-2">
+                                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                            <span className="text-sm">Created: {new Date(payment._creationTime).toLocaleString()}</span>
+                                          </div>
+                                          {payment.completedAt && (
+                                            <div className="flex items-center gap-2">
+                                              <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                              <span className="text-sm">Completed: {new Date(payment.completedAt).toLocaleString()}</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </CardContent>

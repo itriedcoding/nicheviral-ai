@@ -9,6 +9,7 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as adminHelpers from "../adminHelpers.js";
 import type * as aiGeneration from "../aiGeneration.js";
 import type * as aiModels from "../aiModels.js";
 import type * as auth from "../auth.js";
@@ -20,6 +21,7 @@ import type * as fastGeneration from "../fastGeneration.js";
 import type * as http from "../http.js";
 import type * as initAdmin from "../initAdmin.js";
 import type * as passwordAuth from "../passwordAuth.js";
+import type * as paymentProcessor from "../paymentProcessor.js";
 import type * as seedData from "../seedData.js";
 import type * as simpleAuth from "../simpleAuth.js";
 import type * as simpleAuthMutations from "../simpleAuthMutations.js";
@@ -37,6 +39,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  adminHelpers: typeof adminHelpers;
   aiGeneration: typeof aiGeneration;
   aiModels: typeof aiModels;
   auth: typeof auth;
@@ -48,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   initAdmin: typeof initAdmin;
   passwordAuth: typeof passwordAuth;
+  paymentProcessor: typeof paymentProcessor;
   seedData: typeof seedData;
   simpleAuth: typeof simpleAuth;
   simpleAuthMutations: typeof simpleAuthMutations;

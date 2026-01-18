@@ -312,3 +312,43 @@ export const banUser = mutation({
     return { success: true };
   },
 });
+
+// Set user as admin
+export const setAdminRole = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, {
+      role: "admin",
+    });
+    return { success: true };
+  },
+});
+
+// Give unlimited credits to admin
+export const setUnlimitedCredits = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    let userCredits = await ctx.db
+      .query("userCredits")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId as any))
+      .first();
+
+    const UNLIMITED_CREDITS = 999999999;
+
+    if (userCredits) {
+      await ctx.db.patch(userCredits._id, {
+        credits: UNLIMITED_CREDITS,
+        subscriptionTier: "enterprise",
+      });
+    } else {
+      await ctx.db.insert("userCredits", {
+        userId: args.userId as any,
+        credits: UNLIMITED_CREDITS,
+        subscriptionTier: "enterprise",
+        subscriptionStatus: "active",
+      });
+    }
+
+    return { success: true };
+  },
+});

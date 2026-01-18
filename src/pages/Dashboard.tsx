@@ -1369,6 +1369,11 @@ export default function Dashboard() {
     userId ? { userId: userId as any } : "skip"
   );
 
+  const isUserAdmin = useQuery(
+    api.admin.isAdmin,
+    userId ? { userId } : "skip"
+  );
+
   const [isLoadingTrending, setIsLoadingTrending] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -1440,14 +1445,27 @@ export default function Dashboard() {
               <div className="glass rounded-xl px-6 py-3 flex items-center gap-3 shimmer">
                 <Coins className="w-5 h-5 text-primary" />
                 <div>
-                  <div className="font-bold text-lg">{userCredits?.credits || 100}</div>
-                  <div className="text-xs text-muted-foreground">Credits Remaining</div>
+                  {isUserAdmin ? (
+                    <>
+                      <div className="font-bold text-lg flex items-center gap-2">
+                        <span className="text-2xl">♾️</span> UNLIMITED
+                      </div>
+                      <div className="text-xs text-muted-foreground">Admin Credits</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="font-bold text-lg">{userCredits?.credits || 100}</div>
+                      <div className="text-xs text-muted-foreground">Credits Remaining</div>
+                    </>
+                  )}
                 </div>
               </div>
-              <Button className="red-glow" onClick={() => navigate("/billing")}>
-                <Zap className="w-4 h-4 mr-2" />
-                Buy Credits
-              </Button>
+              {!isUserAdmin && (
+                <Button className="red-glow" onClick={() => navigate("/billing")}>
+                  <Zap className="w-4 h-4 mr-2" />
+                  Buy Credits
+                </Button>
+              )}
             </div>
           </div>
 

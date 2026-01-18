@@ -167,6 +167,22 @@ export const deductCredits = mutation({
     generationType: v.string(),
   },
   handler: async (ctx, args) => {
+    // Check if admin (unlimited credits)
+    const user = await ctx.db.get(args.userId);
+
+    if (user?.role === "admin") {
+      // Admin has unlimited credits - don't deduct, just record generation
+      await ctx.db.insert("generations", {
+        userId: args.userId,
+        videoId: args.videoId,
+        generationType: args.generationType,
+        creditsUsed: 0, // No credits used for admin
+      });
+
+      return { success: true, remainingCredits: 999999999 };
+    }
+
+    // Regular user - deduct credits normally
     const userCredits = await ctx.db
       .query("userCredits")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
