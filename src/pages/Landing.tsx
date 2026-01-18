@@ -14,7 +14,9 @@ import {
   Play,
   Star,
   Mic,
-  Film
+  Film,
+  Image,
+  Wand2
 } from "lucide-react";
 import { Link } from "react-router";
 
@@ -141,10 +143,10 @@ export default function Landing() {
             transition={{ duration: 0.8, delay: 0.8 }}
             className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto"
           >
-            <StatCard value="10M+" label="Videos Generated" />
-            <StatCard value="500K+" label="Active Users" />
-            <StatCard value="50+" label="AI Models" />
-            <StatCard value="99.9%" label="Uptime" />
+            <StatCard value="4" label="Video AI Models" />
+            <StatCard value="4" label="Thumbnail Models" />
+            <StatCard value="4" label="Voice AI Models" />
+            <StatCard value="16+" label="Total AI Models" />
           </motion.div>
         </div>
 
@@ -251,6 +253,114 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* AI Models Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold mb-4">Premium AI Models</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Access the world's most advanced AI models for video, voice, and thumbnail generation
+            </p>
+          </div>
+
+          {/* Video Generation Models */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold mb-8 flex items-center gap-3">
+              <Video className="w-8 h-8 text-primary" />
+              Video Generation
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { name: "OpenAI Sora Turbo", desc: "20s of photorealistic 1080p video", resolution: "1080p", icon: Wand2 },
+                { name: "Runway Gen-3 Alpha", desc: "10s of 4K video with motion control", resolution: "4K", icon: Film },
+                { name: "Pika 1.5", desc: "3s rapid HD video generation", resolution: "720p", icon: Zap },
+                { name: "Luma Dream Machine", desc: "5s of cinematic 3D video", resolution: "1080p", icon: Play }
+              ].map((model, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="glass-card rounded-xl p-6 hover:scale-105 transition-all duration-300 hover:red-glow"
+                >
+                  <div className="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <model.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h4 className="font-bold mb-2">{model.name}</h4>
+                  <p className="text-sm text-muted-foreground mb-3">{model.desc}</p>
+                  <Badge variant="outline" className="text-xs">{model.resolution}</Badge>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Thumbnail Generation Models */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold mb-8 flex items-center gap-3">
+              <Image className="w-8 h-8 text-primary" />
+              Thumbnail Generation
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { name: "Midjourney V6", desc: "Industry-leading photorealistic images", resolution: "8K", icon: Star },
+                { name: "DALL-E 3", desc: "Precise prompt following with text", resolution: "1024x1792", icon: Sparkles },
+                { name: "Stable Diffusion XL", desc: "Open-source with fine control", resolution: "1024x1024", icon: Wand2 },
+                { name: "Leonardo.AI", desc: "Optimized for YouTube thumbnails", resolution: "1920x1080", icon: Image }
+              ].map((model, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="glass-card rounded-xl p-6 hover:scale-105 transition-all duration-300 hover:red-glow"
+                >
+                  <div className="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <model.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h4 className="font-bold mb-2">{model.name}</h4>
+                  <p className="text-sm text-muted-foreground mb-3">{model.desc}</p>
+                  <Badge variant="outline" className="text-xs">{model.resolution}</Badge>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Voice Generation Models */}
+          <div>
+            <h3 className="text-3xl font-bold mb-8 flex items-center gap-3">
+              <Mic className="w-8 h-8 text-primary" />
+              Voice Generation
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { name: "ElevenLabs Turbo V2", desc: "Ultra-realistic voice in 29 languages", features: "Voice Cloning", icon: Mic },
+                { name: "PlayHT 3.0", desc: "Conversational AI with emotion", features: "Multi-lingual", icon: Wand2 },
+                { name: "OpenAI TTS HD", desc: "High-quality natural voices", features: "6 Premium Voices", icon: Sparkles },
+                { name: "Murf AI Studio", desc: "Professional voiceovers with control", features: "120+ Voices", icon: Mic }
+              ].map((model, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="glass-card rounded-xl p-6 hover:scale-105 transition-all duration-300 hover:red-glow"
+                >
+                  <div className="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <model.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h4 className="font-bold mb-2">{model.name}</h4>
+                  <p className="text-sm text-muted-foreground mb-3">{model.desc}</p>
+                  <Badge variant="outline" className="text-xs">{model.features}</Badge>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-4xl mx-auto">
@@ -265,7 +375,7 @@ export default function Landing() {
               Ready to Go Viral?
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join thousands of creators using Neura AI to generate millions of views
+              Access 16+ premium AI models to create professional content
             </p>
             <Link to="/auth">
               <Button size="lg" className="px-12 py-7 text-lg rounded-xl red-glow-strong hover:scale-105 transition-all">
@@ -277,73 +387,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4">Trusted by Creators</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Join thousands of content creators who've generated millions of views
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Sarah Johnson",
-                role: "Content Creator",
-                avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-                content: "Neura AI helped me go from 0 to 100K subscribers in just 3 months. The AI-generated scripts are incredibly engaging!",
-                stats: "2.5M+ views"
-              },
-              {
-                name: "Marcus Chen",
-                role: "YouTube Creator",
-                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-                content: "The trend analysis is spot-on. I've tripled my income by focusing on the niches Neura AI recommended.",
-                stats: "5M+ views"
-              },
-              {
-                name: "Emily Rodriguez",
-                role: "Digital Marketer",
-                avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-                content: "Game changer for our agency. We can now produce 10x more content in the same time. ROI increased by 400%!",
-                stats: "8M+ views"
-              }
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
-                className="glass-card rounded-2xl p-8 hover:scale-105 transition-all duration-300"
-              >
-                <div className="flex items-center gap-4 mb-6">
-                  <img
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/50"
-                  />
-                  <div>
-                    <h4 className="font-bold">{testimonial.name}</h4>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                  </div>
-                </div>
-                <p className="text-muted-foreground mb-4 leading-relaxed">"{testimonial.content}"</p>
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 fill-primary text-primary" />
-                  <Star className="w-5 h-5 fill-primary text-primary" />
-                  <Star className="w-5 h-5 fill-primary text-primary" />
-                  <Star className="w-5 h-5 fill-primary text-primary" />
-                  <Star className="w-5 h-5 fill-primary text-primary" />
-                  <span className="ml-2 text-sm text-primary font-semibold">{testimonial.stats}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Pricing Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
