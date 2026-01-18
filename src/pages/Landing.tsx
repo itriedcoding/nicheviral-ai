@@ -127,14 +127,16 @@ export default function Landing() {
                 <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Button
-              size="lg"
-              variant="outline"
-              className="group px-8 py-6 text-lg rounded-xl glass hover:glass-strong transition-all"
-            >
-              <Play className="mr-2 w-5 h-5" />
-              Watch Demo
-            </Button>
+            <a href="#demo-video">
+              <Button
+                size="lg"
+                variant="outline"
+                className="group px-8 py-6 text-lg rounded-xl glass hover:glass-strong transition-all"
+              >
+                <Play className="mr-2 w-5 h-5" />
+                Watch Demo
+              </Button>
+            </a>
           </motion.div>
 
           {/* Stats */}
@@ -152,6 +154,45 @@ export default function Landing() {
         </div>
 
       </motion.section>
+
+      {/* Video Demo Section */}
+      <section id="demo-video" className="py-24 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
+          >
+            <Badge className="mb-4">Watch Demo</Badge>
+            <h2 className="text-5xl font-bold mb-4">
+              See Neura AI in Action
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Watch how easy it is to create professional videos with AI in seconds
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="glass-card rounded-2xl overflow-hidden"
+          >
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute top-0 left-0 w-full h-full rounded-xl"
+                src="https://www.youtube.com/embed/2QkgD-_fW-Y"
+                title="Neura AI Demo"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Features Section */}
       <section ref={featuresRef} className="py-24 px-4 sm:px-6 lg:px-8 relative">
