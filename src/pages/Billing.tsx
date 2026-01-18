@@ -150,9 +150,9 @@ export default function Billing() {
         throw new Error("Card container not found. Please try again.");
       }
 
-      // Initialize Square Payments
+      // Initialize Square Payments with location ID
       // @ts-ignore
-      const payments = window.Square.payments(squareConfig.applicationId);
+      const payments = window.Square.payments(squareConfig.applicationId, squareConfig.locationId);
       const card = await payments.card();
       await card.attach('#card-container');
 
