@@ -34,10 +34,67 @@ const schema = defineSchema(
 
     // add other tables here
 
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    // Trending niches discovered from YouTube API
+    niches: defineTable({
+      title: v.string(),
+      description: v.string(),
+      category: v.string(),
+      trendScore: v.number(), // 0-100 trending score
+      searchVolume: v.number(),
+      competitionLevel: v.string(), // "low", "medium", "high"
+      keywords: v.array(v.string()),
+      thumbnailUrl: v.optional(v.string()),
+      youtubeData: v.optional(v.any()), // Raw YouTube API data
+    })
+      .index("by_category", ["category"])
+      .index("by_trend_score", ["trendScore"]),
+
+    // AI-generated videos
+    videos: defineTable({
+      userId: v.id("users"),
+      nicheId: v.optional(v.id("niches")),
+      title: v.string(),
+      description: v.string(),
+      prompt: v.string(), // Original prompt used
+      status: v.union(
+        v.literal("queued"),
+        v.literal("generating"),
+        v.literal("completed"),
+        v.literal("failed")
+      ),
+      videoUrl: v.optional(v.string()), // URL to generated video
+      thumbnailUrl: v.optional(v.string()),
+      duration: v.optional(v.number()), // Duration in seconds
+      aiModel: v.string(), // e.g., "sora", "runway"
+      voiceModel: v.optional(v.string()), // e.g., "elevenlabs-*"
+      metadata: v.optional(v.any()), // Additional metadata
+      errorMessage: v.optional(v.string()),
+    })
+      .index("by_user", ["userId"])
+      .index("by_status", ["status"])
+      .index("by_niche", ["nicheId"]),
+
+    // User generations history
+    generations: defineTable({
+      userId: v.id("users"),
+      videoId: v.id("videos"),
+      generationType: v.string(), // "video", "voiceover", "script"
+      creditsUsed: v.number(),
+      processingTime: v.optional(v.number()), // Time in seconds
+    }).index("by_user", ["userId"]),
+
+    // User credits/subscriptions
+    userCredits: defineTable({
+      userId: v.id("users"),
+      credits: v.number(),
+      subscriptionTier: v.union(
+        v.literal("free"),
+        v.literal("pro"),
+        v.literal("enterprise")
+      ),
+      subscriptionStatus: v.string(),
+      renewalDate: v.optional(v.number()),
+    }).index("by_user", ["userId"])
   },
   {
     schemaValidation: false,
