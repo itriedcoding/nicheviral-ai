@@ -15,6 +15,7 @@ import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as checkOTPCodes from "../checkOTPCodes.js";
 import type * as debugAuth from "../debugAuth.js";
 import type * as http from "../http.js";
+import type * as passwordAuth from "../passwordAuth.js";
 import type * as seedData from "../seedData.js";
 import type * as simpleAuth from "../simpleAuth.js";
 import type * as simpleAuthMutations from "../simpleAuthMutations.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   checkOTPCodes: typeof checkOTPCodes;
   debugAuth: typeof debugAuth;
   http: typeof http;
+  passwordAuth: typeof passwordAuth;
   seedData: typeof seedData;
   simpleAuth: typeof simpleAuth;
   simpleAuthMutations: typeof simpleAuthMutations;

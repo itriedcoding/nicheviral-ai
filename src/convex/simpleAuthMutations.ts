@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation } from "./_generated/server";
+import { query } from "./_generated/server";
 
 // Store OTP in custom table
 export const storeOTP = mutation({
@@ -28,6 +29,58 @@ export const storeOTP = mutation({
     });
 
     console.log("✅ OTP stored in database for", args.email);
+  },
+});
+
+// Get user by email
+export const getUserByEmail = query({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", args.email))
+      .first();
+  },
+});
+
+// Create user with password
+export const createUserWithPassword = mutation({
+  args: {
+    email: v.string(),
+    passwordHash: v.string(),
+  },
+  handler: async (ctx, args) => {
+    try {
+      // Check if user exists
+      const existingUser = await ctx.db
+        .query("users")
+        .withIndex("email", (q) => q.eq("email", args.email))
+        .first();
+
+      if (existingUser) {
+        throw new Error("An account with this email already exists");
+      }
+
+      // Create user
+      const userId = await ctx.db.insert("users", {
+        email: args.email,
+        passwordHash: args.passwordHash,
+        emailVerificationTime: Date.now(),
+        isAnonymous: false,
+      });
+
+      console.log("✅ User created with password:", args.email);
+
+      return {
+        success: true,
+        userId,
+      };
+    } catch (error: any) {
+      console.error("❌ Create user error:", error);
+      throw error;
+    }
   },
 });
 

@@ -78,7 +78,7 @@ export const sendOTP = action({
                       <tr>
                         <td align="center" style="padding: 20px 40px 40px 40px;">
                           <p style="color: #52525b; font-size: 12px; margin: 0;">
-                            © 2024 Neura AI. All rights reserved.
+                            © 2026 Neura AI. All rights reserved.
                           </p>
                         </td>
                       </tr>
