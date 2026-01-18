@@ -63,14 +63,22 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     setError(null);
     try {
       const formData = new FormData(event.currentTarget);
+
+      // Debug logging
+      console.log("🔍 Form data being submitted:");
+      console.log("  - email:", formData.get("email"));
+      console.log("  - code:", formData.get("code"));
+      console.log("  - otp value:", otp);
+
       await signIn("email-otp", formData);
 
-      console.log("signed in");
+      console.log("✅ Signed in successfully");
 
       const redirect = redirectAfterAuth || "/";
       navigate(redirect);
     } catch (error) {
-      console.error("OTP verification error:", error);
+      console.error("❌ OTP verification error:", error);
+      console.error("  Error details:", JSON.stringify(error, null, 2));
 
       setError("The verification code you entered is incorrect.");
       setIsLoading(false);

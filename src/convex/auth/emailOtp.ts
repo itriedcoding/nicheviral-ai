@@ -17,9 +17,12 @@ export const emailOtp = Email({
   },
   async sendVerificationRequest({ identifier: email, token }) {
     try {
+      console.log("🔐 Sending OTP email to:", email);
+      console.log("🔐 Generated token:", token);
+
       const resend = new Resend(process.env.RESEND_API_KEY);
 
-      await resend.emails.send({
+      const result = await resend.emails.send({
         from: "Neura AI <onboarding@resend.dev>",
         to: email,
         subject: "Your Neura AI verification code",
@@ -97,8 +100,10 @@ export const emailOtp = Email({
           </html>
         `,
       });
+
+      console.log("✅ Email sent successfully via Resend:", result);
     } catch (error) {
-      console.error("Resend email error:", error);
+      console.error("❌ Resend email error:", error);
       throw new Error("Failed to send verification email");
     }
   },
