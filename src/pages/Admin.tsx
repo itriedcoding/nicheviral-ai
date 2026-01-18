@@ -62,8 +62,10 @@ export default function AdminDashboard() {
   const revenueStats = useQuery(api.billing.getRevenueStats, isAuthenticated && isAdmin ? {} : "skip");
   const allPurchases = useQuery(api.billing.getAllPurchases, isAuthenticated && isAdmin ? { limit: 50 } : "skip");
   const adminActions = useQuery(api.admin.getAdminActions, isAuthenticated && isAdmin ? { adminUserId: userId, limit: 50 } : "skip");
+  const activeSessions = useQuery(api.admin.getActiveSessions, isAuthenticated && isAdmin ? { adminUserId: userId } : "skip");
 
   const updateUserCredits = useMutation(api.admin.updateUserCredits);
+  const addCreditsToUser = useMutation(api.admin.addCreditsToUser);
   const banUser = useMutation(api.admin.banUser);
   const deleteUser = useMutation(api.admin.deleteUser);
 
@@ -111,17 +113,16 @@ export default function AdminDashboard() {
 
   const handleQuickAddCredits = async (targetUserId: string, amount: number) => {
     try {
-      const userDetails = await fetch(`/api/getUserCredits?userId=${targetUserId}`);
-      // Get current credits from the user
-      const currentCreditsQuery = allUsers?.find(u => u._id === targetUserId);
-
-      await updateUserCredits({
+      const result = await addCreditsToUser({
         adminUserId: userId,
         targetUserId,
-        credits: amount,
+        creditsToAdd: amount,
         reason: `Quick add ${amount} credits`,
       });
-      toast.success(`Added ${amount} credits`);
+
+      if (result.success) {
+        toast.success(`Added ${amount} credits. New balance: ${result.newBalance}`);
+      }
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -718,10 +719,55 @@ export default function AdminDashboard() {
 
             {/* Activity Tab */}
             <TabsContent value="activity" className="space-y-6">
+              {/* Active Sessions */}
               <Card className="glass-card">
                 <CardHeader>
-                  <CardTitle>Platform Activity</CardTitle>
-                  <CardDescription>Video generation statistics</CardDescription>
+                  <CardTitle>Active Users (Last 24 Hours)</CardTitle>
+                  <CardDescription>Users who generated content recently</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!activeSessions || activeSessions.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Activity className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                      <p className="text-muted-foreground">No active sessions in the last 24 hours</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {activeSessions.map((session: any) => (
+                        <div key={session.userId} className="glass rounded-lg p-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                              <Users className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{session.email}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {session.name || "No name set"}
+                                {session.role === "admin" && (
+                                  <Badge className="ml-2 bg-red-500/20 text-red-500">Admin</Badge>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className="font-medium">{session.recentActivity} actions</p>
+                              <p className="text-sm text-muted-foreground">{session.credits} credits</p>
+                            </div>
+                            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Video Generation Statistics */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle>Video Generation Statistics</CardTitle>
+                  <CardDescription>Real-time generation status</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

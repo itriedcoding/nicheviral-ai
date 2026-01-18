@@ -352,3 +352,200 @@ export const setUnlimitedCredits = mutation({
     return { success: true };
   },
 });
+
+// Admin: Add credits to user (adds to existing balance)
+export const addCreditsToUser = mutation({
+  args: {
+    adminUserId: v.string(),
+    targetUserId: v.string(),
+    creditsToAdd: v.number(),
+    reason: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Verify admin
+    const admin = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("_id"), args.adminUserId))
+      .first();
+
+    if (!admin || admin.email !== ADMIN_EMAIL || admin.role !== "admin") {
+      throw new Error("Unauthorized: Admin access required");
+    }
+
+    // Get current user credits
+    const userCredits = await ctx.db
+      .query("userCredits")
+      .withIndex("by_user", (q) => q.eq("userId", args.targetUserId))
+      .first();
+
+    const currentCredits = userCredits?.credits || 0;
+    const newCredits = currentCredits + args.creditsToAdd;
+
+    if (userCredits) {
+      await ctx.db.patch(userCredits._id, {
+        credits: newCredits,
+      });
+    } else {
+      await ctx.db.insert("userCredits", {
+        userId: args.targetUserId,
+        credits: newCredits,
+        subscriptionTier: "free",
+        subscriptionStatus: "active",
+      });
+    }
+
+    // Log the action
+    await ctx.db.insert("adminActions", {
+      adminUserId: args.adminUserId,
+      action: "add_credits",
+      targetUserId: args.targetUserId,
+      metadata: {
+        creditsAdded: args.creditsToAdd,
+        previousBalance: currentCredits,
+        newBalance: newCredits,
+        reason: args.reason,
+      },
+    });
+
+    return {
+      success: true,
+      previousBalance: currentCredits,
+      newBalance: newCredits,
+      creditsAdded: args.creditsToAdd
+    };
+  },
+});
+
+// Admin: Get active sessions (users logged in recently)
+export const getActiveSessions = query({
+  args: {
+    adminUserId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Verify admin
+    const admin = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("_id"), args.adminUserId))
+      .first();
+
+    if (!admin || admin.email !== ADMIN_EMAIL || admin.role !== "admin") {
+      throw new Error("Unauthorized: Admin access required");
+    }
+
+    // Get all users
+    const allUsers = await ctx.db.query("users").collect();
+
+    // Get all generations in the last 24 hours
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const recentGenerations = await ctx.db
+      .query("generations")
+      .filter((q) => q.gte(q.field("_creationTime"), oneDayAgo))
+      .collect();
+
+    // Count recent activity per user
+    const userActivityMap = new Map<string, number>();
+    for (const gen of recentGenerations) {
+      const count = userActivityMap.get(gen.userId) || 0;
+      userActivityMap.set(gen.userId, count + 1);
+    }
+
+    // Get active users with their details
+    const activeSessions = await Promise.all(
+      allUsers
+        .filter(user => userActivityMap.has(user._id))
+        .map(async (user) => {
+          const credits = await ctx.db
+            .query("userCredits")
+            .withIndex("by_user", (q) => q.eq("userId", user._id))
+            .first();
+
+          return {
+            userId: user._id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            credits: credits?.credits || 0,
+            recentActivity: userActivityMap.get(user._id) || 0,
+            lastActive: user._creationTime,
+          };
+        })
+    );
+
+    // Sort by most recent activity
+    activeSessions.sort((a, b) => b.recentActivity - a.recentActivity);
+
+    return activeSessions;
+  },
+});
+
+// Admin: Get user activity details
+export const getUserActivity = query({
+  args: {
+    adminUserId: v.string(),
+    targetUserId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Verify admin
+    const admin = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("_id"), args.adminUserId))
+      .first();
+
+    if (!admin || admin.email !== ADMIN_EMAIL || admin.role !== "admin") {
+      throw new Error("Unauthorized: Admin access required");
+    }
+
+    // Get user
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("_id"), args.targetUserId))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Get user's generations
+    const generations = await ctx.db
+      .query("generations")
+      .withIndex("by_user", (q) => q.eq("userId", args.targetUserId))
+      .order("desc")
+      .take(50);
+
+    // Get user's videos
+    const videos = await ctx.db
+      .query("videos")
+      .withIndex("by_user", (q) => q.eq("userId", args.targetUserId))
+      .order("desc")
+      .take(50);
+
+    // Get user's purchases
+    const purchases = await ctx.db
+      .query("purchases")
+      .withIndex("by_user", (q) => q.eq("userId", args.targetUserId))
+      .order("desc")
+      .take(50);
+
+    // Get user's credits
+    const credits = await ctx.db
+      .query("userCredits")
+      .withIndex("by_user", (q) => q.eq("userId", args.targetUserId))
+      .first();
+
+    return {
+      user,
+      credits,
+      generations,
+      videos,
+      purchases,
+      stats: {
+        totalGenerations: generations.length,
+        totalVideos: videos.length,
+        totalPurchases: purchases.length,
+        totalSpent: purchases
+          .filter(p => p.status === "completed")
+          .reduce((sum, p) => sum + p.amount, 0),
+      },
+    };
+  },
+});
