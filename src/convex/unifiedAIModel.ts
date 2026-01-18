@@ -318,15 +318,32 @@ async function generateVideoContent(
   const fullNarration = scenes.map((s: any) => s.narration).filter((n: string) => n).join(". ");
 
   // Generate audio if there's narration
+  let audioUrl = "";
   if (fullNarration) {
-    const audioUrl = `https://api.streamelements.com/kappa/v2/speech?voice=Brian&text=${encodeURIComponent(fullNarration)}`;
+    const voice = args.voice || "Brian";
+    audioUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voice}&text=${encodeURIComponent(fullNarration)}`;
     outputs.audio = audioUrl;
   }
 
+  // Store all video data for playback
+  // The frontend will create a video player that shows the slideshow with audio
   outputs.images = images;
   outputs.storyboard = JSON.stringify(scenes);
   outputs.script = fullNarration;
   outputs.thumbnail = images[0];
+
+  // Create video data object that the frontend can use to render the video
+  const videoData = {
+    type: "slideshow",
+    slides: images,
+    audio: audioUrl,
+    duration: duration,
+    slideDuration: duration / images.length,
+    scenes: scenes
+  };
+
+  // Store as base64 encoded data URL so frontend can access it
+  outputs.videoData = `data:application/json;base64,${Buffer.from(JSON.stringify(videoData)).toString('base64')}`;
 }
 
 /**
@@ -472,7 +489,7 @@ async function storeGeneratedContent(
   await ctx.runMutation(api.videos.updateVideoStatus, {
     videoId: contentId,
     status: "completed",
-    videoUrl: outputs.audio || outputs.images?.[0] || "",
+    videoUrl: outputs.videoData || outputs.audio || outputs.images?.[0] || "",
     thumbnailUrl: outputs.thumbnail || outputs.images?.[0] || "",
     duration: args.duration || 0,
   });

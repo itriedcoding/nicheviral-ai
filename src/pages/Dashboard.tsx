@@ -1363,29 +1363,125 @@ function MyVideosSection({ userId }: { userId: string }) {
 
                 <div className="flex gap-2">
                   {video.status === "completed" && video.videoUrl && (
-                    <Button
-                      size="sm"
-                      className="flex-1"
-                      variant="outline"
-                      onClick={() => {
-                        // Handle different types of content
-                        if (video.videoUrl.startsWith('data:')) {
-                          // For data URLs (text content), create downloadable file
-                          const link = document.createElement('a');
-                          link.href = video.videoUrl;
-                          link.download = `${video.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
-                          link.click();
-                          toast.success("Content downloaded!");
-                        } else if (video.videoUrl.startsWith('http')) {
-                          // For external URLs, open in new tab
-                          window.open(video.videoUrl, '_blank');
-                          toast.success("Opening content in new tab!");
-                        }
-                      }}
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => {
+                          // Handle video playback
+                          if (video.videoUrl.startsWith('data:application/json')) {
+                            // This is slideshow video data - open in modal player
+                            try {
+                              const base64Data = video.videoUrl.split(',')[1];
+                              const jsonStr = atob(base64Data);
+                              const videoData = JSON.parse(jsonStr);
+
+                              // Create a new window to play the slideshow
+                              const playerWindow = window.open('', '_blank', 'width=1920,height=1080');
+                              if (playerWindow) {
+                                playerWindow.document.write(`
+                                  <!DOCTYPE html>
+                                  <html>
+                                  <head>
+                                    <title>${video.title}</title>
+                                    <style>
+                                      body {
+                                        margin: 0;
+                                        padding: 0;
+                                        background: #000;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        height: 100vh;
+                                        font-family: Arial, sans-serif;
+                                      }
+                                      #slideshow {
+                                        width: 100%;
+                                        height: 100%;
+                                        position: relative;
+                                      }
+                                      .slide {
+                                        position: absolute;
+                                        width: 100%;
+                                        height: 100%;
+                                        object-fit: contain;
+                                        opacity: 0;
+                                        transition: opacity 0.5s;
+                                      }
+                                      .slide.active {
+                                        opacity: 1;
+                                      }
+                                      #controls {
+                                        position: fixed;
+                                        bottom: 20px;
+                                        left: 50%;
+                                        transform: translateX(-50%);
+                                        background: rgba(0,0,0,0.8);
+                                        padding: 10px 20px;
+                                        border-radius: 10px;
+                                        color: white;
+                                      }
+                                    </style>
+                                  </head>
+                                  <body>
+                                    <div id="slideshow"></div>
+                                    <div id="controls">
+                                      <p>Slide <span id="current">1</span> of ${videoData.slides.length}</p>
+                                    </div>
+                                    <audio id="audio" ${videoData.audio ? `src="${videoData.audio}"` : ''} autoplay></audio>
+                                    <script>
+                                      const slides = ${JSON.stringify(videoData.slides)};
+                                      const slideDuration = ${videoData.slideDuration} * 1000;
+                                      let currentSlide = 0;
+                                      const container = document.getElementById('slideshow');
+
+                                      // Create all slide images
+                                      slides.forEach((src, idx) => {
+                                        const img = document.createElement('img');
+                                        img.src = src;
+                                        img.className = 'slide' + (idx === 0 ? ' active' : '');
+                                        container.appendChild(img);
+                                      });
+
+                                      // Slideshow logic
+                                      function showSlide(index) {
+                                        const allSlides = document.querySelectorAll('.slide');
+                                        allSlides.forEach(s => s.classList.remove('active'));
+                                        allSlides[index].classList.add('active');
+                                        document.getElementById('current').textContent = index + 1;
+                                      }
+
+                                      setInterval(() => {
+                                        currentSlide = (currentSlide + 1) % slides.length;
+                                        showSlide(currentSlide);
+                                      }, slideDuration);
+                                    </script>
+                                  </body>
+                                  </html>
+                                `);
+                                toast.success("Playing video in new window");
+                              }
+                            } catch (e) {
+                              toast.error("Failed to play video");
+                              console.error(e);
+                            }
+                          } else if (video.videoUrl.startsWith('data:')) {
+                            // Text content
+                            const link = document.createElement('a');
+                            link.href = video.videoUrl;
+                            link.download = `${video.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+                            link.click();
+                            toast.success("Content downloaded!");
+                          } else if (video.videoUrl.startsWith('http')) {
+                            window.open(video.videoUrl, '_blank');
+                            toast.success("Opening content!");
+                          }
+                        }}
+                      >
+                        <Play className="w-4 h-4 mr-2" />
+                        {video.videoUrl.startsWith('data:application/json') ? 'Play Video' : 'View'}
+                      </Button>
+                    </>
                   )}
                   <Button
                     size="sm"
