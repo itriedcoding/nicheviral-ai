@@ -70,8 +70,10 @@ export const processCreditCardPayment = action({
       // Square API endpoint - PRODUCTION ONLY
       const squareApiUrl = "https://connect.squareup.com/v2/payments";
 
-      // Generate idempotency key (prevents duplicate charges)
-      const idempotencyKey = `${args.userId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Generate idempotency key (prevents duplicate charges) - Max 45 chars
+      const timestamp = Date.now().toString(36); // Base36 timestamp (shorter)
+      const random = Math.random().toString(36).substr(2, 8);
+      const idempotencyKey = `${timestamp}-${random}`; // Format: timestamp-random (under 45 chars)
 
       // Make REAL payment request to Square
       const paymentRequest = {
