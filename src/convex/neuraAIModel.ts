@@ -216,11 +216,10 @@ async function generateVideoFallback(ctx: any, args: NeuraAIRequest) {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            inputs: `${args.prompt}. Professional, cinematic, high quality.`,
+            inputs: args.prompt,
             parameters: {
               num_frames: 129, // ~5 seconds at 25fps
-              height: 720,
-              width: 1280
+              fps: 25
             }
           })
         }
@@ -228,21 +227,28 @@ async function generateVideoFallback(ctx: any, args: NeuraAIRequest) {
 
       if (response.ok) {
         const videoBlob = await response.blob();
-        const storageId = await ctx.storage.store(videoBlob);
-        const videoUrl = await ctx.storage.getUrl(storageId);
 
-        console.log("✅ Neura AI Fallback: HunyuanVideo REAL video generated!");
+        // Check if we got actual video data (not an error JSON)
+        if (videoBlob.size > 1000 && videoBlob.type.includes('video')) {
+          const storageId = await ctx.storage.store(videoBlob);
+          const videoUrl = await ctx.storage.getUrl(storageId);
 
-        return {
-          videoUrl: videoUrl,
-          thumbnail: videoUrl,
-          images: [videoUrl],
-          audio: null,
-          script: args.prompt
-        };
+          console.log("✅ Neura AI Fallback: HunyuanVideo REAL video generated!");
+
+          return {
+            videoUrl: videoUrl,
+            thumbnail: videoUrl,
+            images: [videoUrl],
+            audio: null,
+            script: args.prompt
+          };
+        } else {
+          console.log("⚠️ HunyuanVideo returned invalid data, trying CogVideoX...");
+        }
+      } else {
+        const errorText = await response.text();
+        console.log(`⚠️ HunyuanVideo error (${response.status}): ${errorText}, trying CogVideoX...`);
       }
-
-      console.log("⚠️ HunyuanVideo unavailable, trying CogVideoX...");
     } catch (e: any) {
       console.log(`⚠️ HunyuanVideo error: ${e.message}, trying CogVideoX...`);
     }
@@ -254,7 +260,7 @@ async function generateVideoFallback(ctx: any, args: NeuraAIRequest) {
       console.log("📹 Neura AI Fallback -> CogVideoX-5B (REAL video generation)");
 
       const response = await fetch(
-        "https://api-inference.huggingface.co/models/THUDM/CogVideoX-5B",
+        "https://api-inference.huggingface.co/models/THUDM/CogVideoX-5b",
         {
           method: "POST",
           headers: {
@@ -262,9 +268,10 @@ async function generateVideoFallback(ctx: any, args: NeuraAIRequest) {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            inputs: `${args.prompt}. Cinematic, professional, high quality.`,
+            inputs: args.prompt,
             parameters: {
-              num_frames: 49, // ~6 seconds
+              num_frames: 49,
+              fps: 8
             }
           })
         }
@@ -272,21 +279,28 @@ async function generateVideoFallback(ctx: any, args: NeuraAIRequest) {
 
       if (response.ok) {
         const videoBlob = await response.blob();
-        const storageId = await ctx.storage.store(videoBlob);
-        const videoUrl = await ctx.storage.getUrl(storageId);
 
-        console.log("✅ Neura AI Fallback: CogVideoX-5B REAL video generated!");
+        // Check if we got actual video data
+        if (videoBlob.size > 1000 && (videoBlob.type.includes('video') || videoBlob.type.includes('application/octet-stream'))) {
+          const storageId = await ctx.storage.store(videoBlob);
+          const videoUrl = await ctx.storage.getUrl(storageId);
 
-        return {
-          videoUrl: videoUrl,
-          thumbnail: videoUrl,
-          images: [videoUrl],
-          audio: null,
-          script: args.prompt
-        };
+          console.log("✅ Neura AI Fallback: CogVideoX-5B REAL video generated!");
+
+          return {
+            videoUrl: videoUrl,
+            thumbnail: videoUrl,
+            images: [videoUrl],
+            audio: null,
+            script: args.prompt
+          };
+        } else {
+          console.log("⚠️ CogVideoX returned invalid data, trying LTX-Video...");
+        }
+      } else {
+        const errorText = await response.text();
+        console.log(`⚠️ CogVideoX error (${response.status}): ${errorText}, trying LTX-Video...`);
       }
-
-      console.log("⚠️ CogVideoX unavailable, trying LTX-Video...");
     } catch (e: any) {
       console.log(`⚠️ CogVideoX error: ${e.message}, trying LTX-Video...`);
     }
@@ -306,41 +320,55 @@ async function generateVideoFallback(ctx: any, args: NeuraAIRequest) {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            inputs: args.prompt,
-            parameters: {
-              num_frames: 121, // ~5 seconds at 24fps
-            }
+            inputs: args.prompt
           })
         }
       );
 
       if (response.ok) {
         const videoBlob = await response.blob();
-        const storageId = await ctx.storage.store(videoBlob);
-        const videoUrl = await ctx.storage.getUrl(storageId);
 
-        console.log("✅ Neura AI Fallback: LTX-Video REAL video generated!");
+        // Check if we got actual video data
+        if (videoBlob.size > 1000) {
+          const storageId = await ctx.storage.store(videoBlob);
+          const videoUrl = await ctx.storage.getUrl(storageId);
 
-        return {
-          videoUrl: videoUrl,
-          thumbnail: videoUrl,
-          images: [videoUrl],
-          audio: null,
-          script: args.prompt
-        };
+          console.log("✅ Neura AI Fallback: LTX-Video REAL video generated!");
+
+          return {
+            videoUrl: videoUrl,
+            thumbnail: videoUrl,
+            images: [videoUrl],
+            audio: null,
+            script: args.prompt
+          };
+        } else {
+          console.log("⚠️ LTX-Video returned invalid data");
+        }
+      } else {
+        const errorText = await response.text();
+        console.log(`⚠️ LTX-Video error (${response.status}): ${errorText}`);
       }
-
-      console.log("⚠️ LTX-Video unavailable");
     } catch (e: any) {
       console.log(`⚠️ LTX-Video error: ${e.message}`);
     }
   }
 
-  // If all real video models fail, throw error
+  // If all real video models fail, throw error with helpful message
+  console.error("❌ Neura AI Fallback: All free video models failed");
+
+  if (!hfToken) {
+    throw new Error(
+      "Neura AI Model: HF_TOKEN not configured. " +
+      "Set HF_TOKEN environment variable to use free models (HunyuanVideo, CogVideoX, LTX)."
+    );
+  }
+
   throw new Error(
-    "Neura AI Model: All REAL video generation models unavailable. " +
-    "Please set HF_TOKEN for free models or RUNWAY_API_KEY/LUMA_API_KEY for premium models. " +
-    "NO SLIDESHOWS WILL BE GENERATED."
+    "Neura AI Model: All free video models are currently loading or unavailable. " +
+    "HuggingFace models may take 20-30 seconds to warm up on first use. " +
+    "Try again in a moment, or use a different model category (Free Models directly, or Premium Models). " +
+    "You can also try selecting models individually: HunyuanVideo, CogVideoX-5B, or LTX-Video."
   );
 }
 
