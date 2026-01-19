@@ -307,16 +307,43 @@ async function generateVideoContent(
   analysis: any,
   outputs: any
 ) {
-  console.log("🎬 Generating video with SORA 2 + Latest AI Models...");
+  console.log("🎬 Generating video with PREMIUM AI Models...");
 
   const duration = args.duration || 10;
   const sceneCount = analysis.sceneCount || 4;
   const openaiKey = process.env.OPENAI_API_KEY;
+  const runwayKey = process.env.RUNWAY_API_KEY;
+  const pikaKey = process.env.PIKA_API_KEY;
 
-  // Try to use OpenAI Sora 2 for native video generation if API key is available
+  // PRIORITY 1: Try Runway Gen-3 Alpha (Hollywood-grade)
+  if (runwayKey && duration <= 10) {
+    try {
+      console.log("🎬 Attempting Runway Gen-3 Alpha video generation (PREMIUM)...");
+
+      const runwayResult = await ctx.runAction(api.premiumAI.generateWithRunway, {
+        prompt: args.prompt,
+        duration: duration,
+        aspectRatio: args.aspectRatio || "16:9"
+      });
+
+      if (runwayResult.success) {
+        console.log("✅ Runway Gen-3 Alpha video generated successfully!");
+        outputs.images = [runwayResult.videoUrl];
+        outputs.thumbnail = runwayResult.videoUrl;
+        outputs.script = args.prompt;
+        outputs.storyboard = JSON.stringify([{ scene: "Runway Gen-3 Alpha video", duration: duration }]);
+        outputs.videoData = runwayResult.videoUrl;
+        return;
+      }
+    } catch (e: any) {
+      console.log(`⚠️ Runway error: ${e.message}, trying Sora 2...`);
+    }
+  }
+
+  // PRIORITY 2: Try OpenAI Sora 2 for native video generation
   if (openaiKey && duration <= 30) {
     try {
-      console.log("🚀 Attempting Sora 2 video generation...");
+      console.log("🚀 Attempting Sora 2 Turbo video generation (PREMIUM)...");
 
       // Generate video directly with Sora 2
       const soraResponse = await fetch("https://api.openai.com/v1/video/generations", {
@@ -348,14 +375,38 @@ async function generateVideoContent(
         outputs.videoData = soraData.data?.[0]?.url;
         return;
       } else {
-        console.log("⚠️ Sora 2 not available, falling back to slideshow generation");
+        console.log("⚠️ Sora 2 not available, trying Pika...");
       }
     } catch (e: any) {
-      console.log(`⚠️ Sora 2 error: ${e.message}, using fallback`);
+      console.log(`⚠️ Sora 2 error: ${e.message}, trying Pika...`);
     }
   }
 
-  // Try Hugging Face CogVideoX for FREE real video generation
+  // PRIORITY 3: Try Pika 2.0 (Fast premium video)
+  if (pikaKey && duration <= 5) {
+    try {
+      console.log("⚡ Attempting Pika 2.0 video generation (PREMIUM)...");
+
+      const pikaResult = await ctx.runAction(api.premiumAI.generateWithPika, {
+        prompt: args.prompt,
+        aspectRatio: args.aspectRatio || "16:9"
+      });
+
+      if (pikaResult.success) {
+        console.log("✅ Pika 2.0 video generated successfully!");
+        outputs.images = [pikaResult.videoUrl];
+        outputs.thumbnail = pikaResult.videoUrl;
+        outputs.script = args.prompt;
+        outputs.storyboard = JSON.stringify([{ scene: "Pika 2.0 video", duration: 3 }]);
+        outputs.videoData = pikaResult.videoUrl;
+        return;
+      }
+    } catch (e: any) {
+      console.log(`⚠️ Pika error: ${e.message}, trying free alternatives...`);
+    }
+  }
+
+  // PRIORITY 4: Try Hugging Face CogVideoX for FREE real video generation
   const hfToken = process.env.HF_TOKEN;
   if (hfToken && duration <= 10) {
     try {
