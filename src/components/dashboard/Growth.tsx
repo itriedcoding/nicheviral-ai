@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, ArrowUpRight, Sparkles, Bookmark } from "lucide-react";
+import { Search, TrendingUp, ArrowUpRight, Sparkles, Bookmark, BarChart2, Target, Zap } from "lucide-react";
 import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 export function Growth() {
   const { userId } = useAuth();
-  const trendingNiches = useQuery(api.niches.getTrendingNiches, { limit: 8 });
+  const trendingNiches = useQuery(api.niches.getTrendingNiches, { limit: 12 });
   const discoverNiches = useAction(api.nicheDiscovery.discoverTrendingNiches);
   const saveNiche = useMutation(api.users.saveNiche);
   const [isDiscovering, setIsDiscovering] = useState(false);
@@ -20,11 +20,10 @@ export function Growth() {
   const handleDiscover = async () => {
     setIsDiscovering(true);
     try {
-      // The action doesn't take arguments in the current implementation
       await discoverNiches({});
-      toast.success("New niches discovered!");
+      toast.success("Market analysis complete. New niches identified.");
     } catch (error) {
-      toast.error("Failed to discover niches. Try again.");
+      toast.error("Analysis failed. Please try again.");
       console.error(error);
     } finally {
       setIsDiscovering(false);
@@ -34,85 +33,119 @@ export function Growth() {
   const handleSaveNiche = async (nicheId: any) => {
     try {
       await saveNiche({ nicheId });
-      toast.success("Niche saved to alerts!");
+      toast.success("Niche saved to watchlist");
     } catch (error) {
       toast.error("Failed to save niche");
     }
   };
 
   return (
-    <div className="space-y-8 p-8 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 p-8 max-w-[1600px] mx-auto">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-primary">Growth & Analytics</h2>
-          <p className="text-muted-foreground">
-            Discover trending niches using real-time AI analysis.
+          <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+            Growth Intelligence
+          </h2>
+          <p className="text-muted-foreground mt-1 text-lg">
+            AI-powered market analysis and trend discovery engine.
           </p>
         </div>
+        <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
+          <Target className="h-4 w-4" />
+          View Saved Niches
+        </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="md:col-span-2 bg-gradient-to-r from-primary/5 via-background to-background border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-primary">
-              <Search className="h-5 w-5" />
+      <div className="grid gap-8">
+        {/* Discovery Engine */}
+        <Card className="bg-gradient-to-br from-card to-background border-primary/20 shadow-lg overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+          <CardHeader className="relative z-10">
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <Search className="h-6 w-6 text-primary" />
               Niche Discovery Engine
             </CardTitle>
-            <CardDescription>
-              Find high-potential video topics with low competition using our AI analysis.
+            <CardDescription className="text-base">
+              Analyze millions of data points to find high-potential, low-competition video topics.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex gap-4">
-              <Input 
-                placeholder="Enter a category (e.g., 'crypto', 'meditation', 'gaming')..." 
-                className="h-12 bg-background"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          <CardContent className="relative z-10">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Enter a category (e.g., 'AI automation', 'sustainable living', 'retro gaming')..." 
+                  className="h-12 pl-10 bg-background/50 border-primary/20 focus-visible:ring-primary/30 text-lg"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
               <Button 
                 size="lg" 
-                className="h-12 px-8 shadow-lg shadow-primary/20"
+                className="h-12 px-8 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-lg font-medium min-w-[200px]"
                 onClick={handleDiscover}
                 disabled={isDiscovering}
               >
                 {isDiscovering ? (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 animate-spin" />
+                    <span>Analyzing...</span>
+                  </div>
                 ) : (
-                  "Discover Niches"
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-5 w-5" />
+                    <span>Run Analysis</span>
+                  </div>
                 )}
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2 border-primary/10 shadow-sm">
-          <CardHeader>
-            <CardTitle>Top Trending Niches</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {!trendingNiches ? (
-              <div className="text-center py-12">Loading niches...</div>
-            ) : trendingNiches.length === 0 ? (
-              <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                <TrendingUp className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground mb-4">No niches found. Use the Discovery Engine above.</p>
-              </div>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {trendingNiches.map((niche, i) => (
-                  <div key={niche._id} className="p-4 border rounded-lg hover:border-primary/50 transition-colors cursor-pointer group bg-card hover:shadow-md relative">
+        {/* Results Grid */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Trending Opportunities
+            </h3>
+            <div className="flex gap-2">
+              <Badge variant="outline" className="bg-background/50">Real-time Data</Badge>
+              <Badge variant="outline" className="bg-background/50">AI Verified</Badge>
+            </div>
+          </div>
+
+          {!trendingNiches ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {Array(8).fill(0).map((_, i) => (
+                <Card key={i} className="h-[200px] animate-pulse bg-muted/20" />
+              ))}
+            </div>
+          ) : trendingNiches.length === 0 ? (
+            <Card className="border-dashed border-2 bg-muted/10">
+              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <Search className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">No Data Available</h3>
+                <p className="text-muted-foreground max-w-md mb-6">
+                  Use the Discovery Engine above to analyze the market and find trending niches.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {trendingNiches.map((niche, i) => (
+                <Card key={niche._id} className="group hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 bg-card/50 backdrop-blur-sm flex flex-col">
+                  <CardHeader className="pb-3">
                     <div className="flex justify-between items-start mb-2">
-                      <Badge variant={i === 0 ? "default" : "secondary"} className={i === 0 ? "bg-primary hover:bg-primary/90" : ""}>
+                      <Badge variant={i < 3 ? "default" : "secondary"} className={i < 3 ? "bg-primary hover:bg-primary/90" : ""}>
                         Score: {niche.score}
                       </Badge>
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-6 w-6 -mt-1 -mr-1 text-muted-foreground hover:text-primary"
+                        className="h-8 w-8 -mt-2 -mr-2 text-muted-foreground hover:text-primary hover:bg-primary/10"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSaveNiche(niche._id);
@@ -121,35 +154,31 @@ export function Growth() {
                         <Bookmark className="h-4 w-4" />
                       </Button>
                     </div>
-                    <h3 className="font-bold text-lg mb-1 line-clamp-1">{niche.name}</h3>
-                    <p className="text-xs text-muted-foreground mb-3 line-clamp-2 h-8">
+                    <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                      {niche.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 flex flex-col">
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-1">
                       {niche.description}
                     </p>
-                    <div className="flex gap-2 text-xs text-muted-foreground mt-auto">
-                      <span className="bg-secondary px-2 py-1 rounded">Pot: {niche.potential}</span>
-                      <span className="bg-secondary px-2 py-1 rounded">Comp: {niche.competition}</span>
+                    
+                    <div className="grid grid-cols-2 gap-2 mt-auto">
+                      <div className="bg-secondary/30 p-2 rounded-lg text-center">
+                        <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Potential</div>
+                        <div className="font-bold text-sm">{niche.potential}</div>
+                      </div>
+                      <div className="bg-secondary/30 p-2 rounded-lg text-center">
+                        <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Competition</div>
+                        <div className="font-bold text-sm">{niche.competition}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-2 border-dashed border-2 bg-muted/20">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-              <TrendingUp className="h-6 w-6 text-primary" />
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <h3 className="text-lg font-semibold mb-2">Connect Your Channel</h3>
-            <p className="text-muted-foreground max-w-md mb-6">
-              Connect your YouTube channel to see real-time analytics and AI-driven growth recommendations tailored to your content.
-            </p>
-            <Button variant="outline" onClick={() => window.location.href = "/dashboard?page=settings"}>
-              Connect in Settings
-            </Button>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       </div>
     </div>
   );

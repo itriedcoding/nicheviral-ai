@@ -3,7 +3,7 @@ import {
   FileText, Tag, Type, AlignLeft, Image as ImageIcon, 
   Lightbulb, Video, MessageSquare, Share2, AtSign, 
   ListVideo, Zap, DollarSign, Users, BarChart, 
-  Radio, Calendar, TrendingUp 
+  Radio, Calendar, TrendingUp, Wand2
 } from "lucide-react";
 
 interface ToolGridProps {
@@ -35,24 +35,38 @@ export function ToolGrid({ activeTool, setActiveTool }: ToolGridProps) {
   ];
 
   return (
-    <div className="lg:col-span-1 space-y-4 h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-      {tools.map((tool) => (
-        <Card 
-          key={tool.id}
-          className={`cursor-pointer transition-all hover:border-primary ${activeTool === tool.id ? "border-primary bg-primary/5" : ""}`}
-          onClick={() => setActiveTool(tool.id)}
-        >
-          <CardHeader className="flex flex-row items-center gap-4 py-4">
-            <div className={`p-2 bg-${tool.color}-100 dark:bg-${tool.color}-900/20 rounded-lg`}>
-              <tool.icon className={`h-6 w-6 text-${tool.color}-600 dark:text-${tool.color}-400`} />
-            </div>
-            <div>
-              <CardTitle className="text-base">{tool.title}</CardTitle>
-              <CardDescription>{tool.desc}</CardDescription>
-            </div>
-          </CardHeader>
-        </Card>
-      ))}
+    <div className="lg:col-span-1 space-y-4 h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="flex items-center gap-2 mb-4 px-1">
+        <Wand2 className="w-4 h-4 text-primary" />
+        <span className="text-sm font-medium text-muted-foreground">Available Tools ({tools.length})</span>
+      </div>
+      <div className="grid gap-3">
+        {tools.map((tool) => (
+          <Card 
+            key={tool.id}
+            className={`cursor-pointer transition-all duration-200 border-l-4 hover:shadow-md ${
+              activeTool === tool.id 
+                ? "border-l-primary border-y-primary/20 border-r-primary/20 bg-primary/5 shadow-sm" 
+                : "border-l-transparent border-border/50 hover:border-l-primary/50 hover:bg-accent/50"
+            }`}
+            onClick={() => setActiveTool(tool.id)}
+          >
+            <CardHeader className="flex flex-row items-center gap-4 py-3 px-4">
+              <div className={`p-2 rounded-md bg-background shadow-sm ring-1 ring-border/50 ${activeTool === tool.id ? "text-primary" : "text-muted-foreground"}`}>
+                <tool.icon className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <CardTitle className={`text-sm font-semibold truncate ${activeTool === tool.id ? "text-primary" : ""}`}>
+                  {tool.title}
+                </CardTitle>
+                <CardDescription className="text-xs truncate mt-0.5">
+                  {tool.desc}
+                </CardDescription>
+              </div>
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

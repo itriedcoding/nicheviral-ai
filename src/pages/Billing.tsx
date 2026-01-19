@@ -198,7 +198,10 @@ export default function Billing() {
       if (result.status === 'OK') {
         if (purchaseType === "subscription") {
           // Start Trial Flow
-          await startTrial({ planId: selectedItem.id });
+          await startTrial({ 
+            planId: selectedItem.id,
+            userId: userId // Pass userId explicitly to fix auth error
+          });
           
           toast.success("🎉 7-Day Free Trial Started Successfully!");
           toast.info("You will be billed automatically after 7 days.");
