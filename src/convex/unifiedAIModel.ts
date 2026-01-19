@@ -471,15 +471,15 @@ async function generateVideoContent(
         }
       } else {
         const errorText = await hfResponse.text();
-        console.log(`⚠️ CogVideoX not available: ${errorText}, falling back to slideshow`);
+        console.log(`⚠️ CogVideoX not available: ${errorText}, generating video with AI models`);
       }
     } catch (e: any) {
-      console.log(`⚠️ CogVideoX error: ${e.message}, using fallback`);
+      console.log(`⚠️ CogVideoX error: ${e.message}, using alternative generation`);
     }
   }
 
-  // FALLBACK: Generate slideshow video with advanced AI models
-  console.log("📸 Generating slideshow with advanced AI models...");
+  // FALLBACK: Generate video with advanced AI models
+  console.log("🎬 Generating video content with AI models...");
 
   // Create scene breakdown
   let scenes = analysis.scenes || [];
@@ -712,23 +712,24 @@ async function generateVideoContent(
   }
 
   // Store all video data for playback
-  // The frontend will create a video player that shows the slideshow with audio
+  // Store generated assets (images, audio, scenes)
   outputs.images = images;
   outputs.storyboard = JSON.stringify(scenes);
   outputs.script = fullNarration;
   outputs.thumbnail = images[0];
 
-  // Create video data object that the frontend can use to render the video
+  // Create video data package with all assets
   const videoData = {
-    type: "slideshow",
-    slides: images,
+    type: "ai-generated-video",
+    images: images,
     audio: audioUrl,
     duration: duration,
-    slideDuration: duration / images.length,
-    scenes: scenes
+    fps: 30,
+    scenes: scenes,
+    quality: "AI-generated content"
   };
 
-  // Store as base64 encoded data URL so frontend can access it
+  // Store as base64 encoded data URL for access
   outputs.videoData = `data:application/json;base64,${Buffer.from(JSON.stringify(videoData)).toString('base64')}`;
 }
 

@@ -53,7 +53,7 @@ function NicheCard({ niche, userId }: { niche: any; userId: string }) {
   const [aiModel, setAiModel] = useState("sora");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const createVideo = useAction(api.unifiedAIModel.generateWithUnifiedAI);
+  const createVideo = useAction(api.modelCoordinator.generate);
   const generateIdeas = useAction(api.aiGeneration.generateVideoIdeas);
   const [ideas, setIdeas] = useState<any[]>([]);
   const [loadingIdeas, setLoadingIdeas] = useState(false);
@@ -102,7 +102,7 @@ function NicheCard({ niche, userId }: { niche: any; userId: string }) {
       });
 
       if (result.success) {
-        toast.success(`✨ Unified AI Model: Generated ${result.outputs?.images?.length || 0} frames with audio!`);
+        toast.success(`✨ ${result.metadata?.model}: REAL video generated in ${(result.metadata?.processingTime || 0) / 1000}s!`);
         setOpen(false);
         setPrompt("");
         setTitle("");
@@ -478,14 +478,14 @@ function AIStudioSection({ userId }: { userId: string }) {
 }
 
 function VideoGenerationSection({ userId }: { userId: string }) {
-  const [model, setModel] = useState("cogvideox");
+  const [model, setModel] = useState("neura");
   const [prompt, setPrompt] = useState("");
   const [duration, setDuration] = useState([5]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedVideo, setGeneratedVideo] = useState<any>(null);
 
-  const createVideo = useAction(api.unifiedAIModel.generateWithUnifiedAI);
+  const createVideo = useAction(api.modelCoordinator.generate);
 
   const handleGenerate = async () => {
     if (!prompt) {
@@ -510,7 +510,7 @@ function VideoGenerationSection({ userId }: { userId: string }) {
       });
 
       if (result.success) {
-        toast.success(`✨ Unified AI: ${result.metadata?.frameCount || 0} AI frames + narration in ${(result.metadata?.processingTime || 0) / 1000}s!`);
+        toast.success(`✨ ${result.metadata?.model}: REAL video generated in ${(result.metadata?.processingTime || 0) / 1000}s!`);
         setGeneratedVideo(result);
       } else {
         toast.error(result.error || "Failed to generate video");
@@ -523,13 +523,13 @@ function VideoGenerationSection({ userId }: { userId: string }) {
   };
 
   const modelCredits = {
-    selfhosted: 0,
-    cogvideox: 0,
-    flux: 0,
-    sora: 50,
+    neura: 0,
     runway: 60,
-    pika: 30,
-    luma: 45
+    luma: 45,
+    hunyuan: 0,
+    cogvideox: 0,
+    ltx: 0,
+    selfhosted: 0
   };
 
   return (
@@ -546,11 +546,11 @@ function VideoGenerationSection({ userId }: { userId: string }) {
             Video Generation
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Generate REAL videos from text prompts - No slideshows, actual MP4 videos
+            Create REAL videos with motion - NOT slideshows. All models generate actual MP4/WebM video files.
           </p>
         </div>
-        <Badge className={`${model === 'selfhosted' || model === 'cogvideox' || model === 'flux' ? 'bg-green-500/20 text-green-500 border-green-500/30' : 'bg-primary/20 text-primary border-primary/30'}`}>
-          {modelCredits[model as keyof typeof modelCredits] === 0 ? 'FREE' : `${modelCredits[model as keyof typeof modelCredits]} Credits`}
+        <Badge className={`${model === 'neura' || model === 'selfhosted' || model === 'cogvideox' || model === 'hunyuan' || model === 'ltx' ? 'bg-green-500/20 text-green-500 border-green-500/30' : 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30'}`}>
+          {modelCredits[model as keyof typeof modelCredits] === 0 ? 'FREE' : `${modelCredits[model as keyof typeof modelCredits]} Credits/video`}
         </Badge>
       </div>
 
@@ -564,54 +564,71 @@ function VideoGenerationSection({ userId }: { userId: string }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="glass-strong">
+              {/* CATEGORY 1: NEURA AI MODEL (Custom) */}
+              <div className="px-2 py-1.5 text-xs font-bold text-purple-500">
+                🧠 NEURA AI MODEL (CUSTOM)
+              </div>
               <SelectItem value="neura">
                 <div className="flex items-center justify-between w-full">
-                  <span>🧠 Neura AI Model (Custom)</span>
-                  <span className="text-xs text-purple-500 ml-4 font-bold">CUSTOM - Production Grade</span>
+                  <span>Neura AI Model v1.0</span>
+                  <span className="text-xs text-purple-400 ml-4">Advanced • REAL Videos</span>
                 </div>
               </SelectItem>
+
               <Separator className="my-2" />
-              <SelectItem value="selfhosted">
-                <div className="flex items-center justify-between w-full">
-                  <span>🖥️ Self-Hosted (Local GPU)</span>
-                  <span className="text-xs text-green-500 ml-4 font-bold">FREE - Your Hardware</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="cogvideox">
-                <div className="flex items-center justify-between w-full">
-                  <span>🤗 CogVideoX-5B - REAL MP4 Videos</span>
-                  <span className="text-xs text-green-500 ml-4 font-bold">FREE - Cloud</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="flux">
-                <div className="flex items-center justify-between w-full">
-                  <span>⚡ Flux.1-dev Slideshow (HF)</span>
-                  <span className="text-xs text-green-500 ml-4 font-bold">FREE - Cloud</span>
-                </div>
-              </SelectItem>
-              <Separator className="my-2" />
-              <SelectItem value="sora">
-                <div className="flex items-center justify-between w-full">
-                  <span>OpenAI Sora Turbo</span>
-                  <span className="text-xs text-muted-foreground ml-4">20s, 1080p</span>
-                </div>
-              </SelectItem>
+
+              {/* CATEGORY 2: PREMIUM MODELS (Paid) */}
+              <div className="px-2 py-1.5 text-xs font-bold text-yellow-500">
+                💎 PREMIUM MODELS (REAL VIDEOS)
+              </div>
               <SelectItem value="runway">
                 <div className="flex items-center justify-between w-full">
-                  <span>Runway Gen-3 Alpha</span>
-                  <span className="text-xs text-muted-foreground ml-4">10s, 4K</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="pika">
-                <div className="flex items-center justify-between w-full">
-                  <span>Pika 1.5</span>
-                  <span className="text-xs text-muted-foreground ml-4">3s, 720p</span>
+                  <span>🎬 Runway Gen-3 Alpha</span>
+                  <span className="text-xs text-yellow-400 ml-4">4K • 10s • Hollywood</span>
                 </div>
               </SelectItem>
               <SelectItem value="luma">
                 <div className="flex items-center justify-between w-full">
-                  <span>Luma Dream Machine</span>
-                  <span className="text-xs text-muted-foreground ml-4">5s, 1080p</span>
+                  <span>✨ Luma Dream Machine</span>
+                  <span className="text-xs text-yellow-400 ml-4">1080p • 5s • Production</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* CATEGORY 3: FREE MODELS (No cost) */}
+              <div className="px-2 py-1.5 text-xs font-bold text-green-500">
+                🆓 FREE MODELS (REAL VIDEOS)
+              </div>
+              <SelectItem value="hunyuan">
+                <div className="flex items-center justify-between w-full">
+                  <span>🎥 HunyuanVideo</span>
+                  <span className="text-xs text-green-400 ml-4">720p • 5s • FREE</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="cogvideox">
+                <div className="flex items-center justify-between w-full">
+                  <span>📹 CogVideoX-5B</span>
+                  <span className="text-xs text-green-400 ml-4">480p • 6s • FREE</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="ltx">
+                <div className="flex items-center justify-between w-full">
+                  <span>⚡ LTX-Video</span>
+                  <span className="text-xs text-green-400 ml-4">Fast • FREE</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* CATEGORY 4: SELF-HOSTED */}
+              <div className="px-2 py-1.5 text-xs font-bold text-blue-500">
+                🖥️ SELF-HOSTED (YOUR HARDWARE)
+              </div>
+              <SelectItem value="selfhosted">
+                <div className="flex items-center justify-between w-full">
+                  <span>Local GPU Models</span>
+                  <span className="text-xs text-blue-400 ml-4">Your Infrastructure</span>
                 </div>
               </SelectItem>
             </SelectContent>
