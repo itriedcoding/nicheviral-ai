@@ -215,7 +215,7 @@ export const getSavedNiches = query({
     const niches = await Promise.all(
       saved.map(async (s) => {
         if (!s.nicheId) return null;
-        const niche = await ctx.db.get(s.nicheId);
+        const niche = await ctx.db.get(s.nicheId!);
         return niche;
       })
     );
