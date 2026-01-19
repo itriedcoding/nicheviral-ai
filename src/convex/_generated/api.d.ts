@@ -19,6 +19,7 @@ import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as billing from "../billing.js";
 import type * as checkOTPCodes from "../checkOTPCodes.js";
 import type * as debugAuth from "../debugAuth.js";
+import type * as extendedAIModels from "../extendedAIModels.js";
 import type * as fastGeneration from "../fastGeneration.js";
 import type * as http from "../http.js";
 import type * as initAdmin from "../initAdmin.js";
@@ -58,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   billing: typeof billing;
   checkOTPCodes: typeof checkOTPCodes;
   debugAuth: typeof debugAuth;
+  extendedAIModels: typeof extendedAIModels;
   fastGeneration: typeof fastGeneration;
   http: typeof http;
   initAdmin: typeof initAdmin;

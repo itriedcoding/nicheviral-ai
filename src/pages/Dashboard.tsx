@@ -431,7 +431,7 @@ function AIStudioSection({ userId }: { userId: string }) {
 
       {/* Sub-navigation */}
       <div className="glass-card rounded-xl p-2">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
           <Button
             variant={activeSubTab === "video" ? "default" : "ghost"}
             onClick={() => setActiveSubTab("video")}
@@ -447,6 +447,14 @@ function AIStudioSection({ userId }: { userId: string }) {
           >
             <Image className="w-4 h-4 mr-2" />
             Thumbnail
+          </Button>
+          <Button
+            variant={activeSubTab === "editing" ? "default" : "ghost"}
+            onClick={() => setActiveSubTab("editing")}
+            className={activeSubTab === "editing" ? "red-glow" : ""}
+          >
+            <Wand2 className="w-4 h-4 mr-2" />
+            Editing
           </Button>
           <Button
             variant={activeSubTab === "voiceover" ? "default" : "ghost"}
@@ -470,6 +478,7 @@ function AIStudioSection({ userId }: { userId: string }) {
       <AnimatePresence mode="wait">
         {activeSubTab === "video" && <VideoGenerationSection key="video" userId={userId} />}
         {activeSubTab === "thumbnail" && <ThumbnailGenerationSection key="thumbnail" userId={userId} />}
+        {activeSubTab === "editing" && <ImageEditingSection key="editing" userId={userId} />}
         {activeSubTab === "voiceover" && <VoiceoverGenerationSection key="voiceover" userId={userId} />}
         {activeSubTab === "script" && <ScriptGenerationSection key="script" userId={userId} />}
       </AnimatePresence>
@@ -563,7 +572,7 @@ function VideoGenerationSection({ userId }: { userId: string }) {
             <SelectTrigger className="glass">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="glass-strong">
+            <SelectContent className="glass-strong max-h-[500px] overflow-y-auto">
               {/* CATEGORY 1: NEURA AI MODEL (Custom) */}
               <div className="px-2 py-1.5 text-xs font-bold text-purple-500">
                 🧠 NEURA AI MODEL (CUSTOM)
@@ -571,59 +580,114 @@ function VideoGenerationSection({ userId }: { userId: string }) {
               <SelectItem value="neura">
                 <div className="flex items-center justify-between w-full">
                   <span>Neura AI Model v1.0</span>
-                  <span className="text-xs text-purple-400 ml-4">Advanced • REAL Videos</span>
+                  <span className="text-xs text-purple-400 ml-4">Advanced • Multi-Capability</span>
                 </div>
               </SelectItem>
 
               <Separator className="my-2" />
 
-              {/* CATEGORY 2: PREMIUM MODELS (Paid) */}
+              {/* CATEGORY 2: PREMIUM VIDEO MODELS (Text-to-Video) */}
               <div className="px-2 py-1.5 text-xs font-bold text-yellow-500">
-                💎 PREMIUM MODELS (REAL VIDEOS)
+                💎 PREMIUM VIDEO - TEXT-TO-VIDEO
               </div>
-              <SelectItem value="runway">
+              <SelectItem value="runway-gen3">
                 <div className="flex items-center justify-between w-full">
-                  <span>🎬 Runway Gen-3 Alpha</span>
-                  <span className="text-xs text-yellow-400 ml-4">4K • 10s • Hollywood</span>
+                  <span>🎬 Runway Gen-3 Alpha Turbo</span>
+                  <span className="text-xs text-yellow-400 ml-4">4K • 10s</span>
                 </div>
               </SelectItem>
               <SelectItem value="luma">
                 <div className="flex items-center justify-between w-full">
-                  <span>✨ Luma Dream Machine</span>
-                  <span className="text-xs text-yellow-400 ml-4">1080p • 5s • Production</span>
+                  <span>✨ Luma Dream Machine (Ray2)</span>
+                  <span className="text-xs text-yellow-400 ml-4">1080p • 5s</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="kling">
+                <div className="flex items-center justify-between w-full">
+                  <span>🎥 Kling Video v1.6</span>
+                  <span className="text-xs text-yellow-400 ml-4">1080p • 5s</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="minimax">
+                <div className="flex items-center justify-between w-full">
+                  <span>📹 Minimax Video</span>
+                  <span className="text-xs text-yellow-400 ml-4">720p • 6s</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="haiper">
+                <div className="flex items-center justify-between w-full">
+                  <span>⚡ Haiper Video v2</span>
+                  <span className="text-xs text-yellow-400 ml-4">1080p • 4s</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="mochi">
+                <div className="flex items-center justify-between w-full">
+                  <span>🌟 Mochi 1 (Genmo)</span>
+                  <span className="text-xs text-yellow-400 ml-4">1080p • 5s</span>
                 </div>
               </SelectItem>
 
               <Separator className="my-2" />
 
-              {/* CATEGORY 3: FREE MODELS (No cost) */}
+              {/* CATEGORY 3: FREE VIDEO MODELS (Text-to-Video) */}
               <div className="px-2 py-1.5 text-xs font-bold text-green-500">
-                🆓 FREE MODELS (REAL VIDEOS)
+                🆓 FREE VIDEO - TEXT-TO-VIDEO
               </div>
               <SelectItem value="hunyuan">
                 <div className="flex items-center justify-between w-full">
-                  <span>🎥 HunyuanVideo</span>
+                  <span>🎥 HunyuanVideo (Tencent)</span>
                   <span className="text-xs text-green-400 ml-4">720p • 5s • FREE</span>
                 </div>
               </SelectItem>
               <SelectItem value="cogvideox">
                 <div className="flex items-center justify-between w-full">
-                  <span>📹 CogVideoX-5B</span>
+                  <span>📹 CogVideoX-5B (Tsinghua)</span>
                   <span className="text-xs text-green-400 ml-4">480p • 6s • FREE</span>
                 </div>
               </SelectItem>
               <SelectItem value="ltx">
                 <div className="flex items-center justify-between w-full">
-                  <span>⚡ LTX-Video</span>
-                  <span className="text-xs text-green-400 ml-4">Fast • FREE</span>
+                  <span>⚡ LTX-Video (Lightricks)</span>
+                  <span className="text-xs text-green-400 ml-4">768x512 • 5s • FREE</span>
                 </div>
               </SelectItem>
 
               <Separator className="my-2" />
 
-              {/* CATEGORY 4: SELF-HOSTED */}
+              {/* CATEGORY 4: IMAGE-TO-VIDEO MODELS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-cyan-500">
+                🖼️ IMAGE-TO-VIDEO
+              </div>
+              <SelectItem value="runway-gen2">
+                <div className="flex items-center justify-between w-full">
+                  <span>🎬 Runway Gen-2</span>
+                  <span className="text-xs text-cyan-400 ml-4">720p • Image Animation</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="hunyuan-i2v">
+                <div className="flex items-center justify-between w-full">
+                  <span>🎥 Hunyuan Image-to-Video</span>
+                  <span className="text-xs text-cyan-400 ml-4">720p Animation</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="animatediff">
+                <div className="flex items-center justify-between w-full">
+                  <span>🎨 AnimateDiff</span>
+                  <span className="text-xs text-cyan-400 ml-4">Animation</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="stable-video">
+                <div className="flex items-center justify-between w-full">
+                  <span>📽️ Stable Video Diffusion</span>
+                  <span className="text-xs text-cyan-400 ml-4">Motion</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* CATEGORY 5: SELF-HOSTED */}
               <div className="px-2 py-1.5 text-xs font-bold text-blue-500">
-                🖥️ SELF-HOSTED (YOUR HARDWARE)
+                🖥️ SELF-HOSTED
               </div>
               <SelectItem value="selfhosted">
                 <div className="flex items-center justify-between w-full">
@@ -806,29 +870,150 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
             <SelectTrigger className="glass">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="glass-strong">
-              <SelectItem value="midjourney">
+            <SelectContent className="glass-strong max-h-[500px] overflow-y-auto">
+              {/* FLUX MODELS (Top Tier) */}
+              <div className="px-2 py-1.5 text-xs font-bold text-purple-500">
+                ⚡ FLUX MODELS (PREMIUM)
+              </div>
+              <SelectItem value="flux-pro">
                 <div className="flex items-center justify-between w-full">
-                  <span>Midjourney V6</span>
-                  <span className="text-xs text-muted-foreground ml-4">8K</span>
+                  <span>FLUX Pro v1.1</span>
+                  <span className="text-xs text-purple-400 ml-4">Ultra High Quality</span>
                 </div>
               </SelectItem>
-              <SelectItem value="dalle">
+              <SelectItem value="flux-schnell">
                 <div className="flex items-center justify-between w-full">
-                  <span>DALL-E 3</span>
-                  <span className="text-xs text-muted-foreground ml-4">1024x1792</span>
+                  <span>FLUX Schnell</span>
+                  <span className="text-xs text-purple-400 ml-4">Fast High Quality</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="flux-dev">
+                <div className="flex items-center justify-between w-full">
+                  <span>FLUX Dev</span>
+                  <span className="text-xs text-purple-400 ml-4">Balanced</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* STABLE DIFFUSION MODELS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-blue-500">
+                🎨 STABLE DIFFUSION
+              </div>
+              <SelectItem value="sd35-large">
+                <div className="flex items-center justify-between w-full">
+                  <span>SD 3.5 Large</span>
+                  <span className="text-xs text-blue-400 ml-4">Latest Version</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="sdxl-lightning">
+                <div className="flex items-center justify-between w-full">
+                  <span>SDXL Lightning</span>
+                  <span className="text-xs text-blue-400 ml-4">Ultra Fast</span>
                 </div>
               </SelectItem>
               <SelectItem value="sdxl">
                 <div className="flex items-center justify-between w-full">
                   <span>Stable Diffusion XL</span>
-                  <span className="text-xs text-muted-foreground ml-4">1024x1024</span>
+                  <span className="text-xs text-blue-400 ml-4">1024x1024</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="stable-cascade">
+                <div className="flex items-center justify-between w-full">
+                  <span>Stable Cascade</span>
+                  <span className="text-xs text-blue-400 ml-4">Fast Variant</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* SPECIALIZED IMAGE MODELS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-yellow-500">
+                ✨ SPECIALIZED
+              </div>
+              <SelectItem value="recraft">
+                <div className="flex items-center justify-between w-full">
+                  <span>Recraft V3</span>
+                  <span className="text-xs text-yellow-400 ml-4">Style Control</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="ideogram">
+                <div className="flex items-center justify-between w-full">
+                  <span>Ideogram v2</span>
+                  <span className="text-xs text-yellow-400 ml-4">Text in Images</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="omnigen">
+                <div className="flex items-center justify-between w-full">
+                  <span>OmniGen v1</span>
+                  <span className="text-xs text-yellow-400 ml-4">Universal Editor</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="aura-flow">
+                <div className="flex items-center justify-between w-full">
+                  <span>Aura Flow</span>
+                  <span className="text-xs text-yellow-400 ml-4">Fast HQ</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="photomaker">
+                <div className="flex items-center justify-between w-full">
+                  <span>Photomaker</span>
+                  <span className="text-xs text-yellow-400 ml-4">Personalized</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="kolors">
+                <div className="flex items-center justify-between w-full">
+                  <span>Kolors</span>
+                  <span className="text-xs text-yellow-400 ml-4">Chinese Model</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* POPULAR MODELS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-green-500">
+                🌟 POPULAR
+              </div>
+              <SelectItem value="midjourney">
+                <div className="flex items-center justify-between w-full">
+                  <span>Midjourney V6</span>
+                  <span className="text-xs text-green-400 ml-4">Artistic 8K</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="dalle">
+                <div className="flex items-center justify-between w-full">
+                  <span>DALL-E 3</span>
+                  <span className="text-xs text-green-400 ml-4">OpenAI</span>
                 </div>
               </SelectItem>
               <SelectItem value="leonardo">
                 <div className="flex items-center justify-between w-full">
-                  <span>Leonardo.AI</span>
-                  <span className="text-xs text-muted-foreground ml-4">1920x1080</span>
+                  <span>Leonardo Phoenix</span>
+                  <span className="text-xs text-green-400 ml-4">Cinematic</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="pixart">
+                <div className="flex items-center justify-between w-full">
+                  <span>PixArt-Σ</span>
+                  <span className="text-xs text-green-400 ml-4">Photorealistic</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="playground">
+                <div className="flex items-center justify-between w-full">
+                  <span>Playground v2.5</span>
+                  <span className="text-xs text-green-400 ml-4">Professional</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="kandinsky">
+                <div className="flex items-center justify-between w-full">
+                  <span>Kandinsky 3</span>
+                  <span className="text-xs text-green-400 ml-4">Unique Style</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="deepfloyd">
+                <div className="flex items-center justify-between w-full">
+                  <span>DeepFloyd IF</span>
+                  <span className="text-xs text-green-400 ml-4">Text Understanding</span>
                 </div>
               </SelectItem>
             </SelectContent>
@@ -903,6 +1088,234 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
           )}
         </Button>
       </div>
+    </motion.div>
+  );
+}
+
+function ImageEditingSection({ userId }: { userId: string }) {
+  const [tool, setTool] = useState("background-removal");
+  const [imageUrl, setImageUrl] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedImage, setProcessedImage] = useState<string | null>(null);
+
+  const processImage = useAction(api.unifiedAIModel.generateWithUnifiedAI);
+
+  const toolCredits = {
+    "background-removal": 5,
+    "face-swap": 8,
+    "face-restore": 6,
+    "upscale-4x": 10,
+    "upscale-ccsr": 12,
+  };
+
+  const handleProcess = async () => {
+    if (!imageUrl) {
+      toast.error("Please enter an image URL");
+      return;
+    }
+
+    if (!userId) {
+      toast.error("Please sign in");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const result = await processImage({
+        userId,
+        prompt: imageUrl,
+        type: "thumbnail",
+        model: tool,
+      });
+
+      if (result.success) {
+        toast.success(`✨ Image processed with ${tool} successfully!`);
+        setProcessedImage(result.outputs?.images?.[0] || null);
+      } else {
+        toast.error(result.error || "Failed to process image");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="glass-card rounded-xl p-6 space-y-6"
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-2xl font-bold flex items-center gap-2">
+            <Wand2 className="w-6 h-6 text-primary" />
+            Image Editing Tools
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Professional AI-powered image editing - background removal, upscaling, face enhancement
+          </p>
+        </div>
+        <Badge className="bg-primary/20 text-primary border-primary/30">
+          {toolCredits[tool as keyof typeof toolCredits]} Credits
+        </Badge>
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Editing Tool</Label>
+          <Select value={tool} onValueChange={setTool}>
+            <SelectTrigger className="glass">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="glass-strong">
+              {/* BACKGROUND & OBJECT TOOLS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-purple-500">
+                🎨 BACKGROUND & OBJECTS
+              </div>
+              <SelectItem value="background-removal">
+                <div className="flex items-center justify-between w-full">
+                  <span>Background Removal (Rembg)</span>
+                  <span className="text-xs text-purple-400 ml-4">Professional</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* FACE TOOLS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-yellow-500">
+                👤 FACE ENHANCEMENT
+              </div>
+              <SelectItem value="face-swap">
+                <div className="flex items-center justify-between w-full">
+                  <span>Face Swap AI</span>
+                  <span className="text-xs text-yellow-400 ml-4">Realistic</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="face-restore">
+                <div className="flex items-center justify-between w-full">
+                  <span>Face Restore (GFPGAN)</span>
+                  <span className="text-xs text-yellow-400 ml-4">Enhancement</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="codeformer">
+                <div className="flex items-center justify-between w-full">
+                  <span>CodeFormer</span>
+                  <span className="text-xs text-yellow-400 ml-4">Face Restoration</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* UPSCALING TOOLS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-green-500">
+                ⬆️ UPSCALING
+              </div>
+              <SelectItem value="upscale-4x">
+                <div className="flex items-center justify-between w-full">
+                  <span>Clarity Upscaler</span>
+                  <span className="text-xs text-green-400 ml-4">4x Universal</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="upscale-ccsr">
+                <div className="flex items-center justify-between w-full">
+                  <span>CCSR</span>
+                  <span className="text-xs text-green-400 ml-4">4x Super Resolution</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="real-esrgan">
+                <div className="flex items-center justify-between w-full">
+                  <span>Real-ESRGAN</span>
+                  <span className="text-xs text-green-400 ml-4">Image SR</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium mb-2 block">Image URL</Label>
+          <Input
+            placeholder="https://example.com/image.jpg"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            className="glass"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Enter the URL of the image you want to edit
+          </p>
+        </div>
+
+        {tool === "face-swap" && (
+          <div>
+            <Label className="text-sm font-medium mb-2 block">Target Face URL</Label>
+            <Input
+              placeholder="https://example.com/target-face.jpg"
+              className="glass"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              URL of the image with the face you want to swap to
+            </p>
+          </div>
+        )}
+
+        <Button
+          onClick={handleProcess}
+          disabled={isProcessing || !imageUrl}
+          className="w-full red-glow"
+          size="lg"
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Processing Image...
+            </>
+          ) : (
+            <>
+              <Wand2 className="w-4 h-4 mr-2" />
+              Process Image
+            </>
+          )}
+        </Button>
+      </div>
+
+      {processedImage && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass rounded-lg p-4"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold">Processed Image</h4>
+            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+              Complete
+            </Badge>
+          </div>
+          <div className="relative rounded-lg overflow-hidden">
+            <img
+              src={processedImage}
+              alt="Processed"
+              className="w-full h-auto"
+              loading="lazy"
+            />
+          </div>
+          <div className="flex gap-2 mt-3">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => window.open(processedImage, '_blank')}
+              className="glass"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 }
@@ -988,28 +1401,77 @@ function VoiceoverGenerationSection({ userId }: { userId: string }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="glass-strong">
+              {/* PREMIUM VOICE MODELS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-yellow-500">
+                💎 PREMIUM VOICE
+              </div>
+              <SelectItem value="elevenlabs-turbo">
+                <div className="flex items-center justify-between w-full">
+                  <span>ElevenLabs Turbo v3</span>
+                  <span className="text-xs text-yellow-400 ml-4">Best Quality • 29 Lang</span>
+                </div>
+              </SelectItem>
               <SelectItem value="elevenlabs">
                 <div className="flex items-center justify-between w-full">
                   <span>ElevenLabs Turbo V2</span>
-                  <span className="text-xs text-muted-foreground ml-4">29 languages</span>
+                  <span className="text-xs text-yellow-400 ml-4">29 languages</span>
                 </div>
               </SelectItem>
               <SelectItem value="playht">
                 <div className="flex items-center justify-between w-full">
                   <span>PlayHT 3.0</span>
-                  <span className="text-xs text-muted-foreground ml-4">Multi-lingual</span>
+                  <span className="text-xs text-yellow-400 ml-4">Natural Speech</span>
                 </div>
               </SelectItem>
               <SelectItem value="openai">
                 <div className="flex items-center justify-between w-full">
                   <span>OpenAI TTS HD</span>
-                  <span className="text-xs text-muted-foreground ml-4">6 voices</span>
+                  <span className="text-xs text-yellow-400 ml-4">6 voices</span>
                 </div>
               </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* PREMIUM MUSIC GENERATION */}
+              <div className="px-2 py-1.5 text-xs font-bold text-purple-500">
+                🎵 MUSIC GENERATION
+              </div>
+              <SelectItem value="stable-audio">
+                <div className="flex items-center justify-between w-full">
+                  <span>Stable Audio</span>
+                  <span className="text-xs text-purple-400 ml-4">Professional Music</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="musicgen">
+                <div className="flex items-center justify-between w-full">
+                  <span>MusicGen (Meta)</span>
+                  <span className="text-xs text-purple-400 ml-4">AI Music</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* FREE MODELS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-green-500">
+                🆓 FREE
+              </div>
+              <SelectItem value="bark">
+                <div className="flex items-center justify-between w-full">
+                  <span>Bark</span>
+                  <span className="text-xs text-green-400 ml-4">Multi-voice TTS • FREE</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* OTHER OPTIONS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-blue-500">
+                🎙️ ADDITIONAL
+              </div>
               <SelectItem value="murf">
                 <div className="flex items-center justify-between w-full">
                   <span>Murf AI Studio</span>
-                  <span className="text-xs text-muted-foreground ml-4">120+ voices</span>
+                  <span className="text-xs text-blue-400 ml-4">120+ voices</span>
                 </div>
               </SelectItem>
             </SelectContent>
