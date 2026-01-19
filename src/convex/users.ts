@@ -46,15 +46,28 @@ export const getCurrentUser = async (ctx: QueryCtx) => {
 };
 
 export const updateChannel = mutation({
-  args: { channelId: v.string() },
+  args: { 
+    channelId: v.string(),
+    userId: v.optional(v.string()) 
+  },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-    
-    const user = await ctx.db
-      .query("users")
-      .withIndex("email", (q) => q.eq("email", identity.email))
-      .first();
+    let userId = args.userId;
+    let user;
+
+    if (userId) {
+      user = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("_id"), userId))
+        .first();
+    } else {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) throw new Error("Not authenticated");
+      
+      user = await ctx.db
+        .query("users")
+        .withIndex("email", (q) => q.eq("email", identity.email))
+        .first();
+    }
 
     if (!user) throw new Error("User not found");
 
@@ -67,8 +80,15 @@ export const updateChannel = mutation({
 });
 
 export const getProfile = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { userId: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    if (args.userId) {
+      return await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("_id"), args.userId))
+        .first();
+    }
+
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
@@ -82,15 +102,28 @@ export const getProfile = query({
 });
 
 export const saveNiche = mutation({
-  args: { nicheId: v.id("niches") },
+  args: { 
+    nicheId: v.id("niches"),
+    userId: v.optional(v.string())
+  },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-    
-    const user = await ctx.db
-      .query("users")
-      .withIndex("email", (q) => q.eq("email", identity.email))
-      .first();
+    let userId = args.userId;
+    let user;
+
+    if (userId) {
+      user = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("_id"), userId))
+        .first();
+    } else {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) throw new Error("Not authenticated");
+      
+      user = await ctx.db
+        .query("users")
+        .withIndex("email", (q) => q.eq("email", identity.email))
+        .first();
+    }
 
     if (!user) throw new Error("User not found");
 
@@ -113,15 +146,25 @@ export const saveNiche = mutation({
 });
 
 export const getSavedNiches = query({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
+  args: { userId: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    let userId = args.userId;
+    let user;
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("email", (q) => q.eq("email", identity.email))
-      .first();
+    if (userId) {
+      user = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("_id"), userId))
+        .first();
+    } else {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) return [];
+
+      user = await ctx.db
+        .query("users")
+        .withIndex("email", (q) => q.eq("email", identity.email))
+        .first();
+    }
 
     if (!user) return [];
 

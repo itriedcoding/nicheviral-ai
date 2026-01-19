@@ -13,11 +13,15 @@ export const PLANS = {
 export const startSubscriptionTrial = mutation({
   args: {
     planId: v.string(),
+    userId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-    const userId = identity.subject;
+    let userId = args.userId;
+    if (!userId) {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) throw new Error("Not authenticated");
+      userId = identity.subject;
+    }
 
     const plan = PLANS[args.planId as keyof typeof PLANS];
     if (!plan) throw new Error("Invalid plan");
@@ -25,7 +29,7 @@ export const startSubscriptionTrial = mutation({
     // Check if user already has a subscription
     const existingSub = await ctx.db
       .query("subscriptions")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .withIndex("by_user", (q) => q.eq("userId", userId!))
       .first();
 
     // Allow reactivation if previous was canceled, but don't allow multiple active/trialing
@@ -51,7 +55,7 @@ export const startSubscriptionTrial = mutation({
       });
     } else {
       await ctx.db.insert("subscriptions", {
-        userId,
+        userId: userId!,
         planId: args.planId,
         status: "trialing",
         currentPeriodStart: now,
@@ -65,7 +69,7 @@ export const startSubscriptionTrial = mutation({
     // Update user credits and status
     const userCredits = await ctx.db
       .query("userCredits")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .withIndex("by_user", (q) => q.eq("userId", userId!))
       .first();
 
     if (userCredits) {
@@ -78,7 +82,7 @@ export const startSubscriptionTrial = mutation({
       });
     } else {
       await ctx.db.insert("userCredits", {
-        userId,
+        userId: userId!,
         credits: plan.credits,
         subscriptionTier: args.planId as any,
         subscriptionStatus: "trialing",
