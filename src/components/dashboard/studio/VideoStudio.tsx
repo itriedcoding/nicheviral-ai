@@ -151,7 +151,7 @@ export function VideoStudio() {
                 {videoModels ? (
                   videoModels.map((model: any) => (
                     <SelectItem key={model.id} value={model.id}>
-                      {model.name} ({model.provider})
+                      {model.name} — {model.creditsPerSecond ? `${model.creditsPerSecond} Credits/s` : "Free"}
                     </SelectItem>
                   ))
                 ) : (

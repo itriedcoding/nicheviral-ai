@@ -125,7 +125,7 @@ export function ThumbnailStudio() {
                 {thumbnailModels ? (
                   thumbnailModels.map((model: any) => (
                     <SelectItem key={model.id} value={model.id}>
-                      {model.name} ({model.provider})
+                      {model.name} — {model.creditsPerImage === 0 ? "Free" : `${model.creditsPerImage} Credits`}
                     </SelectItem>
                   ))
                 ) : (

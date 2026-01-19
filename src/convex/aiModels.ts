@@ -130,6 +130,40 @@ export const AI_MODELS = {
   // Thumbnail Generation Models
   thumbnail: [
     {
+      id: "flux-schnell",
+      name: "Flux Schnell",
+      provider: "Black Forest Labs",
+      type: "thumbnail",
+      description: "Ultra-fast, free image generation for rapid prototyping",
+      capabilities: [
+        "Instant generation",
+        "Good prompt adherence",
+        "1024x1024 resolution",
+        "Free to use"
+      ],
+      resolution: "1024x1024",
+      creditsPerImage: 0,
+      apiEndpoint: "https://api.bfl.ml/v1/flux-schnell",
+      status: "active"
+    },
+    {
+      id: "stable-diffusion-xl-lightning",
+      name: "SDXL Lightning",
+      provider: "ByteDance",
+      type: "thumbnail",
+      description: "Lightning fast generation for quick concepts",
+      capabilities: [
+        "High speed",
+        "Vibrant colors",
+        "1024x1024 resolution",
+        "Free to use"
+      ],
+      resolution: "1024x1024",
+      creditsPerImage: 0,
+      apiEndpoint: "https://api.stability.ai/v2beta/stable-image/generate/sd3",
+      status: "active"
+    },
+    {
       id: "midjourney-v6",
       name: "Midjourney V6",
       provider: "Midjourney",

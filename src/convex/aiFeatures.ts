@@ -242,6 +242,10 @@ export const generateImage = action({
       promptModifier = " (Stable Diffusion 3 style, realistic, cinematic lighting)";
     } else if (args.model === "flux-pro") {
       promptModifier = " (Flux Pro style, professional photography, sharp focus, 8k)";
+    } else if (args.model === "flux-schnell") {
+      promptModifier = " (Flux Schnell style, rapid render, sharp details, digital art)";
+    } else if (args.model === "stable-diffusion-xl-lightning") {
+      promptModifier = " (SDXL Lightning style, vibrant colors, high contrast, 4k)";
     }
     
     // Note: For other models like Midjourney, Stable Diffusion, etc., 
