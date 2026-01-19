@@ -3,7 +3,9 @@ import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, S
 import { Overview } from "@/components/dashboard/Overview";
 import { Studio } from "@/components/dashboard/Studio";
 import { Growth } from "@/components/dashboard/Growth";
-import { LayoutDashboard, Video, TrendingUp, Settings, LogOut, Sparkles } from "lucide-react";
+import { Settings } from "@/components/dashboard/Settings";
+import { Tools } from "@/components/dashboard/Tools";
+import { LayoutDashboard, Video, TrendingUp, Settings as SettingsIcon, LogOut, Sparkles, Wrench } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useNavigate } from "react-router";
@@ -68,11 +70,21 @@ export default function Dashboard() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton 
+                  isActive={activePage === "tools"} 
+                  onClick={() => setActivePage("tools")}
+                  tooltip="Creator Tools"
+                >
+                  <Wrench className="h-4 w-4" />
+                  <span>Creator Tools</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
                   isActive={activePage === "settings"} 
                   onClick={() => setActivePage("settings")}
                   tooltip="Settings"
                 >
-                  <Settings className="h-4 w-4" />
+                  <SettingsIcon className="h-4 w-4" />
                   <span>Settings</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -112,12 +124,8 @@ export default function Dashboard() {
             {activePage === "overview" && <Overview onNavigate={setActivePage} />}
             {activePage === "studio" && <Studio />}
             {activePage === "growth" && <Growth />}
-            {activePage === "settings" && (
-              <div className="p-8">
-                <h2 className="text-2xl font-bold mb-4">Settings</h2>
-                <p className="text-muted-foreground">Account settings and billing management coming soon.</p>
-              </div>
-            )}
+            {activePage === "tools" && <Tools />}
+            {activePage === "settings" && <Settings />}
           </main>
         </SidebarInset>
       </div>

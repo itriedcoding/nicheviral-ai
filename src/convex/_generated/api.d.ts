@@ -12,6 +12,7 @@ import type * as admin from "../admin.js";
 import type * as adminHelpers from "../adminHelpers.js";
 import type * as advancedAIModels from "../advancedAIModels.js";
 import type * as advancedAIModels2 from "../advancedAIModels2.js";
+import type * as aiFeatures from "../aiFeatures.js";
 import type * as aiGeneration from "../aiGeneration.js";
 import type * as aiModels from "../aiModels.js";
 import type * as auth from "../auth.js";
@@ -57,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   adminHelpers: typeof adminHelpers;
   advancedAIModels: typeof advancedAIModels;
   advancedAIModels2: typeof advancedAIModels2;
+  aiFeatures: typeof aiFeatures;
   aiGeneration: typeof aiGeneration;
   aiModels: typeof aiModels;
   auth: typeof auth;

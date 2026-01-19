@@ -35,6 +35,10 @@ const schema = defineSchema(
       // Subscription fields
       subscriptionId: v.optional(v.string()),
       customerId: v.optional(v.string()), // Stripe/Square customer ID
+      
+      // New fields
+      youtubeChannelId: v.optional(v.string()),
+      preferences: v.optional(v.any()),
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
     // add other tables here
@@ -173,6 +177,23 @@ const schema = defineSchema(
         v.literal("refunded")
       ),
       paymentDetails: v.any(),
+    }).index("by_user", ["userId"]),
+
+    // Saved Niches for alerts
+    savedNiches: defineTable({
+      userId: v.string(),
+      nicheId: v.id("niches"),
+      notes: v.optional(v.string()),
+    }).index("by_user", ["userId"]),
+
+    // AI Text Generations (Scripts, Tags, etc)
+    aiTextGenerations: defineTable({
+      userId: v.string(),
+      type: v.string(), // script, tags, title, description
+      input: v.string(),
+      output: v.string(),
+      model: v.string(),
+      createdAt: v.number(),
     }).index("by_user", ["userId"]),
   },
   {

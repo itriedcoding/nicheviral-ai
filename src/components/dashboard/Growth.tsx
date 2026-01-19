@@ -2,8 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, ArrowUpRight, Sparkles } from "lucide-react";
-import { useQuery, useAction } from "convex/react";
+import { Search, TrendingUp, ArrowUpRight, Sparkles, Bookmark } from "lucide-react";
+import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 export function Growth() {
   const trendingNiches = useQuery(api.niches.getTrendingNiches, { limit: 8 });
   const discoverNiches = useAction(api.nicheDiscovery.discoverTrendingNiches);
+  const saveNiche = useMutation(api.users.saveNiche);
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -25,6 +26,15 @@ export function Growth() {
       console.error(error);
     } finally {
       setIsDiscovering(false);
+    }
+  };
+
+  const handleSaveNiche = async (nicheId: any) => {
+    try {
+      await saveNiche({ nicheId });
+      toast.success("Niche saved to alerts!");
+    } catch (error) {
+      toast.error("Failed to save niche");
     }
   };
 
@@ -92,12 +102,22 @@ export function Growth() {
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {trendingNiches.map((niche, i) => (
-                  <div key={niche._id} className="p-4 border rounded-lg hover:border-primary/50 transition-colors cursor-pointer group bg-card hover:shadow-md">
+                  <div key={niche._id} className="p-4 border rounded-lg hover:border-primary/50 transition-colors cursor-pointer group bg-card hover:shadow-md relative">
                     <div className="flex justify-between items-start mb-2">
                       <Badge variant={i === 0 ? "default" : "secondary"} className={i === 0 ? "bg-primary hover:bg-primary/90" : ""}>
                         Score: {niche.score}
                       </Badge>
-                      <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 -mt-1 -mr-1 text-muted-foreground hover:text-primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSaveNiche(niche._id);
+                        }}
+                      >
+                        <Bookmark className="h-4 w-4" />
+                      </Button>
                     </div>
                     <h3 className="font-bold text-lg mb-1 line-clamp-1">{niche.name}</h3>
                     <p className="text-xs text-muted-foreground mb-3 line-clamp-2 h-8">
@@ -123,8 +143,8 @@ export function Growth() {
             <p className="text-muted-foreground max-w-md mb-6">
               Connect your YouTube channel to see real-time analytics and AI-driven growth recommendations tailored to your content.
             </p>
-            <Button variant="outline" disabled>
-              Coming Soon
+            <Button variant="outline" onClick={() => window.location.href = "/dashboard?page=settings"}>
+              Connect in Settings
             </Button>
           </CardContent>
         </Card>

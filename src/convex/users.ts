@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { query, QueryCtx } from "./_generated/server";
+import { mutation, query, QueryCtx } from "./_generated/server";
+import { auth } from "./auth";
 
 /**
  * Get user by ID for custom authentication
@@ -43,3 +44,99 @@ export const getCurrentUser = async (ctx: QueryCtx) => {
   // Frontend should use getUserById with userId from localStorage
   return null;
 };
+
+export const updateChannel = mutation({
+  args: { channelId: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", identity.email))
+      .first();
+
+    if (!user) throw new Error("User not found");
+
+    await ctx.db.patch(user._id, {
+      youtubeChannelId: args.channelId,
+    });
+
+    return { success: true };
+  },
+});
+
+export const getProfile = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", identity.email))
+      .first();
+      
+    return user;
+  },
+});
+
+export const saveNiche = mutation({
+  args: { nicheId: v.id("niches") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", identity.email))
+      .first();
+
+    if (!user) throw new Error("User not found");
+
+    // Check if already saved
+    const existing = await ctx.db
+      .query("savedNiches")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .filter((q) => q.eq(q.field("nicheId"), args.nicheId))
+      .first();
+
+    if (existing) return { success: true, message: "Already saved" };
+
+    await ctx.db.insert("savedNiches", {
+      userId: user._id,
+      nicheId: args.nicheId,
+    });
+
+    return { success: true };
+  },
+});
+
+export const getSavedNiches = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", identity.email))
+      .first();
+
+    if (!user) return [];
+
+    const saved = await ctx.db
+      .query("savedNiches")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    const niches = await Promise.all(
+      saved.map(async (s) => {
+        const niche = await ctx.db.get(s.nicheId);
+        return niche;
+      })
+    );
+
+    return niches.filter(Boolean);
+  },
+});
