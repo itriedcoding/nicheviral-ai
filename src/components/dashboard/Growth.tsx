@@ -7,8 +7,10 @@ import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Growth() {
+  const { userId } = useAuth();
   const trendingNiches = useQuery(api.niches.getTrendingNiches, { limit: 8 });
   const discoverNiches = useAction(api.nicheDiscovery.discoverTrendingNiches);
   const saveNiche = useMutation(api.users.saveNiche);

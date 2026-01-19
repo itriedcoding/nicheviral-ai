@@ -91,13 +91,23 @@ export const processVideoGeneration = action({
 
       if (result.success && result.videoUrl) {
         console.log(`✅ Video generation successful for ${args.videoId}`);
-        await ctx.runMutation(internal.videos.internalUpdateVideoStatus, {
-          videoId: args.videoId,
-          status: "completed",
-          videoUrl: result.videoUrl,
-          metadata: result.metadata,
-          duration: result.metadata.duration,
-        });
+        try {
+          await ctx.runMutation(internal.videos.internalUpdateVideoStatus, {
+            videoId: args.videoId,
+            status: "completed",
+            videoUrl: result.videoUrl,
+            metadata: result.metadata,
+            duration: result.metadata.duration || args.duration || 0,
+          });
+        } catch (updateError) {
+          console.error("Failed to update video status with full metadata, trying minimal update", updateError);
+          // Fallback to minimal update in case metadata schema doesn't match
+          await ctx.runMutation(internal.videos.internalUpdateVideoStatus, {
+            videoId: args.videoId,
+            status: "completed",
+            videoUrl: result.videoUrl,
+          });
+        }
       } else {
         throw new Error(result.error || "Generation failed with unknown error");
       }

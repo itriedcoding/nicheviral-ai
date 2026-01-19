@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ToolGrid } from "./tools/ToolGrid";
 import { ToolWorkspace } from "./tools/ToolWorkspace";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Tools() {
+  const { userId } = useAuth();
   const [activeTool, setActiveTool] = useState("script");
 
   return (
