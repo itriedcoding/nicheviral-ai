@@ -130,7 +130,38 @@ export const generateWithFluxSchnell = action({
         }
       );
 
+      // Handle 410 (Gone) or 503 (Overloaded) by falling back to SDXL Lightning
       if (!response.ok) {
+        if (response.status === 410 || response.status === 503 || response.status === 404) {
+          console.log(`Flux Schnell unavailable (${response.status}), falling back to SDXL Lightning...`);
+          
+          const sdxlResponse = await fetch(
+            "https://api-inference.huggingface.co/models/ByteDance/SDXL-Lightning",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${hfToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ inputs: args.prompt }),
+            }
+          );
+
+          if (!sdxlResponse.ok) {
+            throw new Error(`Flux fallback (SDXL) failed: ${sdxlResponse.status}`);
+          }
+
+          const blob = await sdxlResponse.blob();
+          const storageId = await ctx.storage.store(blob);
+          const imageUrl = await ctx.storage.getUrl(storageId);
+
+          return {
+            success: true,
+            imageUrl: imageUrl!,
+            metadata: { model: "sdxl-lightning-fallback", provider: "ByteDance (HF)" }
+          };
+        }
+        
         throw new Error(`Flux API error: ${response.status}`);
       }
 
