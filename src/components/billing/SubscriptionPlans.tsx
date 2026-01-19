@@ -10,11 +10,11 @@ export const SUBSCRIPTION_PLANS = [
     price: 9.99,
     period: "/month",
     credits: 500,
-    description: "Perfect for trying out AI video generation.",
+    description: "Perfect for trying out AI thumbnail generation.",
     features: [
       "500 AI Credits / month",
       "Access to Standard Models",
-      "720p Video Quality",
+      "High Res Thumbnails",
       "Basic Support",
       "Community Access"
     ],
@@ -26,11 +26,11 @@ export const SUBSCRIPTION_PLANS = [
     price: 24.99,
     period: "/month",
     credits: 1500,
-    description: "For creators ready to grow their channel.",
+    description: "For creators ready to grow their Roblox games.",
     features: [
       "1,500 AI Credits / month",
       "Access to All Models",
-      "1080p Video Quality",
+      "4K Thumbnail Quality",
       "Priority Generation Queue",
       "Niche Discovery Tool",
       "Commercial Rights"
@@ -43,11 +43,11 @@ export const SUBSCRIPTION_PLANS = [
     price: 79.99,
     period: "/month",
     credits: 5000,
-    description: "High volume generation for serious creators.",
+    description: "High volume generation for serious studios.",
     features: [
       "5,000 AI Credits / month",
       "Access to All Models + Beta",
-      "4K Video Upscaling",
+      "Video Trailer Generation",
       "Instant Generation Queue",
       "Advanced Analytics",
       "API Access",
@@ -61,7 +61,7 @@ export const SUBSCRIPTION_PLANS = [
     price: 199.99,
     period: "/month",
     credits: 15000,
-    description: "Maximum power for agencies and studios.",
+    description: "Maximum power for agencies and large games.",
     features: [
       "15,000 AI Credits / month",
       "Custom Model Fine-tuning",

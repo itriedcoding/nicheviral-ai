@@ -49,7 +49,7 @@ export default function Privacy() {
           >
             <div className="prose prose-invert max-w-none">
               <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-                At Neura AI, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose,
+                At NicheViral AI, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose,
                 and safeguard your information when you use our service.
               </p>
 
@@ -61,6 +61,7 @@ export default function Privacy() {
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-6 ml-4">
                 <li>Email address</li>
+                <li>Roblox Username (publicly available)</li>
                 <li>Name (if provided)</li>
                 <li>Password (encrypted)</li>
                 <li>Payment information (processed securely)</li>
@@ -72,7 +73,7 @@ export default function Privacy() {
                 We automatically collect information about your use of the Service:
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-6 ml-4">
-                <li>Videos, thumbnails, and voiceovers generated</li>
+                <li>Thumbnails, videos, and game assets generated</li>
                 <li>Prompts and inputs you provide</li>
                 <li>Feature usage and interaction patterns</li>
                 <li>Browser type and operating system</li>
@@ -88,11 +89,11 @@ export default function Privacy() {
                 <li>Provide, maintain, and improve our Service</li>
                 <li>Process your transactions and manage your account</li>
                 <li>Generate AI content based on your inputs</li>
+                <li>Analyze Roblox market trends to provide insights</li>
                 <li>Train and improve our AI models</li>
                 <li>Send you technical notices and support messages</li>
                 <li>Respond to your comments and questions</li>
                 <li>Detect and prevent fraud, abuse, and security incidents</li>
-                <li>Analyze usage trends and optimize user experience</li>
               </ul>
 
               <h2 className="text-2xl font-bold mb-4 text-foreground">3. Data Sharing and Disclosure</h2>
@@ -102,7 +103,7 @@ export default function Privacy() {
                 We may share your information with:
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-6 ml-4">
-                <li><strong>AI Service Providers:</strong> OpenAI, Anthropic, ElevenLabs for content generation</li>
+                <li><strong>AI Service Providers:</strong> OpenAI, Anthropic, Replicate for content generation</li>
                 <li><strong>Payment Processors:</strong> For secure payment processing</li>
                 <li><strong>Cloud Infrastructure:</strong> For hosting and data storage</li>
                 <li><strong>Analytics Providers:</strong> For usage analytics and performance monitoring</li>
@@ -199,10 +200,10 @@ export default function Privacy() {
                 If you have questions about this Privacy Policy or our data practices, please contact us:
               </p>
               <div className="glass rounded-lg p-6">
-                <p className="text-foreground font-medium mb-2">Neura AI Privacy Team</p>
-                <p className="text-muted-foreground text-sm">Email: privacy@neuraai.cyou</p>
+                <p className="text-foreground font-medium mb-2">NicheViral AI Privacy Team</p>
+                <p className="text-muted-foreground text-sm">Email: privacy@nicheviral.ai</p>
                 <p className="text-muted-foreground text-sm">Address: San Francisco, CA, United States</p>
-                <p className="text-muted-foreground text-sm mt-2">Data Protection Officer: dpo@neuraai.cyou</p>
+                <p className="text-muted-foreground text-sm mt-2">Data Protection Officer: dpo@nicheviral.ai</p>
               </div>
             </div>
           </motion.div>

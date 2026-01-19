@@ -2,40 +2,40 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Video, Zap, TrendingUp, Globe, Sparkles, Lock, Smartphone, BarChart } from "lucide-react";
+import { Video, Zap, TrendingUp, Globe, Sparkles, Lock, Smartphone, BarChart, Gamepad2, Image as ImageIcon } from "lucide-react";
 import { Link } from "react-router";
 
 export default function Features() {
   const features = [
     {
-      icon: <Video className="h-8 w-8 text-primary" />,
-      title: "Multi-Model AI Generation",
-      description: "Access the world's best video models including Runway Gen-3, Luma Dream Machine, and more from a single interface."
-    },
-    {
       icon: <TrendingUp className="h-8 w-8 text-primary" />,
-      title: "Niche Discovery Engine",
-      description: "Our AI analyzes millions of data points to identify high-growth, low-competition niches for your channel."
+      title: "Roblox Trend Discovery",
+      description: "Real-time analysis of the Roblox marketplace. Identify breakout games and trending genres before they go viral."
     },
     {
-      icon: <Zap className="h-8 w-8 text-primary" />,
-      title: "Instant Generation",
-      description: "Generate videos in minutes, not hours. Our optimized pipeline ensures the fastest possible delivery times."
+      icon: <ImageIcon className="h-8 w-8 text-primary" />,
+      title: "AI Thumbnail Studio",
+      description: "Generate high-CTR 3D thumbnails for your Roblox games in seconds. Supports multiple styles including DALL-E 3 and Midjourney-style rendering."
     },
     {
-      icon: <Globe className="h-8 w-8 text-primary" />,
-      title: "Global Content",
-      description: "Automatically translate and dub your videos into 30+ languages to reach a worldwide audience."
+      icon: <Gamepad2 className="h-8 w-8 text-primary" />,
+      title: "Game Analytics",
+      description: "Deep dive into game performance metrics. Track concurrent players, visits, and growth rates to optimize your strategy."
+    },
+    {
+      icon: <Video className="h-8 w-8 text-primary" />,
+      title: "AI Video Trailers",
+      description: "Create cinematic trailers for your games using advanced video generation models like Runway Gen-3 and Luma Dream Machine."
     },
     {
       icon: <Smartphone className="h-8 w-8 text-primary" />,
-      title: "Social Optimized",
-      description: "Auto-formatting for YouTube Shorts, TikTok, and Instagram Reels with perfect aspect ratios."
+      title: "Shorts & TikToks",
+      description: "Automatically generate vertical video content to promote your game on social media platforms like TikTok and YouTube Shorts."
     },
     {
-      icon: <BarChart className="h-8 w-8 text-primary" />,
-      title: "Real-time Analytics",
-      description: "Track your video performance and get AI-driven recommendations to improve engagement."
+      icon: <Zap className="h-8 w-8 text-primary" />,
+      title: "Instant Asset Generation",
+      description: "Generate game icons, badges, and promotional art instantly. Streamline your workflow and focus on development."
     }
   ];
 
@@ -51,7 +51,7 @@ export default function Features() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-6xl font-bold mb-6 text-primary"
           >
-            Powerful Features for Modern Creators
+            The Ultimate Toolkit for Roblox Developers
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -59,7 +59,7 @@ export default function Features() {
             transition={{ delay: 0.1 }}
             className="text-xl text-muted-foreground mb-10"
           >
-            Everything you need to build, grow, and monetize your audience using the power of Artificial Intelligence.
+            Explode your game's growth with AI-powered insights, thumbnail generation, and marketing tools.
           </motion.p>
         </div>
       </section>
@@ -93,13 +93,13 @@ export default function Features() {
       {/* CTA */}
       <section className="py-20 px-4 bg-primary/5">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to experience the future?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to dominate the front page?</h2>
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Join thousands of creators who are already using our platform to dominate their niches.
+            Join thousands of top developers using NicheViral AI to grow their games.
           </p>
           <Link to="/auth">
             <Button size="lg" className="h-14 px-10 text-lg rounded-full shadow-xl shadow-primary/20">
-              Start Creating Now
+              Start Growing Now
               <Sparkles className="ml-2 h-5 w-5" />
             </Button>
           </Link>

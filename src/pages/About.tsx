@@ -22,21 +22,21 @@ export default function About() {
             <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
               Our Mission
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-blue-600 to-primary bg-clip-text text-transparent">
-              Democratizing High-End<br />Video Creation
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-orange-500 to-primary bg-clip-text text-transparent">
+              Empowering Roblox<br />Creators with AI
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              NicheViral AI was founded with a single belief: professional-grade video production shouldn't be limited to big studios. We're building the world's most advanced AI video platform to empower creators, marketers, and businesses to tell their stories.
+              NicheViral AI is the first all-in-one growth platform designed specifically for Roblox developers and content creators. We combine real-time market intelligence with state-of-the-art generative AI to help you build, grow, and monetize your games faster than ever before.
             </p>
           </motion.div>
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-32">
             {[
-              { label: "Videos Generated", value: "1M+" },
-              { label: "Active Creators", value: "50k+" },
-              { label: "AI Models", value: "15+" },
-              { label: "Countries", value: "120+" },
+              { label: "Thumbnails Generated", value: "500k+" },
+              { label: "Active Developers", value: "10k+" },
+              { label: "Games Analyzed", value: "1M+" },
+              { label: "Growth Rate", value: "300%" },
             ].map((stat, index) => (
               <motion.div
                 key={index}
@@ -61,9 +61,9 @@ export default function About() {
               <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Innovation First</h3>
+              <h3 className="text-xl font-bold mb-4">Data-Driven Growth</h3>
               <p className="text-muted-foreground">
-                We constantly push the boundaries of what's possible with Generative AI, integrating the latest models from OpenAI, Runway, and Stability AI.
+                We don't guess. Our platform analyzes millions of data points from the Roblox API to identify trending niches and opportunities before they go mainstream.
               </p>
             </motion.div>
 
@@ -76,9 +76,9 @@ export default function About() {
               <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
                 <Users className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Creator Centric</h3>
+              <h3 className="text-xl font-bold mb-4">Creator First</h3>
               <p className="text-muted-foreground">
-                Every feature we build is designed to solve real problems for content creators. We listen to our community and evolve with their needs.
+                Built by developers for developers. We understand the unique challenges of the Roblox ecosystem and build tools to solve them.
               </p>
             </motion.div>
 
@@ -91,9 +91,9 @@ export default function About() {
               <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
                 <Globe className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Global Impact</h3>
+              <h3 className="text-xl font-bold mb-4">AI Innovation</h3>
               <p className="text-muted-foreground">
-                We're breaking down language and technical barriers, allowing anyone, anywhere to create world-class video content.
+                We leverage the latest in generative AI to automate the hardest parts of game development, from thumbnail creation to marketing assets.
               </p>
             </motion.div>
           </div>
@@ -105,7 +105,7 @@ export default function About() {
               {[
                 { name: "Alex Chen", role: "Founder & CEO", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" },
                 { name: "Sarah Miller", role: "Head of AI", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" },
-                { name: "David Park", role: "CTO", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop" },
+                { name: "David Park", role: "Lead Roblox Dev", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop" },
               ].map((member, index) => (
                 <motion.div
                   key={index}

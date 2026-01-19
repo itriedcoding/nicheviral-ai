@@ -33,7 +33,7 @@ export default function Dashboard() {
           <SidebarHeader className="h-16 flex items-center justify-center border-b border-border/50">
             <div className="flex items-center gap-2 font-bold text-xl px-4 w-full">
               <Sparkles className="h-6 w-6 text-primary" />
-              <span className="group-data-[collapsible=icon]:hidden">Neura AI</span>
+              <span className="group-data-[collapsible=icon]:hidden">NicheViral AI</span>
             </div>
           </SidebarHeader>
           <SidebarContent className="p-2">

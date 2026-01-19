@@ -10,7 +10,11 @@ export const CREDIT_PACKAGES = [
     credits: 500,
     price: 9.99,
     description: "Quick top-up for small projects",
-    features: ["500 AI Credits", "Never Expire", "Use on any model"],
+    features: [
+      "500 AI Credits",
+      "Never Expire",
+      "Use on Thumbnails & Video"
+    ],
     popular: false,
   },
   {
@@ -19,7 +23,11 @@ export const CREDIT_PACKAGES = [
     credits: 1500,
     price: 24.99,
     description: "Best value for active creators",
-    features: ["1,500 AI Credits", "Never Expire", "Priority Processing"],
+    features: [
+      "1,500 AI Credits",
+      "Never Expire",
+      "Priority Processing"
+    ],
     popular: true,
   },
   {
@@ -28,7 +36,11 @@ export const CREDIT_PACKAGES = [
     credits: 5000,
     price: 79.99,
     description: "For high volume production",
-    features: ["5,000 AI Credits", "Never Expire", "Highest Priority"],
+    features: [
+      "5,000 AI Credits",
+      "Never Expire",
+      "Highest Priority"
+    ],
     popular: false,
   },
   {
@@ -37,7 +49,11 @@ export const CREDIT_PACKAGES = [
     credits: 15000,
     price: 199.99,
     description: "Maximum scale and power",
-    features: ["15,000 AI Credits", "Never Expire", "Dedicated Support"],
+    features: [
+      "15,000 AI Credits",
+      "Never Expire",
+      "Dedicated Support"
+    ],
     popular: false,
   },
 ];

@@ -51,7 +51,7 @@ export default function Terms() {
             <div className="prose prose-invert max-w-none">
               <h2 className="text-2xl font-bold mb-4 text-foreground">1. Acceptance of Terms</h2>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                By accessing and using Neura AI ("Service"), you accept and agree to be bound by the terms and provision of this agreement.
+                By accessing and using NicheViral AI ("Service"), you accept and agree to be bound by the terms and provision of this agreement.
                 If you do not agree to abide by the above, please do not use this service.
               </p>
 
@@ -62,7 +62,7 @@ export default function Terms() {
               <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-6 ml-4">
                 <li>Modify or copy the materials</li>
                 <li>Use the materials for any commercial purpose or for any public display</li>
-                <li>Attempt to reverse engineer any software contained on Neura AI's platform</li>
+                <li>Attempt to reverse engineer any software contained on NicheViral AI's platform</li>
                 <li>Remove any copyright or other proprietary notations from the materials</li>
                 <li>Transfer the materials to another person or "mirror" the materials on any other server</li>
               </ul>
@@ -174,8 +174,8 @@ export default function Terms() {
                 If you have any questions about these Terms, please contact us at:
               </p>
               <div className="glass rounded-lg p-6">
-                <p className="text-foreground font-medium mb-2">Neura AI Legal Department</p>
-                <p className="text-muted-foreground text-sm">Email: legal@neuraai.cyou</p>
+                <p className="text-foreground font-medium mb-2">NicheViral AI Legal Department</p>
+                <p className="text-muted-foreground text-sm">Email: legal@nicheviral.ai</p>
                 <p className="text-muted-foreground text-sm">Address: San Francisco, CA, United States</p>
               </div>
             </div>
