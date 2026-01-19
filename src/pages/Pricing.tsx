@@ -13,28 +13,18 @@ import { useAuth } from "@/hooks/use-auth";
 export default function Pricing() {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
-  const startTrial = useMutation(api.billing.startSubscriptionTrial);
 
   const handleStartTrial = async (planId: string) => {
     if (isLoading) return;
     
     if (!user) {
       // Redirect to auth with return path
-      navigate("/auth?redirect=/pricing");
+      navigate(`/auth?redirect=/billing?plan=${planId}&trial=true`);
       return;
     }
 
-    try {
-      await startTrial({ planId });
-      toast.success("7-Day Free Trial Started!", {
-        description: "You have full access for 7 days. You will be billed automatically after the trial ends."
-      });
-      navigate("/dashboard");
-    } catch (error: any) {
-      toast.error("Failed to start trial", {
-        description: error.message
-      });
-    }
+    // Navigate to billing page to complete setup
+    navigate(`/billing?plan=${planId}&trial=true`);
   };
 
   const plans = [
@@ -175,7 +165,7 @@ export default function Pricing() {
                 onClick={() => handleStartTrial(plan.id)}
                 disabled={isLoading}
               >
-                {isLoading ? "Loading..." : user ? "Start 7-Day Free Trial" : "Sign In to Start Trial"}
+                {isLoading ? "Loading..." : "Start 7-Day Free Trial"}
               </Button>
               <p className="text-xs text-center mt-3 text-muted-foreground">
                 {plan.price}/mo after trial. Cancel anytime.

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,11 +11,21 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { Loader2, Youtube, CreditCard, User, Bell, Moon, Sun, Download } from "lucide-react";
+import { getSession } from "@/lib/auth";
 
 export function Settings() {
-  const user = useQuery(api.users.getProfile);
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const session = getSession();
+    if (session) {
+      setUserId(session.userId);
+    }
+  }, []);
+
+  const user = useQuery(api.users.getUserById, userId ? { userId } : "skip");
   const updateChannel = useMutation(api.users.updateChannel);
-  const userCredits = useQuery(api.billing.getUserPurchases, { userId: user?._id || "" });
+  const userCredits = useQuery(api.billing.getUserPurchases, userId ? { userId } : "skip");
   
   const [channelId, setChannelId] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -37,7 +47,19 @@ export function Settings() {
     }
   };
 
-  if (!user) return <div className="p-8 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (userId && user === undefined) {
+    return <div className="p-8 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
+
+  if (!userId || user === null) {
+     // Handle case where user is not found or not logged in
+     return (
+        <div className="p-8 flex flex-col items-center justify-center space-y-4">
+            <p className="text-muted-foreground">Please log in to view settings.</p>
+            <Button onClick={() => window.location.href = "/auth"}>Log In</Button>
+        </div>
+     );
+  }
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
@@ -63,19 +85,19 @@ export function Settings() {
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={user.image} />
-                  <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
+                  <AvatarImage src={user?.image} />
+                  <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
                 </Avatar>
                 <Button variant="outline">Change Avatar</Button>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Full Name</Label>
-                  <Input defaultValue={user.name} />
+                  <Input defaultValue={user?.name} />
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input defaultValue={user.email} disabled />
+                  <Input defaultValue={user?.email} disabled />
                 </div>
               </div>
               <Button>Save Changes</Button>
@@ -111,16 +133,12 @@ export function Settings() {
                   <p className="font-medium">Plan Status</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge variant="default" className="capitalize">
-                      {/* We don't have subscription status on user object directly in schema, 
-                          but we can infer or fetch. For now, placeholder. */}
-                      Active Trial
+                      {user?.subscriptionId ? "Active Subscription" : "Free Plan"}
                     </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      Ends in 7 days
-                    </span>
+                    {/* Placeholder for trial status */}
                   </div>
                 </div>
-                <Button variant="outline">Manage Subscription</Button>
+                <Button variant="outline" onClick={() => window.location.href = "/billing"}>Manage Subscription</Button>
               </div>
               
               <div className="space-y-4">
@@ -190,11 +208,11 @@ export function Settings() {
                   <div>
                     <p className="font-medium">YouTube Channel</p>
                     <p className="text-sm text-muted-foreground">
-                      {user.youtubeChannelId ? `Connected: ${user.youtubeChannelId}` : "Not connected"}
+                      {user?.youtubeChannelId ? `Connected: ${user.youtubeChannelId}` : "Not connected"}
                     </p>
                   </div>
                 </div>
-                {user.youtubeChannelId ? (
+                {user?.youtubeChannelId ? (
                   <Button variant="outline" onClick={() => updateChannel({ channelId: "" })}>Disconnect</Button>
                 ) : (
                   <div className="flex gap-2 items-center">

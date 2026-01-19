@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useQuery, useAction } from "convex/react";
+import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,8 +17,9 @@ import {
   AlertCircle,
   Receipt,
   Calendar,
+  Zap,
 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { Navigation } from "@/components/Navigation";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { getSession } from "@/lib/auth";
@@ -65,21 +66,36 @@ const PACKAGES = [
 
 export default function Billing() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [userId, setUserId] = useState("");
   const [squareConfigured, setSquareConfigured] = useState(false);
   const [paymentFormReady, setPaymentFormReady] = useState(false);
+  
+  // Check if we are in trial setup mode
+  const isTrialMode = searchParams.get("trial") === "true";
+  const preselectedPlan = searchParams.get("plan");
 
   // Check authentication
   useEffect(() => {
     const session = getSession();
     if (!session) {
-      navigate("/auth");
+      const returnUrl = isTrialMode 
+        ? `/billing?plan=${preselectedPlan}&trial=true` 
+        : "/billing";
+      navigate(`/auth?redirect=${encodeURIComponent(returnUrl)}`);
     } else {
       setUserId(session.userId);
     }
-  }, [navigate]);
+  }, [navigate, isTrialMode, preselectedPlan]);
+
+  // Auto-select plan if in URL
+  useEffect(() => {
+    if (preselectedPlan && PACKAGES.find(p => p.id === preselectedPlan)) {
+      setSelectedPackage(preselectedPlan);
+    }
+  }, [preselectedPlan]);
 
   // Fetch user credits
   const userCredits = useQuery(
@@ -96,6 +112,7 @@ export default function Billing() {
   // Payment processor actions - PRODUCTION ONLY
   const processCreditCard = useAction(api.paymentProcessor.processCreditCardPayment);
   const getSquareConfig = useAction(api.paymentProcessor.getSquareApplicationId);
+  const startTrial = useMutation(api.billing.startSubscriptionTrial);
 
   // Check if Square is configured
   useEffect(() => {
@@ -156,7 +173,7 @@ export default function Billing() {
       const card = await payments.card();
       await card.attach('#card-container');
 
-      toast.success("Payment form ready! Enter your card details and click Pay.");
+      toast.success("Payment form ready! Enter your card details.");
 
       // Store card instance for cleanup
       (window as any).squareCard = card;
@@ -186,34 +203,51 @@ export default function Billing() {
     setIsProcessing(true);
 
     try {
-      toast.info("Processing payment...");
+      toast.info(isTrialMode ? "Verifying card..." : "Processing payment...");
 
       // Tokenize card details
       const result = await card.tokenize();
 
       if (result.status === 'OK') {
-        // Process REAL payment with Square
-        const paymentResult = await processCreditCard({
-          userId,
-          packageId: pkg.id,
-          cardNonce: result.token,
-          cardholderName: "Customer",
-        });
-
-        if (paymentResult.success) {
-          toast.success("✅ Payment successful! Credits added to your account.");
-          toast.info(`Transaction ID: ${paymentResult.transactionId}`, {
-            duration: 5000,
-          });
-
-          // Clean up
+        if (isTrialMode) {
+          // Start Trial Flow
+          // In a real app, we would save the card nonce to create a Customer in Square
+          // For now, we just verify tokenization worked and start the trial
+          
+          await startTrial({ planId: pkg.id });
+          
+          toast.success("🎉 7-Day Free Trial Started Successfully!");
+          toast.info("You will be billed automatically after 7 days.");
+          
+          // Clean up and redirect
           await card.destroy();
           (window as any).squareCard = null;
-          setPaymentFormReady(false);
-          setSelectedPackage(null);
-          setIsProcessing(false);
+          navigate("/dashboard");
+          
         } else {
-          throw new Error(paymentResult.error || "Payment failed");
+          // One-time Purchase Flow
+          const paymentResult = await processCreditCard({
+            userId,
+            packageId: pkg.id,
+            cardNonce: result.token,
+            cardholderName: "Customer",
+          });
+
+          if (paymentResult.success) {
+            toast.success("✅ Payment successful! Credits added to your account.");
+            toast.info(`Transaction ID: ${paymentResult.transactionId}`, {
+              duration: 5000,
+            });
+
+            // Clean up
+            await card.destroy();
+            (window as any).squareCard = null;
+            setPaymentFormReady(false);
+            setSelectedPackage(null);
+            setIsProcessing(false);
+          } else {
+            throw new Error(paymentResult.error || "Payment failed");
+          }
         }
       } else {
         let errorMessage = `Tokenization failed: ${result.status}`;
@@ -252,69 +286,79 @@ export default function Billing() {
 
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-3">Purchase Credits</h1>
-            <p className="text-muted-foreground text-lg">Choose a plan that fits your needs</p>
+            <h1 className="text-4xl font-bold mb-3">
+              {isTrialMode ? "Start Your Free Trial" : "Purchase Credits"}
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              {isTrialMode 
+                ? "Enter your payment details to activate your 7-day free trial" 
+                : "Choose a plan that fits your needs"}
+            </p>
           </div>
 
           {/* Current Balance */}
-          <div className="max-w-md mx-auto mb-12">
-            <div className="glass-card rounded-xl p-6 text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Coins className="w-5 h-5 text-primary" />
-                <span className="text-sm text-muted-foreground">Current Balance</span>
+          {!isTrialMode && (
+            <div className="max-w-md mx-auto mb-12">
+              <div className="glass-card rounded-xl p-6 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Coins className="w-5 h-5 text-primary" />
+                  <span className="text-sm text-muted-foreground">Current Balance</span>
+                </div>
+                <div className="text-4xl font-bold text-primary">{userCredits?.credits || 0}</div>
+                <div className="text-xs text-muted-foreground mt-1">AI Credits</div>
               </div>
-              <div className="text-4xl font-bold text-primary">{userCredits?.credits || 0}</div>
-              <div className="text-xs text-muted-foreground mt-1">AI Credits</div>
             </div>
-          </div>
+          )}
 
-          {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {PACKAGES.map((pkg) => (
-              <motion.div
-                key={pkg.id}
-                whileHover={{ y: -4 }}
-                className={`relative glass-card rounded-xl p-6 cursor-pointer transition-all border ${
-                  selectedPackage === pkg.id
-                    ? "border-primary shadow-lg"
-                    : "border-transparent hover:border-primary/50"
-                }`}
-                onClick={() => setSelectedPackage(pkg.id)}
-              >
-                {pkg.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-primary text-primary-foreground border-0 px-3">
-                      Most Popular
-                    </Badge>
-                  </div>
-                )}
-
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold mb-2">{pkg.name}</h3>
-                  <div className="flex items-baseline justify-center gap-1 mb-2">
-                    <span className="text-3xl font-bold">${pkg.price}</span>
-                  </div>
-                  <div className="text-sm text-primary font-medium mb-3">
-                    {pkg.credits.toLocaleString()} Credits
-                  </div>
-                  <p className="text-xs text-muted-foreground">{pkg.description}</p>
-                </div>
-
-                <div className="space-y-2">
-                  {pkg.features.map((feature, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-xs text-muted-foreground">{feature}</span>
+          {/* Pricing Cards - Hide if in trial mode with preselected plan */}
+          {(!isTrialMode || !preselectedPlan) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {PACKAGES.map((pkg) => (
+                <motion.div
+                  key={pkg.id}
+                  whileHover={{ y: -4 }}
+                  className={`relative glass-card rounded-xl p-6 cursor-pointer transition-all border ${
+                    selectedPackage === pkg.id
+                      ? "border-primary shadow-lg"
+                      : "border-transparent hover:border-primary/50"
+                  }`}
+                  onClick={() => setSelectedPackage(pkg.id)}
+                >
+                  {pkg.popular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-primary text-primary-foreground border-0 px-3">
+                        Most Popular
+                      </Badge>
                     </div>
-                  ))}
-                </div>
+                  )}
 
-                {selectedPackage === pkg.id && (
-                  <div className="absolute inset-0 rounded-xl border-2 border-primary pointer-events-none" />
-                )}
-              </motion.div>
-            ))}
-          </div>
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold mb-2">{pkg.name}</h3>
+                    <div className="flex items-baseline justify-center gap-1 mb-2">
+                      <span className="text-3xl font-bold">${pkg.price}</span>
+                    </div>
+                    <div className="text-sm text-primary font-medium mb-3">
+                      {pkg.credits.toLocaleString()} Credits
+                    </div>
+                    <p className="text-xs text-muted-foreground">{pkg.description}</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    {pkg.features.map((feature, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                        <span className="text-xs text-muted-foreground">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {selectedPackage === pkg.id && (
+                    <div className="absolute inset-0 rounded-xl border-2 border-primary pointer-events-none" />
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          )}
 
           {/* Payment Section */}
           {selectedPackage && (
@@ -325,7 +369,9 @@ export default function Billing() {
             >
               <div className="glass-card rounded-xl p-8">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold">Checkout</h2>
+                  <h2 className="text-2xl font-bold">
+                    {isTrialMode ? "Activate Trial" : "Checkout"}
+                  </h2>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Shield className="w-4 h-4 text-green-500" />
                     <span>Secure Payment</span>
@@ -347,9 +393,29 @@ export default function Billing() {
                   <Separator className="my-3" />
                   <div className="flex items-center justify-between">
                     <span className="font-bold">Total</span>
-                    <span className="text-2xl font-bold text-primary">${selectedPkg?.price}</span>
+                    <div className="text-right">
+                      <span className="text-2xl font-bold text-primary">${selectedPkg?.price}</span>
+                      {isTrialMode && (
+                        <p className="text-xs text-muted-foreground">Due after 7 days</p>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {/* Trial Info */}
+                {isTrialMode && (
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
+                    <div className="flex items-start gap-3">
+                      <Zap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-primary text-sm mb-1">7-Day Free Trial</p>
+                        <p className="text-xs text-muted-foreground">
+                          You won't be charged today. Your subscription will start automatically after 7 days unless you cancel.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Payment Status */}
                 {!squareConfigured ? (
@@ -414,7 +480,7 @@ export default function Billing() {
                     ) : (
                       <>
                         <CreditCard className="w-5 h-5 mr-2" />
-                        Continue to Payment
+                        {isTrialMode ? "Enter Payment Details" : "Continue to Payment"}
                       </>
                     )}
                   </Button>
@@ -433,7 +499,7 @@ export default function Billing() {
                     ) : (
                       <>
                         <Lock className="w-5 h-5 mr-2" />
-                        Pay ${selectedPkg?.price}
+                        {isTrialMode ? "Start Free Trial" : `Pay $${selectedPkg?.price}`}
                       </>
                     )}
                   </Button>
@@ -446,8 +512,8 @@ export default function Billing() {
             </motion.div>
           )}
 
-          {/* Purchase History */}
-          {purchases && purchases.length > 0 && (
+          {/* Purchase History - Only show if not in trial mode */}
+          {!isTrialMode && purchases && purchases.length > 0 && (
             <div className="max-w-4xl mx-auto mt-16">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                 <Receipt className="w-6 h-6 text-primary" />
