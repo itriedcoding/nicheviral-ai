@@ -17,7 +17,7 @@ export function VideoStudio() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [videoPrompt, setVideoPrompt] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
-  const [videoModel, setVideoModel] = useState("runway-gen3");
+  const [videoModel, setVideoModel] = useState("hunyuan-video");
   const [aspectRatio, setAspectRatio] = useState("16:9");
   const [duration, setDuration] = useState("5");
   const [stylePreset, setStylePreset] = useState("none");

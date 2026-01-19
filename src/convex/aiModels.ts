@@ -6,6 +6,42 @@ export const AI_MODELS = {
   // Video Generation Models
   video: [
     {
+      id: "hunyuan-video",
+      name: "Hunyuan Video (Free)",
+      provider: "HuggingFace",
+      type: "video",
+      description: "Open source video generation model by Tencent",
+      capabilities: [
+        "Free to use",
+        "Good motion quality",
+        "720p resolution",
+        "Standard duration"
+      ],
+      maxDuration: 5,
+      resolution: "720p",
+      creditsPerSecond: 0,
+      apiEndpoint: "https://api-inference.huggingface.co/models/tencent/HunyuanVideo",
+      status: "active"
+    },
+    {
+      id: "cogvideox-5b",
+      name: "CogVideoX-5B (Free)",
+      provider: "HuggingFace",
+      type: "video",
+      description: "Open source video generation model by Zhipu AI",
+      capabilities: [
+        "Free to use",
+        "Consistent motion",
+        "720p resolution",
+        "Standard duration"
+      ],
+      maxDuration: 6,
+      resolution: "720p",
+      creditsPerSecond: 0,
+      apiEndpoint: "https://api-inference.huggingface.co/models/THUDM/CogVideoX-5b",
+      status: "active"
+    },
+    {
       id: "sora-turbo",
       name: "OpenAI Sora Turbo",
       provider: "OpenAI",

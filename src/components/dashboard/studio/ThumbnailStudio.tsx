@@ -16,7 +16,7 @@ export function ThumbnailStudio() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [imagePrompt, setImagePrompt] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState("dall-e-3");
+  const [selectedModel, setSelectedModel] = useState("flux-schnell");
   const [referenceImageUrl, setReferenceImageUrl] = useState("");
 
   const { userId } = useAuth();

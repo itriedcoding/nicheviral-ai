@@ -66,6 +66,18 @@ export const processVideoGeneration = action({
            prompt: args.prompt, 
            duration: args.duration 
          });
+      } else if (args.aiModel === "hunyuan-video") {
+         // Explicitly use Hunyuan Video (Free)
+         result = await ctx.runAction(api.videoModels.generateWithHunyuanVideo, { 
+           prompt: args.prompt, 
+           duration: args.duration 
+         });
+      } else if (args.aiModel === "cogvideox-5b") {
+         // Explicitly use CogVideoX (Free)
+         result = await ctx.runAction(api.videoModels.generateWithCogVideoX, { 
+           prompt: args.prompt, 
+           duration: args.duration 
+         });
       } else if (args.aiModel.includes("sora") && process.env.OPENAI_API_KEY) {
          // Placeholder for Sora if it becomes available or mapped to something else
          // For now, fallback to smart selector if Sora is selected but not implemented
