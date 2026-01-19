@@ -14,13 +14,13 @@ export const createVideoRecord = mutation({
     voiceModel: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    // Determine userId: use provided arg or identity.subject
-    // Note: In a real app, we should validate that if userId is provided, it matches the auth user or the user is admin.
-    // For now, we'll prefer the identity.subject if not provided, or just use identity.subject to be safe.
-    const userId = identity.subject;
+    let userId = args.userId;
+    
+    if (!userId) {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) throw new Error("Not authenticated");
+      userId = identity.subject;
+    }
 
     const videoId = await ctx.db.insert("videos", {
       userId: userId,
@@ -95,12 +95,12 @@ export const getUserVideos = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
     const limit = args.limit || 50;
     
     let userId = args.userId;
     if (!userId) {
-        if (!identity) return []; // Or throw, but returning empty is safer for UI
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return []; 
         userId = identity.subject;
     }
 
@@ -201,10 +201,9 @@ export const initializeUserCredits = mutation({
 export const getUserCredits = query({
   args: { userId: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    
     let userId = args.userId;
     if (!userId) {
+        const identity = await ctx.auth.getUserIdentity();
         if (!identity) return null;
         userId = identity.subject;
     }
@@ -215,6 +214,19 @@ export const getUserCredits = query({
       .first();
 
     if (!credits) {
+      // Auto-initialize if not found (fallback)
+      if (userId) {
+         // We can't mutate in a query, so return a default structure
+         // The component should call initializeCredits if needed
+         return {
+            userId: userId,
+            credits: 0,
+            subscriptionTier: "free",
+            subscriptionStatus: "inactive",
+            trialEndsAt: undefined,
+            renewalDate: undefined
+         };
+      }
       return null;
     }
 

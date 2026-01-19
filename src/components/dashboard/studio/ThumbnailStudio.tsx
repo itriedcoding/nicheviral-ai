@@ -8,6 +8,7 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/hooks/use-auth";
 
 export function ThumbnailStudio() {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -15,8 +16,9 @@ export function ThumbnailStudio() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState("dall-e-3");
 
+  const { userId } = useAuth();
   const generateImageAction = useAction(api.aiFeatures.generateImage);
-  const user = useQuery(api.users.getProfile, {});
+  const user = useQuery(api.users.getProfile, userId ? { userId } : "skip");
   const thumbnailModels = useQuery(api.aiModels.getModelsByType, { type: "thumbnail" });
 
   const handleGenerateImage = async () => {

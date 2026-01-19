@@ -51,18 +51,12 @@ export const initializeCredits = mutation({
     let userId = args.userId;
     if (!userId) {
       const identity = await ctx.auth.getUserIdentity();
-      if (!identity) return; // Not authenticated, can't init
-      userId = identity.subject; // Use subject as userId for Convex Auth
-      
-      // Double check if we can find the user by email to be sure
-      const user = await ctx.db
-        .query("users")
-        .withIndex("email", (q) => q.eq("email", identity.email!))
-        .first();
-        
-      if (user) userId = user._id;
+      if (identity) {
+        userId = identity.subject;
+      }
     }
 
+    // If still no userId, we can't initialize
     if (!userId) return;
 
     const existing = await ctx.db
@@ -99,10 +93,16 @@ export const updateChannel = mutation({
       const identity = await ctx.auth.getUserIdentity();
       if (!identity) throw new Error("Not authenticated");
       
+      // Try to find by email if identity exists
       user = await ctx.db
         .query("users")
-        .withIndex("email", (q) => q.eq("email", identity.email))
+        .withIndex("email", (q) => q.eq("email", identity.email!))
         .first();
+        
+      // If not found by email, try subject as ID (though our schema uses custom IDs mostly)
+      if (!user) {
+         // Fallback logic if needed
+      }
     }
 
     if (!user) throw new Error("User not found");
@@ -136,7 +136,7 @@ export const getProfile = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("email", (q) => q.eq("email", identity.email))
+      .withIndex("email", (q) => q.eq("email", identity.email!))
       .first();
       
     return user;

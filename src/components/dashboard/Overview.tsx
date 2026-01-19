@@ -4,10 +4,13 @@ import { Play, Zap, Video, TrendingUp, ArrowRight } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Overview({ onNavigate }: { onNavigate: (page: string) => void }) {
-  const userVideos = useQuery(api.videos.getUserVideos, { limit: 5 });
-  const credits = useQuery(api.videos.getUserCredits, {});
+  const { userId } = useAuth();
+  
+  const userVideos = useQuery(api.videos.getUserVideos, userId ? { userId, limit: 5 } : "skip");
+  const credits = useQuery(api.videos.getUserCredits, userId ? { userId } : "skip");
   const trendingNiches = useQuery(api.niches.getTrendingNiches, { limit: 3 });
 
   return (
