@@ -4,7 +4,7 @@ import { query, mutation, internalMutation } from "./_generated/server";
 // Create video record
 export const createVideoRecord = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.optional(v.string()), // Make optional to allow inference from auth
     title: v.string(),
     description: v.string(),
     prompt: v.string(),
@@ -13,8 +13,16 @@ export const createVideoRecord = mutation({
     voiceModel: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    // Determine userId: use provided arg or identity.subject
+    // Note: In a real app, we should validate that if userId is provided, it matches the auth user or the user is admin.
+    // For now, we'll prefer the identity.subject if not provided, or just use identity.subject to be safe.
+    const userId = identity.subject;
+
     return await ctx.db.insert("videos", {
-      userId: args.userId,
+      userId: userId,
       nicheId: args.nicheId,
       title: args.title,
       description: args.description,
@@ -51,15 +59,22 @@ export const updateVideoStatus = mutation({
 // Get user's videos
 export const getUserVideos = query({
   args: {
-    userId: v.id("users"),
+    userId: v.optional(v.string()), // Make optional
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
     const limit = args.limit || 50;
+    
+    let userId = args.userId;
+    if (!userId) {
+        if (!identity) return []; // Or throw, but returning empty is safer for UI
+        userId = identity.subject;
+    }
 
     const videos = await ctx.db
       .query("videos")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", userId!))
       .order("desc")
       .take(limit);
 
@@ -152,11 +167,19 @@ export const initializeUserCredits = mutation({
 
 // Get user credits
 export const getUserCredits = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.optional(v.string()) },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    
+    let userId = args.userId;
+    if (!userId) {
+        if (!identity) return null;
+        userId = identity.subject;
+    }
+
     const credits = await ctx.db
       .query("userCredits")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", userId!))
       .first();
 
     if (!credits) {
