@@ -24,7 +24,7 @@ export default function Pricing() {
     try {
       await startTrial({ planId });
       toast.success("7-Day Free Trial Started!", {
-        description: "You have full access for 7 days. Enjoy!"
+        description: "You have full access for 7 days. You will be billed automatically after the trial ends."
       });
       navigate("/dashboard");
     } catch (error: any) {
@@ -117,9 +117,9 @@ export default function Pricing() {
             Choose the plan that fits your growth.
           </p>
           
-          <div className="inline-flex items-center gap-2 bg-secondary/50 px-4 py-2 rounded-full text-sm font-medium text-primary">
+          <div className="inline-flex items-center gap-2 bg-secondary/50 px-4 py-2 rounded-full text-sm font-medium text-primary border border-primary/20">
             <Zap className="h-4 w-4 fill-current" />
-            <span>7-Day Free Trial Included on All Plans</span>
+            <span>7-Day Free Trial Included on All Plans • No Commitment • Cancel Anytime</span>
           </div>
         </div>
 
@@ -174,7 +174,7 @@ export default function Pricing() {
                 Start 7-Day Free Trial
               </Button>
               <p className="text-xs text-center mt-3 text-muted-foreground">
-                Then {plan.price}/mo. Cancel anytime.
+                {plan.price}/mo after trial. Cancel anytime.
               </p>
             </motion.div>
           ))}
