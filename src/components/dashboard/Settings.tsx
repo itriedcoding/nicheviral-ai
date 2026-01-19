@@ -35,13 +35,21 @@ export function Settings() {
       toast.error("Please enter a Channel ID");
       return;
     }
+    
+    // Basic validation for YouTube Channel ID (usually starts with UC)
+    if (!channelId.startsWith("UC")) {
+        toast.error("Invalid Channel ID. It should start with 'UC'.");
+        return;
+    }
+
     setIsUpdating(true);
     try {
       await updateChannel({ channelId });
       toast.success("Channel connected successfully!");
       setChannelId(""); // Clear input
     } catch (error) {
-      toast.error("Failed to connect channel");
+      console.error(error);
+      toast.error("Failed to connect channel. Please try again.");
     } finally {
       setIsUpdating(false);
     }

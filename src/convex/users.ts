@@ -71,6 +71,12 @@ export const updateChannel = mutation({
 
     if (!user) throw new Error("User not found");
 
+    // Validate channel ID format if needed, but for now just save it
+    if (args.channelId && !args.channelId.startsWith("UC")) {
+        // Optional: could throw error here, but frontend handles it too.
+        // Allowing flexibility for now, but good to be aware.
+    }
+
     await ctx.db.patch(user._id, {
       youtubeChannelId: args.channelId,
     });
