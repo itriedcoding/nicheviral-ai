@@ -45,6 +45,7 @@ import type * as system from "../system.js";
 import type * as testResend from "../testResend.js";
 import type * as unifiedAIModel from "../unifiedAIModel.js";
 import type * as users from "../users.js";
+import type * as videoModels from "../videoModels.js";
 import type * as videos from "../videos.js";
 import type * as youtube from "../youtube.js";
 import type * as youtubeQueries from "../youtubeQueries.js";
@@ -93,6 +94,7 @@ declare const fullApi: ApiFromModules<{
   testResend: typeof testResend;
   unifiedAIModel: typeof unifiedAIModel;
   users: typeof users;
+  videoModels: typeof videoModels;
   videos: typeof videos;
   youtube: typeof youtube;
   youtubeQueries: typeof youtubeQueries;

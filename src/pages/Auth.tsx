@@ -14,7 +14,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 
-import { ArrowRight, Loader2, Mail, Sparkles } from "lucide-react";
+import { ArrowRight, Loader2, Mail, Sparkles, Lock, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useMutation, useAction } from "convex/react";
@@ -150,37 +150,37 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       {/* Animated Background */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
       </div>
 
       {/* Auth Content */}
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div className="flex items-center justify-center h-full flex-col">
-          <Card className="min-w-[350px] sm:min-w-[400px] pb-0 border glass-card shadow-2xl">
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          <Card className="border-primary/20 bg-card/50 backdrop-blur-xl shadow-2xl shadow-primary/5">
             {step === "choice" ? (
               <>
-                <CardHeader className="text-center">
-                  <div className="flex justify-center mb-4">
-                    <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate("/")}>
-                      <Sparkles className="w-8 h-8 text-primary group-hover:animate-pulse" />
-                      <span className="text-2xl font-bold bg-gradient-to-r from-primary via-red-500 to-primary bg-clip-text text-transparent">
-                        Neura AI
-                      </span>
+                <CardHeader className="text-center space-y-4 pb-8">
+                  <div className="flex justify-center">
+                    <div className="flex items-center gap-2 cursor-pointer group p-3 rounded-2xl bg-primary/10 hover:bg-primary/20 transition-colors" onClick={() => navigate("/")}>
+                      <Sparkles className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
                     </div>
                   </div>
-                  <CardTitle className="text-2xl font-bold">Get Started</CardTitle>
-                  <CardDescription className="text-base">
-                    Create viral videos with AI
-                  </CardDescription>
+                  <div className="space-y-2">
+                    <CardTitle className="text-3xl font-bold tracking-tight">Welcome to Neura AI</CardTitle>
+                    <CardDescription className="text-base">
+                      The next generation of AI video creation
+                    </CardDescription>
+                  </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-4">
                   <Button
                     onClick={() => setStep("signUp")}
-                    className="w-full"
+                    className="w-full h-12 text-base font-medium shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
                     size="lg"
                   >
                     Create Account
@@ -189,72 +189,79 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                   <Button
                     onClick={() => setStep("signIn")}
                     variant="outline"
-                    className="w-full"
+                    className="w-full h-12 text-base font-medium hover:bg-primary/5"
                     size="lg"
                   >
                     Sign In
                   </Button>
                 </CardContent>
-                <div className="py-4 px-6 text-xs text-center text-muted-foreground bg-muted/50 border-t rounded-b-lg">
-                  <div className="flex items-center justify-center gap-1">
-                    <Sparkles className="w-3 h-3 text-primary" />
+                <div className="py-6 px-6 text-xs text-center text-muted-foreground border-t border-primary/10 mt-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <Lock className="w-3 h-3 text-primary" />
                     <span>Secured with enterprise-grade encryption</span>
                   </div>
                 </div>
               </>
             ) : step === "signIn" || step === "signUp" ? (
               <>
-                <CardHeader className="text-center">
-                  <div className="flex justify-center mb-4">
+                <CardHeader className="text-center space-y-4">
+                  <div className="flex justify-center">
                     <div className="flex items-center gap-2 cursor-pointer group" onClick={() => navigate("/")}>
-                      <Sparkles className="w-8 h-8 text-primary group-hover:animate-pulse" />
-                      <span className="text-2xl font-bold bg-gradient-to-r from-primary via-red-500 to-primary bg-clip-text text-transparent">
-                        Neura AI
-                      </span>
+                      <Sparkles className="w-6 h-6 text-primary" />
+                      <span className="font-bold text-xl">Neura AI</span>
                     </div>
                   </div>
-                  <CardTitle className="text-2xl font-bold">
-                    {step === "signUp" ? "Create Account" : "Welcome Back"}
-                  </CardTitle>
-                  <CardDescription className="text-base">
-                    {step === "signUp"
-                      ? "Get started with AI-powered videos"
-                      : "Sign in to create viral videos with AI"}
-                  </CardDescription>
+                  <div className="space-y-1">
+                    <CardTitle className="text-2xl font-bold">
+                      {step === "signUp" ? "Create Account" : "Welcome Back"}
+                    </CardTitle>
+                    <CardDescription>
+                      {step === "signUp"
+                        ? "Enter your details to get started"
+                        : "Enter your credentials to continue"}
+                    </CardDescription>
+                  </div>
                 </CardHeader>
                 <form onSubmit={handlePasswordSubmit}>
                   <CardContent className="space-y-4">
-                    <div className="relative flex items-center gap-2">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input
-                        type="email"
-                        name="email"
-                        placeholder="Enter your email"
-                        className="pl-10"
-                        required
-                        disabled={isLoading}
-                      />
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 text-muted-foreground w-4 h-4" />
+                        <Input
+                          type="email"
+                          name="email"
+                          placeholder="name@example.com"
+                          className="pl-10 h-11 bg-background/50"
+                          required
+                          disabled={isLoading}
+                        />
+                      </div>
                     </div>
-                    <div className="relative flex items-center gap-2">
-                      <Input
-                        type="password"
-                        name="password"
-                        placeholder="Enter your password"
-                        required
-                        disabled={isLoading}
-                        minLength={8}
-                      />
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 text-muted-foreground w-4 h-4" />
+                        <Input
+                          type="password"
+                          name="password"
+                          placeholder="Password"
+                          className="pl-10 h-11 bg-background/50"
+                          required
+                          disabled={isLoading}
+                          minLength={8}
+                        />
+                      </div>
                     </div>
                     {error && (
-                      <p className="mt-2 text-sm text-red-500">
+                      <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center gap-2">
+                        <div className="w-1 h-1 rounded-full bg-destructive" />
                         {error}
-                      </p>
+                      </div>
                     )}
                   </CardContent>
-                  <CardFooter className="flex-col gap-2">
+                  <CardFooter className="flex-col gap-3">
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full h-11 shadow-lg shadow-primary/20"
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -269,21 +276,21 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                         </>
                       )}
                     </Button>
-                    <div className="w-full text-center">
+                    <div className="flex items-center justify-center gap-2 w-full text-sm">
                       <Button
                         type="button"
-                        variant="link"
-                        className="text-sm"
+                        variant="ghost"
+                        className="text-muted-foreground hover:text-primary"
                         onClick={() => setStep("choice")}
                         disabled={isLoading}
                       >
                         Back
                       </Button>
-                      <span className="text-muted-foreground mx-2">•</span>
+                      <span className="text-muted-foreground/30">|</span>
                       <Button
                         type="button"
-                        variant="link"
-                        className="text-sm"
+                        variant="ghost"
+                        className="text-primary hover:text-primary/80"
                         onClick={() => setStep(step === "signUp" ? "signIn" : "signUp")}
                         disabled={isLoading}
                       >
@@ -292,23 +299,22 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                     </div>
                   </CardFooter>
                 </form>
-                <div className="py-4 px-6 text-xs text-center text-muted-foreground bg-muted/50 border-t rounded-b-lg">
-                  <div className="flex items-center justify-center gap-1">
-                    <Sparkles className="w-3 h-3 text-primary" />
-                    <span>Secured with enterprise-grade encryption</span>
-                  </div>
-                </div>
               </>
             ) : typeof step === "object" && step.mode === "otp" ? (
               <>
-                <CardHeader className="text-center mt-4">
-                  <CardTitle>Check your email</CardTitle>
-                  <CardDescription>
-                    We've sent a code to {step.email}
-                  </CardDescription>
+                <CardHeader className="text-center space-y-4">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                    <Mail className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl">Check your email</CardTitle>
+                    <CardDescription>
+                      We've sent a verification code to <span className="text-foreground font-medium">{step.email}</span>
+                    </CardDescription>
+                  </div>
                 </CardHeader>
                 <form onSubmit={handleOtpSubmit}>
-                  <CardContent className="pb-4">
+                  <CardContent className="space-y-6">
                     <div className="flex justify-center">
                       <InputOTP
                         value={otp}
@@ -324,37 +330,43 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                           }
                         }}
                       >
-                        <InputOTPGroup>
+                        <InputOTPGroup className="gap-2">
                           {Array.from({ length: 6 }).map((_, index) => (
-                            <InputOTPSlot key={index} index={index} />
+                            <InputOTPSlot 
+                              key={index} 
+                              index={index} 
+                              className="h-12 w-10 sm:w-12 border-primary/20 bg-background/50"
+                            />
                           ))}
                         </InputOTPGroup>
                       </InputOTP>
                     </div>
                     {error && (
-                      <p className="mt-2 text-sm text-red-500 text-center">
+                      <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
                         {error}
-                      </p>
+                      </div>
                     )}
-                    <p className="text-sm text-muted-foreground text-center mt-4">
-                      Didn't receive a code?{" "}
-                      <Button
-                        variant="link"
-                        className="p-0 h-auto"
-                        onClick={() => {
-                          setStep("signIn");
-                          setOtp("");
-                          setError(null);
-                        }}
-                      >
-                        Try again
-                      </Button>
-                    </p>
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground">
+                        Didn't receive the code?{" "}
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto text-primary"
+                          onClick={() => {
+                            setStep("signIn");
+                            setOtp("");
+                            setError(null);
+                          }}
+                        >
+                          Try again
+                        </Button>
+                      </p>
+                    </div>
                   </CardContent>
-                  <CardFooter className="flex-col gap-2">
+                  <CardFooter className="flex-col gap-3">
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full h-11"
                       disabled={isLoading || otp.length !== 6}
                     >
                       {isLoading ? (
@@ -364,8 +376,8 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                         </>
                       ) : (
                         <>
-                          Verify code
-                          <ArrowRight className="ml-2 h-4 w-4" />
+                          Verify Email
+                          <CheckCircle2 className="ml-2 h-4 w-4" />
                         </>
                       )}
                     </Button>
@@ -379,16 +391,10 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       }}
                       disabled={isLoading}
                     >
-                      Back
+                      Back to Sign In
                     </Button>
                   </CardFooter>
                 </form>
-                <div className="py-4 px-6 text-xs text-center text-muted-foreground bg-muted/50 border-t rounded-b-lg">
-                  <div className="flex items-center justify-center gap-1">
-                    <Sparkles className="w-3 h-3 text-primary" />
-                    <span>Secured with enterprise-grade encryption</span>
-                  </div>
-                </div>
               </>
             ) : null}
           </Card>

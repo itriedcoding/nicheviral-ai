@@ -16,12 +16,18 @@ export const AI_MODELS = {
         "1080p resolution",
         "Complex scene understanding",
         "Character consistency",
-        "Camera motion control"
+        "Camera motion control",
+        "Physics simulation",
+        "Multi-character interaction",
+        "Dynamic lighting",
+        "Cinematic composition",
+        "Real-time preview"
       ],
       maxDuration: 20,
       resolution: "1080p",
       creditsPerSecond: 10,
-      apiEndpoint: "https://api.openai.com/v1/video/generations"
+      apiEndpoint: "https://api.openai.com/v1/video/generations",
+      status: "active"
     },
     {
       id: "runway-gen3",
@@ -34,12 +40,18 @@ export const AI_MODELS = {
         "Motion brush control",
         "Director mode",
         "Multi-motion control",
-        "Custom camera movements"
+        "Custom camera movements",
+        "Style transfer",
+        "Lip sync",
+        "Green screen generation",
+        "Object removal",
+        "Slow motion"
       ],
       maxDuration: 10,
       resolution: "4K",
       creditsPerSecond: 15,
-      apiEndpoint: "https://api.runwayml.com/v1/gen3/generate"
+      apiEndpoint: "https://api.runwayml.com/v1/gen3/generate",
+      status: "active"
     },
     {
       id: "pika-1.5",
@@ -52,12 +64,18 @@ export const AI_MODELS = {
         "Rapid generation time",
         "Style transfer",
         "Image-to-video",
-        "Video extension"
+        "Video extension",
+        "Lip sync",
+        "Sound effects generation",
+        "Region modification",
+        "Canvas expansion",
+        "Parameter tuning"
       ],
       maxDuration: 3,
       resolution: "720p",
       creditsPerSecond: 5,
-      apiEndpoint: "https://api.pika.art/v1/generate"
+      apiEndpoint: "https://api.pika.art/v1/generate",
+      status: "active"
     },
     {
       id: "luma-dream-machine",
@@ -70,12 +88,42 @@ export const AI_MODELS = {
         "3D scene understanding",
         "Smooth motion",
         "Natural physics",
-        "High-quality rendering"
+        "High-quality rendering",
+        "Keyframe control",
+        "Loop generation",
+        "Camera path editing",
+        "Texture synthesis",
+        "Lighting adjustment"
       ],
       maxDuration: 5,
       resolution: "1080p",
       creditsPerSecond: 12,
-      apiEndpoint: "https://api.lumalabs.ai/v1/dream-machine"
+      apiEndpoint: "https://api.lumalabs.ai/v1/dream-machine",
+      status: "active"
+    },
+    {
+      id: "kling-ai",
+      name: "Kling AI Pro",
+      provider: "Kuaishou",
+      type: "video",
+      description: "High-fidelity video generation with long duration support",
+      capabilities: [
+        "Up to 2 minutes generation",
+        "1080p/4K support",
+        "Complex choreography",
+        "Realistic human motion",
+        "Temporal consistency",
+        "Prompt adherence",
+        "Negative prompting",
+        "Seed control",
+        "Batch generation",
+        "API integration"
+      ],
+      maxDuration: 120,
+      resolution: "1080p",
+      creditsPerSecond: 8,
+      apiEndpoint: "https://api.kling.ai/v1/generate",
+      status: "active"
     }
   ],
 
@@ -92,11 +140,17 @@ export const AI_MODELS = {
         "Text rendering",
         "Style control",
         "Aspect ratio customization",
-        "Upscaling to 8K"
+        "Upscaling to 8K",
+        "Character reference",
+        "Style reference",
+        "Zoom out/Pan",
+        "Region variation",
+        "Tile generation"
       ],
       resolution: "8K",
       creditsPerImage: 25,
-      apiEndpoint: "https://api.midjourney.com/v1/imagine"
+      apiEndpoint: "https://api.midjourney.com/v1/imagine",
+      status: "active"
     },
     {
       id: "dalle-3",
@@ -109,66 +163,90 @@ export const AI_MODELS = {
         "Text in images",
         "Multiple styles",
         "Natural composition",
-        "1024x1792 resolution"
+        "1024x1792 resolution",
+        "Prompt optimization",
+        "Safety filters",
+        "HD quality mode",
+        "Variation generation",
+        "In-painting"
       ],
       resolution: "1024x1792",
       creditsPerImage: 20,
-      apiEndpoint: "https://api.openai.com/v1/images/generations"
+      apiEndpoint: "https://api.openai.com/v1/images/generations",
+      status: "active"
     },
     {
-      id: "stable-diffusion-xl",
-      name: "Stable Diffusion XL",
+      id: "stable-diffusion-3",
+      name: "Stable Diffusion 3",
       provider: "Stability AI",
       type: "thumbnail",
-      description: "Open-source image generation with fine-tuned control",
+      description: "Next-gen open model with superior text handling",
       capabilities: [
-        "1024x1024 resolution",
-        "Fine-tuned control",
-        "Multiple models",
-        "LoRA support",
-        "Inpainting"
+        "Superior typography",
+        "Complex prompt understanding",
+        "Photorealism",
+        "Artistic styles",
+        "ControlNet support",
+        "LoRA compatibility",
+        "Negative prompts",
+        "Seed control",
+        "Sampler selection",
+        "Step count control"
       ],
       resolution: "1024x1024",
-      creditsPerImage: 10,
-      apiEndpoint: "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image"
+      creditsPerImage: 15,
+      apiEndpoint: "https://api.stability.ai/v2beta/stable-image/generate/sd3",
+      status: "active"
     },
     {
-      id: "leonardo-ai",
-      name: "Leonardo.AI",
-      provider: "Leonardo.AI",
+      id: "flux-pro",
+      name: "Flux Pro",
+      provider: "Black Forest Labs",
       type: "thumbnail",
-      description: "Specialized for YouTube thumbnails and marketing visuals",
+      description: "State-of-the-art open weights model for professional use",
       capabilities: [
-        "Optimized for thumbnails",
-        "High contrast",
-        "Text-friendly layouts",
-        "Style presets",
-        "Batch generation"
+        "12B parameters",
+        "Exceptional prompt adherence",
+        "High aesthetic quality",
+        "Diverse styles",
+        "Commercial usage",
+        "Fast inference",
+        "Detail preservation",
+        "Color accuracy",
+        "Lighting control",
+        "Composition guidance"
       ],
-      resolution: "1920x1080",
-      creditsPerImage: 15,
-      apiEndpoint: "https://cloud.leonardo.ai/api/rest/v1/generations"
+      resolution: "2048x2048",
+      creditsPerImage: 18,
+      apiEndpoint: "https://api.bfl.ml/v1/flux-pro",
+      status: "active"
     }
   ],
 
   // Voice/Audio Models
   voice: [
     {
-      id: "elevenlabs-turbo-v2",
-      name: "ElevenLabs Turbo V2",
+      id: "elevenlabs-turbo-v2-5",
+      name: "ElevenLabs Turbo V2.5",
       provider: "ElevenLabs",
       type: "voice",
       description: "Ultra-realistic voice synthesis with emotion control",
       capabilities: [
-        "29 languages",
+        "32 languages",
         "Voice cloning",
         "Emotion control",
         "Ultra-low latency",
-        "Professional quality"
+        "Professional quality",
+        "Accent control",
+        "Style transfer",
+        "Speech-to-speech",
+        "Sound effects",
+        "Dubbing"
       ],
-      maxDuration: 300,
+      maxDuration: 600,
       creditsPerSecond: 0.5,
-      apiEndpoint: "https://api.elevenlabs.io/v1/text-to-speech"
+      apiEndpoint: "https://api.elevenlabs.io/v1/text-to-speech",
+      status: "active"
     },
     {
       id: "play-ht-v3",
@@ -181,14 +259,20 @@ export const AI_MODELS = {
         "Voice cloning",
         "Multi-lingual",
         "Expressive speech",
-        "Fast generation"
+        "Fast generation",
+        "Character voices",
+        "Podcast style",
+        "Audiobook quality",
+        "SSML support",
+        "Real-time streaming"
       ],
       maxDuration: 600,
       creditsPerSecond: 0.4,
-      apiEndpoint: "https://api.play.ht/api/v3/text-to-speech"
+      apiEndpoint: "https://api.play.ht/api/v3/text-to-speech",
+      status: "active"
     },
     {
-      id: "openai-tts",
+      id: "openai-tts-hd",
       name: "OpenAI TTS HD",
       provider: "OpenAI",
       type: "voice",
@@ -198,28 +282,17 @@ export const AI_MODELS = {
         "Multiple languages",
         "HD quality",
         "Fast generation",
-        "Natural intonation"
+        "Natural intonation",
+        "Speed control",
+        "Format selection",
+        "Streaming support",
+        "Low latency",
+        "Consistent tone"
       ],
       maxDuration: 600,
       creditsPerSecond: 0.3,
-      apiEndpoint: "https://api.openai.com/v1/audio/speech"
-    },
-    {
-      id: "murf-ai",
-      name: "Murf AI Studio",
-      provider: "Murf.AI",
-      type: "voice",
-      description: "Professional voiceovers with pitch and speed control",
-      capabilities: [
-        "120+ voices",
-        "Pitch control",
-        "Speed control",
-        "Emphasis control",
-        "Background music"
-      ],
-      maxDuration: 300,
-      creditsPerSecond: 0.6,
-      apiEndpoint: "https://api.murf.ai/v1/speech/generate"
+      apiEndpoint: "https://api.openai.com/v1/audio/speech",
+      status: "active"
     }
   ]
 };

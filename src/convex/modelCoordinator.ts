@@ -97,6 +97,8 @@ export const generate = action({
         console.log("🧠 Using NEURA AI MODEL (Custom)");
 
         try {
+          // Check if Neura AI is available via environment or fallback
+          // We try to run it, and if it fails (e.g. function not found or error), we catch it
           const neuraResult = await ctx.runAction(api.neuraAIModel.generateWithNeuraAI, {
             userId: args.userId,
             prompt: args.prompt,
@@ -140,7 +142,7 @@ export const generate = action({
         // CATEGORY 2: PREMIUM MODELS (if API keys available)
         if (args.model === "runway") {
           console.log("💎 Using Runway Gen-3 (Premium)");
-          const result = await ctx.runAction(api.realVideoGeneration.generateWithRunwayGen3, {
+          const result = await ctx.runAction(api.videoModels.generateWithRunwayGen3, {
             prompt: args.prompt,
             duration: args.duration,
             aspectRatio: args.aspectRatio,
@@ -162,7 +164,7 @@ export const generate = action({
 
         if (args.model === "luma") {
           console.log("💎 Using Luma Dream Machine (Premium)");
-          const result = await ctx.runAction(api.realVideoGeneration.generateWithLumaDreamMachine, {
+          const result = await ctx.runAction(api.videoModels.generateWithLumaDreamMachine, {
             prompt: args.prompt,
             duration: args.duration,
             aspectRatio: args.aspectRatio,
@@ -185,7 +187,7 @@ export const generate = action({
         // CATEGORY 3: FREE MODELS (specific selection)
         if (args.model === "hunyuan") {
           console.log("🆓 Using HunyuanVideo (Free)");
-          const result = await ctx.runAction(api.realVideoGeneration.generateWithHunyuanVideo, {
+          const result = await ctx.runAction(api.videoModels.generateWithHunyuanVideo, {
             prompt: args.prompt,
             duration: args.duration,
           });
@@ -206,7 +208,7 @@ export const generate = action({
 
         if (args.model === "cogvideox") {
           console.log("🆓 Using CogVideoX-5B (Free)");
-          const result = await ctx.runAction(api.realVideoGeneration.generateWithCogVideoX, {
+          const result = await ctx.runAction(api.videoModels.generateWithCogVideoX, {
             prompt: args.prompt,
             duration: args.duration,
           });
@@ -227,7 +229,7 @@ export const generate = action({
 
         if (args.model === "ltx") {
           console.log("🆓 Using LTX-Video (Free)");
-          const result = await ctx.runAction(api.realVideoGeneration.generateWithLTXVideo, {
+          const result = await ctx.runAction(api.videoModels.generateWithLTXVideo, {
             prompt: args.prompt,
             duration: args.duration,
           });

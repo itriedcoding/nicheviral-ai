@@ -4,11 +4,11 @@ import { internal } from "./_generated/api";
 const crons = cronJobs();
 
 // 1. Niche Discovery Cron
-// Run every 24 hours to discover new trending niches
+// Run every 24 hours to discover new trending niches using Real YouTube Data
 crons.interval(
   "discover-trending-niches",
   { hours: 24 },
-  internal.nicheDiscoveryInternal.saveTrendingNiches,
+  internal.youtube.internalFetchTrendingVideos,
   {}
 );
 

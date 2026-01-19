@@ -77,7 +77,7 @@ export function ToolWorkspace({ activeTool }: ToolWorkspaceProps) {
       }
 
       if (res?.success) {
-        setResult(res.content);
+        setResult(res.content || "");
         toast.success("Generated successfully!");
       } else {
         toast.error(res?.error || "Failed to generate");
