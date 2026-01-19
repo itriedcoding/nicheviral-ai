@@ -32,12 +32,13 @@ export function ProjectHistory() {
               <CardContent className="flex flex-col items-center justify-center p-12 text-center">
                 <Video className="w-12 h-12 text-muted-foreground/20 mb-4" />
                 <p className="text-muted-foreground">No videos generated yet.</p>
+                <p className="text-xs text-muted-foreground mt-1">Create your first Roblox trailer above!</p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {videos.map((video) => (
-                <Card key={video._id} className="overflow-hidden group">
+                <Card key={video._id} className="overflow-hidden group border-primary/10 hover:border-primary/30 transition-colors">
                   <div className="aspect-video bg-black/10 relative">
                     {video.videoUrl ? (
                       <video 
@@ -92,12 +93,13 @@ export function ProjectHistory() {
               <CardContent className="flex flex-col items-center justify-center p-12 text-center">
                 <ImageIcon className="w-12 h-12 text-muted-foreground/20 mb-4" />
                 <p className="text-muted-foreground">No thumbnails generated yet.</p>
+                <p className="text-xs text-muted-foreground mt-1">Create your first Roblox thumbnail above!</p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {images.map((image) => (
-                <Card key={image._id} className="overflow-hidden group">
+                <Card key={image._id} className="overflow-hidden group border-primary/10 hover:border-primary/30 transition-colors">
                   <div className="aspect-square bg-black/10 relative">
                     <img 
                       src={image.imageUrl} 

@@ -163,7 +163,7 @@ export function ThumbnailStudio() {
             />
           </div>
           <Button 
-            className="w-full size-lg" 
+            className="w-full size-lg bg-gradient-to-r from-primary to-orange-600 hover:from-primary/90 hover:to-orange-600/90" 
             onClick={handleGenerateImage}
             disabled={isGeneratingImage}
           >

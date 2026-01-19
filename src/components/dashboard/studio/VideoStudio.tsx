@@ -62,11 +62,11 @@ export function VideoStudio() {
     if (value === "none") return;
     
     const styles: Record<string, string> = {
-      "cinematic": "Cinematic lighting, 8k resolution, photorealistic, anamorphic lens flares, shallow depth of field, hollywood color grading",
-      "anime": "Studio Ghibli style, vibrant colors, detailed background, cel shaded, high quality anime art",
-      "cyberpunk": "Neon lights, futuristic city, rain reflections, high contrast, cyan and magenta color palette, blade runner aesthetic",
-      "3d": "Unreal Engine 5 render, ray tracing, global illumination, highly detailed textures, 3D masterpiece",
-      "vintage": "16mm film grain, retro aesthetic, warm colors, vignette, dust and scratches, 1980s style"
+      "gameplay": "Roblox gameplay footage, high energy, showing game mechanics, 60fps, 4k, vibrant colors",
+      "cinematic": "Cinematic Roblox trailer, dramatic lighting, slow motion action shots, 8k resolution, ray tracing enabled",
+      "obby": "Roblox Obby showcase, bright neon colors, parkour jumps, floating platforms, fun atmosphere",
+      "tycoon": "Roblox Tycoon base building timelapse, money particles, upgrading structures, satisfying progress",
+      "horror": "Scary Roblox horror game, dark atmosphere, flashlight lighting, spooky corridors, jumpscare tension"
     };
     
     if (videoPrompt && !videoPrompt.includes(styles[value])) {
@@ -126,15 +126,15 @@ export function VideoStudio() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Film className="w-5 h-5 text-primary" />
-            Configuration
+            Trailer Config
           </CardTitle>
-          <CardDescription>Setup your video parameters</CardDescription>
+          <CardDescription>Setup your Roblox video parameters</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label>Project Title</Label>
+            <Label>Video Title</Label>
             <Input 
-              placeholder="e.g., Cyberpunk City Intro" 
+              placeholder="e.g., Ultimate Obby Trailer" 
               value={videoTitle}
               onChange={(e) => setVideoTitle(e.target.value)}
               className="bg-background/50"
@@ -165,18 +165,18 @@ export function VideoStudio() {
           </div>
 
           <div className="space-y-2">
-            <Label>Style Preset</Label>
+            <Label>Roblox Style Preset</Label>
             <Select value={stylePreset} onValueChange={handleStyleChange}>
               <SelectTrigger className="bg-background/50">
                 <SelectValue placeholder="Select Style" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No Preset</SelectItem>
-                <SelectItem value="cinematic">Cinematic</SelectItem>
-                <SelectItem value="anime">Anime / Animation</SelectItem>
-                <SelectItem value="cyberpunk">Cyberpunk / Sci-Fi</SelectItem>
-                <SelectItem value="3d">3D Render</SelectItem>
-                <SelectItem value="vintage">Vintage Film</SelectItem>
+                <SelectItem value="gameplay">Gameplay Showcase</SelectItem>
+                <SelectItem value="cinematic">Cinematic Trailer</SelectItem>
+                <SelectItem value="obby">Obby / Parkour</SelectItem>
+                <SelectItem value="tycoon">Tycoon / Simulator</SelectItem>
+                <SelectItem value="horror">Horror / Mystery</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -189,8 +189,8 @@ export function VideoStudio() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
-                  <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+                  <SelectItem value="16:9">16:9 (YouTube)</SelectItem>
+                  <SelectItem value="9:16">9:16 (TikTok/Shorts)</SelectItem>
                   <SelectItem value="1:1">1:1 (Square)</SelectItem>
                 </SelectContent>
               </Select>
@@ -211,7 +211,7 @@ export function VideoStudio() {
 
           <div className="space-y-4 pt-4 border-t">
             <div className="flex items-center justify-between">
-              <Label className="cursor-pointer">High Quality Mode</Label>
+              <Label className="cursor-pointer">High Quality Render</Label>
               <Switch defaultChecked />
             </div>
             <div className="flex items-center justify-between">
@@ -243,7 +243,7 @@ export function VideoStudio() {
           </CardHeader>
           <CardContent className="space-y-4">
             <Textarea 
-              placeholder="Describe your video in extreme detail. Mention lighting, camera movement, style, and mood... (e.g., A cinematic drone shot flying through a futuristic neon city at night, rain reflecting on the streets, 8k resolution, photorealistic, slow motion)"
+              placeholder="Describe your Roblox video in detail. E.g., 'A cinematic trailer for a ninja simulator game, showing players jumping across rooftops, sword fighting effects, particle explosions, dynamic camera angles...'"
               className="min-h-[150px] text-base resize-none bg-background/50 focus:ring-primary/50"
               value={videoPrompt}
               onChange={(e) => setVideoPrompt(e.target.value)}
@@ -251,14 +251,14 @@ export function VideoStudio() {
             <div className="flex justify-end">
               <Button 
                 size="lg" 
-                className="w-full md:w-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 transition-all duration-300 shadow-lg shadow-primary/25"
+                className="w-full md:w-auto bg-gradient-to-r from-primary to-orange-600 hover:from-primary/90 hover:to-orange-600/90 transition-all duration-300 shadow-lg shadow-primary/25"
                 onClick={handleGenerateVideo}
                 disabled={isGeneratingVideo}
               >
                 {isGeneratingVideo ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Generating Video...
+                    Generating Trailer...
                   </>
                 ) : (
                   <>
@@ -278,7 +278,7 @@ export function VideoStudio() {
             </div>
             <h3 className="text-xl font-semibold mb-2">Ready to Create</h3>
             <p className="text-muted-foreground max-w-md">
-              Your generated videos will appear in the "My Projects" section below. 
+              Your generated Roblox trailers will appear in the "Creation History" section below. 
               We use state-of-the-art models to render high-fidelity video content.
             </p>
           </CardContent>
