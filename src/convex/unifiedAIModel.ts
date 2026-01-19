@@ -91,7 +91,33 @@ export const generateWithUnifiedAI = action({
     try {
       console.log(`🤖 UNIFIED AI MODEL V4: Processing ${args.type} request`);
 
-      // PRIORITY 1: Try SELF-HOSTED models first
+      // PRIORITY 1: Try NEURA AI MODEL (Custom Built)
+      try {
+        console.log("🧠 Attempting NEURA AI MODEL generation...");
+        const neuraResult = await ctx.runAction(api.neuraAIModel.generateWithNeuraAI, args);
+
+        if (neuraResult.success) {
+          console.log("✅ NEURA AI MODEL generation successful!");
+          return {
+            success: true,
+            outputs: {
+              images: neuraResult.images,
+              audio: neuraResult.audio,
+              script: neuraResult.script,
+              thumbnail: neuraResult.thumbnail
+            },
+            metadata: {
+              processingTime: neuraResult.metadata.processingTime,
+              aiModel: "Neura AI Model v1.0 (Custom)",
+              frameCount: neuraResult.images?.length
+            }
+          };
+        }
+      } catch (e: any) {
+        console.log(`⚠️ Neura AI Model unavailable: ${e.message}, trying alternatives...`);
+      }
+
+      // PRIORITY 2: Try SELF-HOSTED models
       const selfHostedEnabled = process.env.LOCAL_AI_SERVER || process.env.COMFYUI_SERVER;
       if (selfHostedEnabled) {
         try {
@@ -120,7 +146,7 @@ export const generateWithUnifiedAI = action({
         }
       }
 
-      // PRIORITY 2 & 3: Cloud Premium or Cloud Free (existing code)
+      // PRIORITY 3 & 4: Cloud Premium or Cloud Free (existing code)
       console.log(`🤖 Using cloud AI models...`);
 
       // PHASE 1: INTELLIGENT PROMPT ANALYSIS

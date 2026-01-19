@@ -20,6 +20,7 @@ import type * as debugAuth from "../debugAuth.js";
 import type * as fastGeneration from "../fastGeneration.js";
 import type * as http from "../http.js";
 import type * as initAdmin from "../initAdmin.js";
+import type * as neuraAIModel from "../neuraAIModel.js";
 import type * as passwordAuth from "../passwordAuth.js";
 import type * as paymentProcessor from "../paymentProcessor.js";
 import type * as premiumAI from "../premiumAI.js";
@@ -54,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   fastGeneration: typeof fastGeneration;
   http: typeof http;
   initAdmin: typeof initAdmin;
+  neuraAIModel: typeof neuraAIModel;
   passwordAuth: typeof passwordAuth;
   paymentProcessor: typeof paymentProcessor;
   premiumAI: typeof premiumAI;

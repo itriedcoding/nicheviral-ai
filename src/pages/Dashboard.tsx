@@ -564,6 +564,13 @@ function VideoGenerationSection({ userId }: { userId: string }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="glass-strong">
+              <SelectItem value="neura">
+                <div className="flex items-center justify-between w-full">
+                  <span>🧠 Neura AI Model (Custom)</span>
+                  <span className="text-xs text-purple-500 ml-4 font-bold">CUSTOM - Production Grade</span>
+                </div>
+              </SelectItem>
+              <Separator className="my-2" />
               <SelectItem value="selfhosted">
                 <div className="flex items-center justify-between w-full">
                   <span>🖥️ Self-Hosted (Local GPU)</span>
