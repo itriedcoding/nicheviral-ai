@@ -198,11 +198,134 @@ async function generateVideoFallback(ctx: any, args: NeuraAIRequest) {
   console.log("🎬 Neura AI Fallback: Routing to REAL video generation models...");
 
   const duration = args.duration || 5;
-
-  // Try real video generation models in priority order
+  const falKey = process.env.FAL_API_KEY;
   const hfToken = process.env.HF_TOKEN;
 
-  // PRIORITY 1: Try HunyuanVideo (FREE, 720p, 5s, REAL VIDEO)
+  // PRIORITY 1: Try Luma Dream Machine (PAID, 1080p, RELIABLE)
+  if (falKey) {
+    try {
+      console.log("✨ Neura AI Fallback -> Luma Dream Machine (1080p professional)");
+
+      const response = await fetch("https://queue.fal.run/fal-ai/luma-dream-machine", {
+        method: "POST",
+        headers: {
+          Authorization: `Key ${falKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: args.prompt,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const videoUrl = data.video?.url;
+
+        if (videoUrl) {
+          const videoBlob = await fetch(videoUrl).then((r) => r.blob());
+          const storageId = await ctx.storage.store(videoBlob);
+          const storedUrl = await ctx.storage.getUrl(storageId);
+
+          console.log("✅ Neura AI: Luma Dream Machine video generated!");
+
+          return {
+            videoUrl: storedUrl,
+            thumbnail: storedUrl,
+            images: [storedUrl],
+            audio: null,
+            script: args.prompt
+          };
+        }
+      }
+    } catch (e: any) {
+      console.log(`⚠️ Luma error: ${e.message}, trying Kling...`);
+    }
+  }
+
+  // PRIORITY 2: Try Kling Video (PAID, 1080p, RELIABLE)
+  if (falKey) {
+    try {
+      console.log("🎥 Neura AI Fallback -> Kling Video (1080p professional)");
+
+      const response = await fetch("https://queue.fal.run/fal-ai/kling-video/v1/standard/text-to-video", {
+        method: "POST",
+        headers: {
+          Authorization: `Key ${falKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: args.prompt,
+          duration: "5",
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const videoUrl = data.video?.url;
+
+        if (videoUrl) {
+          const videoBlob = await fetch(videoUrl).then((r) => r.blob());
+          const storageId = await ctx.storage.store(videoBlob);
+          const storedUrl = await ctx.storage.getUrl(storageId);
+
+          console.log("✅ Neura AI: Kling Video generated!");
+
+          return {
+            videoUrl: storedUrl,
+            thumbnail: storedUrl,
+            images: [storedUrl],
+            audio: null,
+            script: args.prompt
+          };
+        }
+      }
+    } catch (e: any) {
+      console.log(`⚠️ Kling error: ${e.message}, trying Mochi...`);
+    }
+  }
+
+  // PRIORITY 3: Try Mochi (PAID via Fal.ai, 1080p, RELIABLE)
+  if (falKey) {
+    try {
+      console.log("🌟 Neura AI Fallback -> Mochi 1 (1080p)");
+
+      const response = await fetch("https://queue.fal.run/fal-ai/mochi-v1", {
+        method: "POST",
+        headers: {
+          Authorization: `Key ${falKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: args.prompt,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const videoUrl = data.video?.url;
+
+        if (videoUrl) {
+          const videoBlob = await fetch(videoUrl).then((r) => r.blob());
+          const storageId = await ctx.storage.store(videoBlob);
+          const storedUrl = await ctx.storage.getUrl(storageId);
+
+          console.log("✅ Neura AI: Mochi video generated!");
+
+          return {
+            videoUrl: storedUrl,
+            thumbnail: storedUrl,
+            images: [storedUrl],
+            audio: null,
+            script: args.prompt
+          };
+        }
+      }
+    } catch (e: any) {
+      console.log(`⚠️ Mochi error: ${e.message}, trying free models...`);
+    }
+  }
+
+  // PRIORITY 4: Try HunyuanVideo (FREE, 720p, 5s, REAL VIDEO)
   if (hfToken) {
     try {
       console.log("🎥 Neura AI Fallback -> HunyuanVideo (REAL video generation)");
