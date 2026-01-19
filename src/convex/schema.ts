@@ -31,6 +31,10 @@ const schema = defineSchema(
       passwordHash: v.optional(v.string()), // hashed password for email/password auth
 
       role: v.optional(roleValidator), // role of the user. do not remove
+      
+      // Subscription fields
+      subscriptionId: v.optional(v.string()),
+      customerId: v.optional(v.string()), // Stripe/Square customer ID
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
     // add other tables here
@@ -97,11 +101,26 @@ const schema = defineSchema(
       credits: v.number(),
       subscriptionTier: v.union(
         v.literal("free"),
+        v.literal("starter"),
         v.literal("pro"),
+        v.literal("business"),
         v.literal("enterprise")
       ),
-      subscriptionStatus: v.string(),
+      subscriptionStatus: v.string(), // active, trialing, canceled, past_due
       renewalDate: v.optional(v.number()),
+      trialEndsAt: v.optional(v.number()),
+    }).index("by_user", ["userId"]),
+
+    // Subscriptions (Recurring)
+    subscriptions: defineTable({
+      userId: v.string(),
+      planId: v.string(),
+      status: v.string(), // active, trialing, canceled, past_due
+      currentPeriodStart: v.number(),
+      currentPeriodEnd: v.number(),
+      trialStart: v.optional(v.number()),
+      trialEnd: v.optional(v.number()),
+      cancelAtPeriodEnd: v.boolean(),
     }).index("by_user", ["userId"]),
 
     // Purchases (custom billing)

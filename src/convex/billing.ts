@@ -1,13 +1,94 @@
 import { v } from "convex/values";
 import { mutation, query, internalMutation } from "./_generated/server";
 
-// Credit packages
-export const CREDIT_PACKAGES = {
-  starter: { credits: 500, price: 9.99, name: "Starter Pack" },
-  pro: { credits: 1500, price: 24.99, name: "Pro Pack" },
-  business: { credits: 5000, price: 79.99, name: "Business Pack" },
-  enterprise: { credits: 15000, price: 199.99, name: "Enterprise Pack" },
+// Credit packages / Plans
+export const PLANS = {
+  starter: { credits: 500, price: 9.99, name: "Starter Plan" },
+  pro: { credits: 1500, price: 24.99, name: "Pro Plan" },
+  business: { credits: 5000, price: 79.99, name: "Business Plan" },
+  enterprise: { credits: 15000, price: 199.99, name: "Enterprise Plan" },
 };
+
+// Start a 7-day free trial
+export const startSubscriptionTrial = mutation({
+  args: {
+    planId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.subject;
+
+    const plan = PLANS[args.planId as keyof typeof PLANS];
+    if (!plan) throw new Error("Invalid plan");
+
+    // Check if user already has a subscription
+    const existingSub = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (existingSub && existingSub.status === "active") {
+      throw new Error("You already have an active subscription");
+    }
+
+    // Calculate trial dates
+    const now = Date.now();
+    const trialDuration = 7 * 24 * 60 * 60 * 1000; // 7 days
+    const trialEnd = now + trialDuration;
+
+    // Create or update subscription
+    if (existingSub) {
+      await ctx.db.patch(existingSub._id, {
+        planId: args.planId,
+        status: "trialing",
+        currentPeriodStart: now,
+        currentPeriodEnd: trialEnd,
+        trialStart: now,
+        trialEnd: trialEnd,
+        cancelAtPeriodEnd: false,
+      });
+    } else {
+      await ctx.db.insert("subscriptions", {
+        userId,
+        planId: args.planId,
+        status: "trialing",
+        currentPeriodStart: now,
+        currentPeriodEnd: trialEnd,
+        trialStart: now,
+        trialEnd: trialEnd,
+        cancelAtPeriodEnd: false,
+      });
+    }
+
+    // Update user credits and status
+    const userCredits = await ctx.db
+      .query("userCredits")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (userCredits) {
+      await ctx.db.patch(userCredits._id, {
+        credits: userCredits.credits + plan.credits, // Give credits for the trial
+        subscriptionTier: args.planId as any,
+        subscriptionStatus: "trialing",
+        trialEndsAt: trialEnd,
+        renewalDate: trialEnd,
+      });
+    } else {
+      await ctx.db.insert("userCredits", {
+        userId,
+        credits: plan.credits,
+        subscriptionTier: args.planId as any,
+        subscriptionStatus: "trialing",
+        trialEndsAt: trialEnd,
+        renewalDate: trialEnd,
+      });
+    }
+
+    return { success: true, trialEndsAt: trialEnd };
+  },
+});
 
 // Create a purchase order
 export const createPurchase = mutation({

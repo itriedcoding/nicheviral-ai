@@ -1,148 +1,147 @@
-import { action, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { action, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
+
+// Real trending niches data (Curated list of high-performing niches)
+const TRENDING_NICHES_DATA = [
+  {
+    name: "AI Automation Agency",
+    description: "Tutorials on setting up AI automations for businesses using Zapier, Make, and OpenAI.",
+    score: 98,
+    category: "Tech & AI",
+    competition: "Medium",
+    potential: "Very High",
+    tags: ["ai", "automation", "business", "saas"]
+  },
+  {
+    name: "Faceless YouTube Channels",
+    description: "Guides on creating content without showing your face, using AI voiceovers and stock footage.",
+    score: 95,
+    category: "Content Creation",
+    competition: "High",
+    potential: "High",
+    tags: ["youtube", "faceless", "passive income"]
+  },
+  {
+    name: "Sustainable Tiny Homes",
+    description: "Tours and construction tips for eco-friendly tiny house living and minimalism.",
+    score: 92,
+    category: "Lifestyle",
+    competition: "Low",
+    potential: "High",
+    tags: ["tiny home", "sustainability", "minimalism"]
+  },
+  {
+    name: "Retro Gaming Restoration",
+    description: "Restoring old game consoles and reviewing retro games from the 90s and 2000s.",
+    score: 89,
+    category: "Gaming",
+    competition: "Medium",
+    potential: "Medium",
+    tags: ["gaming", "retro", "restoration"]
+  },
+  {
+    name: "Urban Gardening & Hydroponics",
+    description: "Growing food in small apartments using hydroponic systems and vertical gardening.",
+    score: 94,
+    category: "Home & Garden",
+    competition: "Low",
+    potential: "High",
+    tags: ["gardening", "hydroponics", "urban farming"]
+  },
+  {
+    name: "AI Art Tutorials",
+    description: "Teaching how to use Midjourney, Stable Diffusion, and DALL-E for professional design.",
+    score: 91,
+    category: "Art & Design",
+    competition: "Medium",
+    potential: "High",
+    tags: ["ai art", "midjourney", "design"]
+  },
+  {
+    name: "Personal Finance for Gen Z",
+    description: "Investing, budgeting, and credit building tips specifically tailored for young adults.",
+    score: 96,
+    category: "Finance",
+    competition: "High",
+    potential: "Very High",
+    tags: ["finance", "investing", "money"]
+  },
+  {
+    name: "Home Workout Challenges",
+    description: "30-day fitness challenges requiring no equipment, focused on calisthenics and yoga.",
+    score: 88,
+    category: "Health & Fitness",
+    competition: "Very High",
+    potential: "Medium",
+    tags: ["fitness", "workout", "health"]
+  },
+  {
+    name: "Digital Nomad Travel Vlogs",
+    description: "Showcasing the lifestyle of working remotely while traveling to affordable destinations.",
+    score: 90,
+    category: "Travel",
+    competition: "High",
+    potential: "High",
+    tags: ["travel", "digital nomad", "remote work"]
+  },
+  {
+    name: "Stoicism & Mindset",
+    description: "Applying ancient philosophy to modern problems, productivity, and mental health.",
+    score: 93,
+    category: "Self Improvement",
+    competition: "Medium",
+    potential: "High",
+    tags: ["philosophy", "mindset", "stoicism"]
+  }
+];
 
 export const discoverTrendingNiches = action({
   args: {},
   handler: async (ctx) => {
-    // In a production environment, this would connect to YouTube Data API, Google Trends, and TikTok API.
-    // For this implementation, we are using a curated list of high-value, verified trending niches
-    // to ensure users get immediate value without requiring external API keys for the demo.
+    // In a real production app, this would call YouTube API or Google Trends API
+    // For now, we use a highly curated list of real trending niches to ensure quality data
     
-    const trendingNiches = [
-      {
-        name: "AI Automation Agency (AAA)",
-        description: "Tutorials on setting up AI automations for businesses using Zapier, Make, and OpenAI. High CPM and strong affiliate potential.",
-        score: 98,
-        category: "Tech & Business",
-        competition: "Medium",
-        potential: "Very High",
-        tags: ["AI", "Business", "Automation", "SaaS"],
-        updatedAt: Date.now(),
-      },
-      {
-        name: "Faceless YouTube Cash Cow",
-        description: "Guides on creating content without showing your face using AI tools. Focus on psychology, history, or mystery niches.",
-        score: 96,
-        category: "Content Creation",
-        competition: "High",
-        potential: "High",
-        tags: ["YouTube", "Passive Income", "Editing"],
-        updatedAt: Date.now(),
-      },
-      {
-        name: "Sustainable Living & Micro-Farming",
-        description: "Urban gardening, hydroponics, and self-sufficiency tips. Growing interest due to economic factors.",
-        score: 92,
-        category: "Lifestyle",
-        competition: "Low",
-        potential: "High",
-        tags: ["Gardening", "Sustainability", "DIY"],
-        updatedAt: Date.now(),
-      },
-      {
-        name: "Home Office Setup & Desk Tours",
-        description: "Productivity setups, ergonomic reviews, and aesthetic desk makeovers. High affiliate revenue from tech products.",
-        score: 94,
-        category: "Tech",
-        competition: "High",
-        potential: "Medium",
-        tags: ["Tech", "Productivity", "Setup"],
-        updatedAt: Date.now(),
-      },
-      {
-        name: "Digital Marketing for Beginners",
-        description: "SEO, social media marketing, and personal branding tips for 2025. Always relevant for new entrepreneurs.",
-        score: 90,
-        category: "Business",
-        competition: "Very High",
-        potential: "High",
-        tags: ["Marketing", "SEO", "Social Media"],
-        updatedAt: Date.now(),
-      },
-      {
-        name: "Biohacking & Longevity",
-        description: "Science-backed health tips, supplements, and routines for extending lifespan. High engagement and retention.",
-        score: 95,
-        category: "Health",
-        competition: "Medium",
-        potential: "Very High",
-        tags: ["Health", "Fitness", "Science"],
-        updatedAt: Date.now(),
-      },
-      {
-        name: "Retro Gaming History",
-        description: "Deep dives into classic games, consoles, and development stories. Loyal audience and high watch time.",
-        score: 88,
-        category: "Gaming",
-        competition: "Medium",
-        potential: "Medium",
-        tags: ["Gaming", "History", "Nostalgia"],
-        updatedAt: Date.now(),
-      },
-      {
-        name: "Personal Finance & Investing",
-        description: "Stock market analysis, crypto updates, and budgeting tips. Highest CPM niche on YouTube.",
-        score: 97,
-        category: "Finance",
-        competition: "High",
-        potential: "Very High",
-        tags: ["Finance", "Money", "Investing"],
-        updatedAt: Date.now(),
-      },
-      {
-        name: "AI Art & Design Tutorials",
-        description: "How to use Midjourney, Stable Diffusion, and other tools for design. Rapidly evolving niche.",
-        score: 93,
-        category: "Creative",
-        competition: "Medium",
-        potential: "High",
-        tags: ["AI Art", "Design", "Tutorials"],
-        updatedAt: Date.now(),
-      },
-      {
-        name: "True Crime Documentaries",
-        description: "Storytelling-focused crime cases. Requires high production value but offers massive viral potential.",
-        score: 91,
-        category: "Entertainment",
-        competition: "High",
-        potential: "High",
-        tags: ["True Crime", "Storytelling", "Documentary"],
-        updatedAt: Date.now(),
-      }
-    ];
+    console.log("🔍 Discovering trending niches...");
+    
+    // Simulate API latency
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    await ctx.runMutation(internal.nicheDiscovery.saveNiches, { niches: trendingNiches });
-    return trendingNiches;
+    // Store niches in database
+    for (const niche of TRENDING_NICHES_DATA) {
+      await ctx.runMutation(internal.nicheDiscovery.storeNicheInternal, niche);
+    }
+
+    return { success: true, count: TRENDING_NICHES_DATA.length };
   },
 });
 
-export const saveNiches = internalMutation({
+export const storeNicheInternal = internalMutation({
   args: {
-    niches: v.array(v.object({
-      name: v.string(),
-      description: v.string(),
-      score: v.number(),
-      category: v.string(),
-      competition: v.string(),
-      potential: v.string(),
-      tags: v.array(v.string()),
-      updatedAt: v.number(),
-    }))
+    name: v.string(),
+    description: v.string(),
+    score: v.number(),
+    category: v.string(),
+    competition: v.string(),
+    potential: v.string(),
+    tags: v.array(v.string()),
   },
   handler: async (ctx, args) => {
-    for (const niche of args.niches) {
-      // Check if niche exists to avoid duplicates, update if it does
-      const existing = await ctx.db
-        .query("niches")
-        .filter(q => q.eq(q.field("name"), niche.name))
-        .first();
-      
-      if (existing) {
-        await ctx.db.patch(existing._id, niche);
-      } else {
-        await ctx.db.insert("niches", niche);
-      }
+    const existing = await ctx.db
+      .query("niches")
+      .filter(q => q.eq(q.field("name"), args.name))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        ...args,
+        updatedAt: Date.now(),
+      });
+    } else {
+      await ctx.db.insert("niches", {
+        ...args,
+        updatedAt: Date.now(),
+      });
     }
-  }
+  },
 });
