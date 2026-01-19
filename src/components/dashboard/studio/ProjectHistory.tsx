@@ -5,10 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Play, Image as ImageIcon, Video, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 export function ProjectHistory() {
-  const videos = useQuery(api.videos.getUserVideos, { limit: 10 });
-  const images = useQuery(api.images.getUserImages, { limit: 10 });
+  const { userId } = useAuth();
+  const videos = useQuery(api.videos.getUserVideos, userId ? { limit: 10, userId } : "skip");
+  const images = useQuery(api.images.getUserImages, userId ? { limit: 10, userId } : "skip");
 
   return (
     <div className="space-y-6 mt-12">

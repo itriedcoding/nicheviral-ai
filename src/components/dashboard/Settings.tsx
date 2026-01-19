@@ -12,16 +12,10 @@ import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { Loader2, Youtube, CreditCard, User, Bell, Moon, Sun, Download } from "lucide-react";
 import { getSession } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Settings() {
-  const [userId, setUserId] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const session = getSession();
-    if (session) {
-      setUserId(session.userId);
-    }
-  }, []);
+  const { userId } = useAuth();
 
   const user = useQuery(api.users.getUserById, userId ? { userId } : "skip");
   const updateChannel = useMutation(api.users.updateChannel);

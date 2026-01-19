@@ -10,6 +10,7 @@ import { useMutation, useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/hooks/use-auth";
 
 export function VideoStudio() {
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
@@ -19,9 +20,12 @@ export function VideoStudio() {
   const [aspectRatio, setAspectRatio] = useState("16:9");
   const [duration, setDuration] = useState("5");
   
+  const { userId } = useAuth();
   const createVideoRecord = useMutation(api.videos.createVideoRecord);
   const processVideoGeneration = useAction(api.realVideoGeneration.processVideoGeneration);
-  const user = useQuery(api.users.getProfile, {});
+  
+  // Pass userId to getProfile to ensure we get the user even if ctx.auth isn't fully synced yet
+  const user = useQuery(api.users.getProfile, userId ? { userId } : "skip");
   const videoModels = useQuery(api.aiModels.getModelsByType, { type: "video" });
 
   const handleGenerateVideo = async () => {
