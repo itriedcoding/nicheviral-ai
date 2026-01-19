@@ -3,35 +3,29 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { vly } from "../lib/vly-integrations";
 
-// Helper to call OpenAI
+// Helper to call AI using Vly Integrations
 async function callOpenAI(prompt: string, systemPrompt: string) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OpenAI API key not configured");
-  }
-
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini", // Cost effective
+  try {
+    const result = await vly.ai.completion({
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: prompt },
       ],
-    }),
-  });
+      maxTokens: 1000,
+    });
 
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.statusText}`);
+    if (result.success && result.data) {
+      return result.data.choices[0]?.message?.content || "No response generated";
+    }
+    
+    throw new Error(result.error || "AI request failed");
+  } catch (error: any) {
+    console.error("AI Generation Error:", error);
+    throw new Error(`AI Generation failed: ${error.message}`);
   }
-
-  const data = await response.json();
-  return data.choices[0].message.content;
 }
 
 export const generateScript = action({
@@ -212,7 +206,7 @@ export const generateImage = action({
   handler: async (ctx, args) => {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      throw new Error("OpenAI API key not configured");
+      throw new Error("OpenAI API key not configured. Please add OPENAI_API_KEY in the Integrations tab or API Keys settings to use Image Generation.");
     }
 
     // Default to DALL-E 3 if not specified or if an unsupported model is requested
