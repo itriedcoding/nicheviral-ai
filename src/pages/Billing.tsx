@@ -18,62 +18,27 @@ import {
   Receipt,
   Calendar,
   Zap,
+  History,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router";
 import { Navigation } from "@/components/Navigation";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { getSession } from "@/lib/auth";
-
-// Credit packages
-const PACKAGES = [
-  {
-    id: "starter",
-    name: "Starter",
-    credits: 500,
-    price: 9.99,
-    description: "Perfect for trying out AI generation",
-    features: ["500 AI Credits", "Video Generation", "Thumbnail Creation", "Email Support"],
-    popular: false,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    credits: 1500,
-    price: 24.99,
-    description: "Best for content creators",
-    features: ["1,500 AI Credits", "Priority Generation", "All AI Models", "Priority Support"],
-    popular: true,
-  },
-  {
-    id: "business",
-    name: "Business",
-    credits: 5000,
-    price: 79.99,
-    description: "For professional studios",
-    features: ["5,000 AI Credits", "Fastest Processing", "Advanced Features", "24/7 Support"],
-    popular: false,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    credits: 15000,
-    price: 199.99,
-    description: "Maximum power and scale",
-    features: ["15,000 AI Credits", "Dedicated Support", "Custom Integration", "SLA Guarantee"],
-    popular: false,
-  },
-];
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SubscriptionPlans, SUBSCRIPTION_PLANS } from "@/components/billing/SubscriptionPlans";
+import { CreditBundles, CREDIT_PACKAGES } from "@/components/billing/CreditBundles";
 
 export default function Billing() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [purchaseType, setPurchaseType] = useState<"subscription" | "credits">("subscription");
   const [isProcessing, setIsProcessing] = useState(false);
   const [userId, setUserId] = useState("");
   const [squareConfigured, setSquareConfigured] = useState(false);
   const [paymentFormReady, setPaymentFormReady] = useState(false);
   
-  // Check if we are in trial setup mode
+  // Check if we are in trial setup mode from URL
   const isTrialMode = searchParams.get("trial") === "true";
   const preselectedPlan = searchParams.get("plan");
 
@@ -92,12 +57,16 @@ export default function Billing() {
 
   // Auto-select plan if in URL
   useEffect(() => {
-    if (preselectedPlan && PACKAGES.find(p => p.id === preselectedPlan)) {
-      setSelectedPackage(preselectedPlan);
+    if (preselectedPlan) {
+      const plan = SUBSCRIPTION_PLANS.find(p => p.id === preselectedPlan);
+      if (plan) {
+        setSelectedItem(plan);
+        setPurchaseType("subscription");
+      }
     }
   }, [preselectedPlan]);
 
-  // Fetch user credits
+  // Fetch user credits and subscription info
   const userCredits = useQuery(
     api.videos.getUserCredits,
     userId ? { userId: userId as any } : "skip"
@@ -109,7 +78,7 @@ export default function Billing() {
     userId ? { userId, limit: 10 } : "skip"
   );
 
-  // Payment processor actions - PRODUCTION ONLY
+  // Payment processor actions
   const processCreditCard = useAction(api.paymentProcessor.processCreditCardPayment);
   const getSquareConfig = useAction(api.paymentProcessor.getSquareApplicationId);
   const startTrial = useMutation(api.billing.startSubscriptionTrial);
@@ -119,7 +88,7 @@ export default function Billing() {
     const checkSquareConfig = async () => {
       try {
         const config = await getSquareConfig({});
-        setSquareConfigured(true);
+        setSquareConfigured(!!config?.applicationId);
       } catch (error) {
         console.log("Square not configured");
         setSquareConfigured(false);
@@ -128,14 +97,35 @@ export default function Billing() {
     checkSquareConfig();
   }, [getSquareConfig]);
 
-  const handlePurchase = async () => {
-    if (!selectedPackage) {
-      toast.error("Please select a package");
+  const handleSelectPlan = (planId: string) => {
+    const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
+    if (plan) {
+      setSelectedItem(plan);
+      setPurchaseType("subscription");
+      // Scroll to payment section
+      setTimeout(() => {
+        document.getElementById("payment-section")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  };
+
+  const handleSelectPackage = (packageId: string) => {
+    const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
+    if (pkg) {
+      setSelectedItem(pkg);
+      setPurchaseType("credits");
+      // Scroll to payment section
+      setTimeout(() => {
+        document.getElementById("payment-section")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  };
+
+  const initializePayment = async () => {
+    if (!selectedItem) {
+      toast.error("Please select a plan or package");
       return;
     }
-
-    const pkg = PACKAGES.find((p) => p.id === selectedPackage);
-    if (!pkg) return;
 
     setIsProcessing(true);
 
@@ -188,10 +178,7 @@ export default function Billing() {
 
   // Handle actual payment when Pay button is clicked
   const handlePayment = async () => {
-    if (!selectedPackage) return;
-
-    const pkg = PACKAGES.find((p) => p.id === selectedPackage);
-    if (!pkg) return;
+    if (!selectedItem) return;
 
     // @ts-ignore
     const card = (window as any).squareCard;
@@ -203,18 +190,15 @@ export default function Billing() {
     setIsProcessing(true);
 
     try {
-      toast.info(isTrialMode ? "Verifying card..." : "Processing payment...");
+      toast.info(purchaseType === "subscription" ? "Verifying card for trial..." : "Processing payment...");
 
       // Tokenize card details
       const result = await card.tokenize();
 
       if (result.status === 'OK') {
-        if (isTrialMode) {
+        if (purchaseType === "subscription") {
           // Start Trial Flow
-          // In a real app, we would save the card nonce to create a Customer in Square
-          // For now, we just verify tokenization worked and start the trial
-          
-          await startTrial({ planId: pkg.id });
+          await startTrial({ planId: selectedItem.id });
           
           toast.success("🎉 7-Day Free Trial Started Successfully!");
           toast.info("You will be billed automatically after 7 days.");
@@ -228,7 +212,7 @@ export default function Billing() {
           // One-time Purchase Flow
           const paymentResult = await processCreditCard({
             userId,
-            packageId: pkg.id,
+            packageId: selectedItem.id,
             cardNonce: result.token,
             cardholderName: "Customer",
           });
@@ -243,7 +227,7 @@ export default function Billing() {
             await card.destroy();
             (window as any).squareCard = null;
             setPaymentFormReady(false);
-            setSelectedPackage(null);
+            setSelectedItem(null);
             setIsProcessing(false);
           } else {
             throw new Error(paymentResult.error || "Payment failed");
@@ -263,8 +247,6 @@ export default function Billing() {
   };
 
   if (!userId) return null;
-
-  const selectedPkg = PACKAGES.find((p) => p.id === selectedPackage);
 
   return (
     <div className="min-h-screen relative bg-background">
@@ -287,90 +269,92 @@ export default function Billing() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-3">
-              {isTrialMode ? "Start Your Free Trial" : "Purchase Credits"}
+              Billing & Plans
             </h1>
             <p className="text-muted-foreground text-lg">
-              {isTrialMode 
-                ? "Enter your payment details to activate your 7-day free trial" 
-                : "Choose a plan that fits your needs"}
+              Manage your subscription and credit balance
             </p>
           </div>
 
-          {/* Current Balance */}
-          {!isTrialMode && (
-            <div className="max-w-md mx-auto mb-12">
-              <div className="glass-card rounded-xl p-6 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Coins className="w-5 h-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">Current Balance</span>
-                </div>
-                <div className="text-4xl font-bold text-primary">{userCredits?.credits || 0}</div>
-                <div className="text-xs text-muted-foreground mt-1">AI Credits</div>
+          {/* Current Balance & Status */}
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12">
+            <div className="glass-card rounded-xl p-6 flex flex-col items-center justify-center text-center">
+              <div className="flex items-center gap-2 mb-2">
+                <Coins className="w-5 h-5 text-primary" />
+                <span className="text-sm text-muted-foreground">Available Credits</span>
               </div>
+              <div className="text-4xl font-bold text-primary">{userCredits?.credits || 0}</div>
+              <Button variant="link" className="text-xs mt-2" onClick={() => document.getElementById("plans-tabs")?.scrollIntoView({ behavior: "smooth" })}>
+                Top up credits
+              </Button>
             </div>
-          )}
 
-          {/* Pricing Cards - Hide if in trial mode with preselected plan */}
-          {(!isTrialMode || !preselectedPlan) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              {PACKAGES.map((pkg) => (
-                <motion.div
-                  key={pkg.id}
-                  whileHover={{ y: -4 }}
-                  className={`relative glass-card rounded-xl p-6 cursor-pointer transition-all border ${
-                    selectedPackage === pkg.id
-                      ? "border-primary shadow-lg"
-                      : "border-transparent hover:border-primary/50"
-                  }`}
-                  onClick={() => setSelectedPackage(pkg.id)}
-                >
-                  {pkg.popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-primary text-primary-foreground border-0 px-3">
-                        Most Popular
-                      </Badge>
-                    </div>
-                  )}
-
-                  <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold mb-2">{pkg.name}</h3>
-                    <div className="flex items-baseline justify-center gap-1 mb-2">
-                      <span className="text-3xl font-bold">${pkg.price}</span>
-                    </div>
-                    <div className="text-sm text-primary font-medium mb-3">
-                      {pkg.credits.toLocaleString()} Credits
-                    </div>
-                    <p className="text-xs text-muted-foreground">{pkg.description}</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    {pkg.features.map((feature, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                        <span className="text-xs text-muted-foreground">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {selectedPackage === pkg.id && (
-                    <div className="absolute inset-0 rounded-xl border-2 border-primary pointer-events-none" />
-                  )}
-                </motion.div>
-              ))}
+            <div className="glass-card rounded-xl p-6 flex flex-col items-center justify-center text-center">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="w-5 h-5 text-primary" />
+                <span className="text-sm text-muted-foreground">Current Plan</span>
+              </div>
+              <div className="text-2xl font-bold capitalize">
+                {userCredits?.subscriptionTier || "Free Plan"}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                Status: <span className="capitalize text-primary">{userCredits?.subscriptionStatus || "Active"}</span>
+              </div>
+              {userCredits?.trialEndsAt && (
+                <Badge variant="secondary" className="mt-2">
+                  Trial ends {new Date(userCredits.trialEndsAt).toLocaleDateString()}
+                </Badge>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Plans & Packages Tabs */}
+          <div id="plans-tabs" className="mb-12">
+            <Tabs defaultValue={preselectedPlan ? "subscriptions" : "subscriptions"} className="w-full">
+              <div className="flex justify-center mb-8">
+                <TabsList className="grid w-full max-w-md grid-cols-2">
+                  <TabsTrigger value="subscriptions">Subscription Plans</TabsTrigger>
+                  <TabsTrigger value="credits">Credit Packs</TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="subscriptions">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold mb-2">Upgrade your Workspace</h2>
+                  <p className="text-muted-foreground">Start with a 7-day free trial. Cancel anytime.</p>
+                </div>
+                <SubscriptionPlans 
+                  onSelectPlan={handleSelectPlan} 
+                  currentPlanId={userCredits?.subscriptionTier}
+                  isLoading={isProcessing}
+                />
+              </TabsContent>
+
+              <TabsContent value="credits">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold mb-2">Pay-as-you-go Credits</h2>
+                  <p className="text-muted-foreground">One-time purchase. Credits never expire.</p>
+                </div>
+                <CreditBundles 
+                  onSelectPackage={handleSelectPackage}
+                  isLoading={isProcessing}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
 
           {/* Payment Section */}
-          {selectedPackage && (
+          {selectedItem && (
             <motion.div
+              id="payment-section"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="max-w-2xl mx-auto"
+              className="max-w-2xl mx-auto mb-16"
             >
-              <div className="glass-card rounded-xl p-8">
+              <div className="glass-card rounded-xl p-8 border-2 border-primary/20">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold">
-                    {isTrialMode ? "Activate Trial" : "Checkout"}
+                    {purchaseType === "subscription" ? "Start Free Trial" : "Complete Purchase"}
                   </h2>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Shield className="w-4 h-4 text-green-500" />
@@ -383,27 +367,27 @@ export default function Billing() {
                 {/* Order Summary */}
                 <div className="bg-muted/30 rounded-lg p-4 mb-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Package</span>
-                    <span className="font-medium">{selectedPkg?.name}</span>
+                    <span className="text-sm text-muted-foreground">Item</span>
+                    <span className="font-medium">{selectedItem.name}</span>
                   </div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-muted-foreground">Credits</span>
-                    <span className="font-medium">{selectedPkg?.credits.toLocaleString()}</span>
+                    <span className="font-medium">{selectedItem.credits.toLocaleString()}</span>
                   </div>
                   <Separator className="my-3" />
                   <div className="flex items-center justify-between">
                     <span className="font-bold">Total</span>
                     <div className="text-right">
-                      <span className="text-2xl font-bold text-primary">${selectedPkg?.price}</span>
-                      {isTrialMode && (
-                        <p className="text-xs text-muted-foreground">Due after 7 days</p>
+                      <span className="text-2xl font-bold text-primary">${selectedItem.price}</span>
+                      {purchaseType === "subscription" && (
+                        <p className="text-xs text-muted-foreground">Billed after 7 days</p>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Trial Info */}
-                {isTrialMode && (
+                {purchaseType === "subscription" && (
                   <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
                     <div className="flex items-start gap-3">
                       <Zap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
@@ -452,36 +436,18 @@ export default function Billing() {
                   </div>
                 )}
 
-                {/* Security Badge */}
-                <div className="flex items-center justify-center gap-6 py-4 mb-6 border-t border-b border-border">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Lock className="w-4 h-4" />
-                    <span>256-bit SSL Encryption</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Shield className="w-4 h-4" />
-                    <span>PCI DSS Compliant</span>
-                  </div>
-                </div>
-
                 {/* Action Buttons */}
                 {!paymentFormReady ? (
                   <Button
-                    onClick={handlePurchase}
+                    onClick={initializePayment}
                     disabled={isProcessing || !squareConfigured}
                     className="w-full"
                     size="lg"
                   >
                     {isProcessing ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Initializing...
-                      </>
+                      <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Initializing...</>
                     ) : (
-                      <>
-                        <CreditCard className="w-5 h-5 mr-2" />
-                        {isTrialMode ? "Enter Payment Details" : "Continue to Payment"}
-                      </>
+                      <><CreditCard className="w-5 h-5 mr-2" /> Enter Payment Details</>
                     )}
                   </Button>
                 ) : (
@@ -492,32 +458,33 @@ export default function Billing() {
                     size="lg"
                   >
                     {isProcessing ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Processing...
-                      </>
+                      <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Processing...</>
                     ) : (
-                      <>
-                        <Lock className="w-5 h-5 mr-2" />
-                        {isTrialMode ? "Start Free Trial" : `Pay $${selectedPkg?.price}`}
-                      </>
+                      <><Lock className="w-5 h-5 mr-2" /> {purchaseType === "subscription" ? "Start Free Trial" : `Pay $${selectedItem.price}`}</>
                     )}
                   </Button>
                 )}
-
-                <p className="text-xs text-center text-muted-foreground mt-4">
-                  By completing this purchase, you agree to our Terms of Service and Privacy Policy.
-                </p>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full mt-4"
+                  onClick={() => {
+                    setSelectedItem(null);
+                    setPaymentFormReady(false);
+                  }}
+                >
+                  Cancel
+                </Button>
               </div>
             </motion.div>
           )}
 
-          {/* Purchase History - Only show if not in trial mode */}
-          {!isTrialMode && purchases && purchases.length > 0 && (
+          {/* Purchase History */}
+          {purchases && purchases.length > 0 && (
             <div className="max-w-4xl mx-auto mt-16">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                <Receipt className="w-6 h-6 text-primary" />
-                Purchase History
+                <History className="w-6 h-6 text-primary" />
+                Transaction History
               </h2>
 
               <div className="glass-card rounded-xl overflow-hidden">
@@ -527,10 +494,10 @@ export default function Billing() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                            <Coins className="w-5 h-5 text-primary" />
+                            <Receipt className="w-5 h-5 text-primary" />
                           </div>
                           <div>
-                            <p className="font-medium">{purchase.credits} Credits</p>
+                            <p className="font-medium capitalize">{purchase.packageId.replace(/_/g, " ")}</p>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <Calendar className="w-3 h-3" />
                               <span>{new Date(purchase._creationTime).toLocaleDateString()}</span>

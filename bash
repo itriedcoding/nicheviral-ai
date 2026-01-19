@@ -1,0 +1,1 @@
+mkdir -p src/components/billing && rm src/pages/Pricing.tsx
