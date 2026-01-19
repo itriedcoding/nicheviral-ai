@@ -1,8 +1,8 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
 
-// Store a niche in the database
-export const storeNiche = mutation({
+// Store a niche in the database (internal for AI to call)
+export const storeNiche = internalMutation({
   args: {
     title: v.string(),
     description: v.string(),

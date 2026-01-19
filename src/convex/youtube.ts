@@ -2,7 +2,7 @@
 
 import { v } from "convex/values";
 import { action } from "./_generated/server";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 
 // YouTube API integration for fetching trending niches
 export const fetchTrendingVideos = action({
@@ -73,7 +73,7 @@ export const fetchTrendingVideos = action({
 
       // Store niches in database
       for (const niche of niches) {
-        await ctx.runMutation(api.youtubeQueries.storeNiche, niche);
+        await ctx.runMutation(internal.youtubeQueries.storeNiche, niche);
       }
 
       return {

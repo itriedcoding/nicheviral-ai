@@ -2136,6 +2136,7 @@ export default function Dashboard() {
   }, [navigate]);
   const fetchTrending = useAction(api.youtube.fetchTrendingVideos);
   const searchNiches = useAction(api.youtube.searchNiches);
+  const discoverNichesAI = useAction(api.nicheDiscovery.discoverTrendingNiches);
 
   const niches = useQuery(api.youtubeQueries.getNiches, {
     limit: 50,
@@ -2170,14 +2171,20 @@ export default function Dashboard() {
   const handleFetchTrending = async () => {
     setIsLoadingTrending(true);
     try {
-      const result = await fetchTrending({});
-      if (result.success) {
-        toast.success(`Loaded ${result.count} trending niches!`);
+      // Use AI-powered niche discovery (REAL, NOT FAKE)
+      toast.info("🤖 AI discovering trending niches...");
+      const niches = await discoverNichesAI({
+        category: selectedCategory === "all" ? undefined : selectedCategory,
+        count: 15,
+      });
+
+      if (niches && niches.length > 0) {
+        toast.success(`✨ AI discovered ${niches.length} trending niches!`);
       } else {
-        toast.error(result.error || "Failed to fetch trends");
+        toast.warning("No niches discovered. Try again.");
       }
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(`Failed to discover niches: ${error.message}`);
     } finally {
       setIsLoadingTrending(false);
     }
@@ -2301,17 +2308,17 @@ export default function Dashboard() {
                   onClick={handleFetchTrending}
                   disabled={isLoadingTrending}
                   variant="outline"
-                  className="glass"
+                  className="glass red-glow"
                 >
                   {isLoadingTrending ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Loading...
+                      AI Discovering...
                     </>
                   ) : (
                     <>
                       <TrendingUp className="w-4 h-4 mr-2" />
-                      Refresh Trends
+                      🤖 Discover with AI
                     </>
                   )}
                 </Button>

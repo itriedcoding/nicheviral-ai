@@ -63,62 +63,35 @@ export const runwayGen3Turbo = action({
     }
 
     try {
-      // Use Runway's correct Gen-3 API endpoint
-      const response = await fetch("https://api.runwayml.com/v1/image_to_video", {
+      // Use Fal.ai's Runway Gen-3 integration (more reliable)
+      const falKey = process.env.FAL_API_KEY;
+
+      if (!falKey) {
+        throw new Error("FAL_API_KEY required for Runway Gen-3. Please configure it.");
+      }
+
+      const response = await fetch("https://queue.fal.run/fal-ai/runway-gen3/turbo/text-to-video", {
         method: "POST",
         headers: {
-          "X-Runway-Version": "2024-11-06",
-          Authorization: `Bearer ${runwayKey}`,
+          Authorization: `Key ${falKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gen3a_turbo",
-          promptText: args.prompt,
+          prompt: args.prompt,
           duration: args.duration || 5,
-          ratio: args.aspectRatio || "1280:768",
+          aspect_ratio: args.aspectRatio || "16:9",
         }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Runway API ${response.status}: ${errorText}`);
+        throw new Error(`Runway Gen-3 API ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      const taskId = data.id;
+      const videoUrl = data.video?.url;
 
-      // Poll for completion (Gen-3 takes 60-120 seconds)
-      let videoUrl: string | null = null;
-      const maxAttempts = 40; // 2 minutes max
-
-      for (let i = 0; i < maxAttempts; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 3000)); // Check every 3s
-
-        const statusRes = await fetch(`https://api.runwayml.com/v1/tasks/${taskId}`, {
-          headers: {
-            "X-Runway-Version": "2024-11-06",
-            Authorization: `Bearer ${runwayKey}`,
-          },
-        });
-
-        if (!statusRes.ok) {
-          console.log(`Runway status check ${i + 1}/${maxAttempts}: ${statusRes.status}`);
-          continue;
-        }
-
-        const statusData = await statusRes.json();
-
-        if (statusData.status === "SUCCEEDED" && statusData.output) {
-          videoUrl = statusData.output[0];
-          break;
-        } else if (statusData.status === "FAILED") {
-          throw new Error(`Runway generation failed: ${statusData.failure || "Unknown"}`);
-        }
-
-        console.log(`Runway progress ${i + 1}/${maxAttempts}: ${statusData.status}`);
-      }
-
-      if (!videoUrl) throw new Error("Runway timeout after 2 minutes");
+      if (!videoUrl) throw new Error("No video URL in Runway response");
 
       const videoBlob = await fetch(videoUrl).then((r) => r.blob());
       const storageId = await ctx.storage.store(videoBlob);
