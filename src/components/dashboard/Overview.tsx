@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Zap, Video, TrendingUp, ArrowRight, Activity, Sparkles, BarChart3, Clock } from "lucide-react";
+import { Play, Zap, Video, TrendingUp, ArrowRight, Activity, Sparkles, BarChart3, Clock, Plus, FileText, Image as ImageIcon } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,6 +39,30 @@ export function Overview({ onNavigate }: { onNavigate: (page: string) => void })
             New Generation
           </Button>
         </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Button variant="outline" className="h-auto py-4 flex flex-col gap-2 border-primary/10 hover:bg-primary/5 hover:border-primary/30 transition-all" onClick={() => onNavigate("studio")}>
+          <Video className="h-6 w-6 text-primary" />
+          <span className="font-semibold">New Video</span>
+          <span className="text-xs text-muted-foreground font-normal">Generate AI Video</span>
+        </Button>
+        <Button variant="outline" className="h-auto py-4 flex flex-col gap-2 border-primary/10 hover:bg-primary/5 hover:border-primary/30 transition-all" onClick={() => onNavigate("studio")}>
+          <ImageIcon className="h-6 w-6 text-blue-400" />
+          <span className="font-semibold">New Thumbnail</span>
+          <span className="text-xs text-muted-foreground font-normal">Create Viral Thumbnails</span>
+        </Button>
+        <Button variant="outline" className="h-auto py-4 flex flex-col gap-2 border-primary/10 hover:bg-primary/5 hover:border-primary/30 transition-all" onClick={() => onNavigate("tools")}>
+          <FileText className="h-6 w-6 text-purple-400" />
+          <span className="font-semibold">Script Writer</span>
+          <span className="text-xs text-muted-foreground font-normal">Generate Scripts</span>
+        </Button>
+        <Button variant="outline" className="h-auto py-4 flex flex-col gap-2 border-primary/10 hover:bg-primary/5 hover:border-primary/30 transition-all" onClick={() => onNavigate("growth")}>
+          <TrendingUp className="h-6 w-6 text-green-400" />
+          <span className="font-semibold">Trend Analysis</span>
+          <span className="text-xs text-muted-foreground font-normal">Find Opportunities</span>
+        </Button>
       </div>
 
       {/* Stats Grid */}

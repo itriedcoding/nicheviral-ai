@@ -28,6 +28,24 @@ async function callOpenAI(prompt: string, systemPrompt: string) {
   }
 }
 
+export const enhancePrompt = action({
+  args: { prompt: v.string(), type: v.string() },
+  handler: async (ctx, args) => {
+    const systemPrompt = args.type === 'video' 
+      ? "You are an expert video prompt engineer for AI video generation models like Runway and Sora. Enhance the user's prompt to be highly detailed, describing lighting, camera angles, motion, texture, and mood. Keep it under 100 words."
+      : "You are an expert image prompt engineer for DALL-E 3 and Midjourney. Enhance the user's prompt to be highly detailed, describing composition, lighting, style, and texture. Keep it under 100 words.";
+      
+    const prompt = `Original Prompt: ${args.prompt}`;
+    
+    try {
+      const enhanced = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content: enhanced };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
 export const generateScript = action({
   args: { topic: v.string(), tone: v.optional(v.string()) },
   handler: async (ctx, args) => {

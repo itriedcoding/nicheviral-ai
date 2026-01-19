@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Wand2, Film, Loader2, MonitorPlay, Sparkles } from "lucide-react";
+import { Wand2, Film, Loader2, MonitorPlay, Sparkles, Zap } from "lucide-react";
 import { useMutation, useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
@@ -14,19 +14,67 @@ import { useAuth } from "@/hooks/use-auth";
 
 export function VideoStudio() {
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
   const [videoPrompt, setVideoPrompt] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
   const [videoModel, setVideoModel] = useState("runway-gen3");
   const [aspectRatio, setAspectRatio] = useState("16:9");
   const [duration, setDuration] = useState("5");
+  const [stylePreset, setStylePreset] = useState("none");
   
   const { userId } = useAuth();
   const createVideoRecord = useMutation(api.videos.createVideoRecord);
   const processVideoGeneration = useAction(api.realVideoGeneration.processVideoGeneration);
+  const enhancePromptAction = useAction(api.aiFeatures.enhancePrompt);
   
   // Pass userId to getProfile to ensure we get the user even if ctx.auth isn't fully synced yet
   const user = useQuery(api.users.getProfile, userId ? { userId } : "skip");
   const videoModels = useQuery(api.aiModels.getModelsByType, { type: "video" });
+
+  const handleEnhancePrompt = async () => {
+    if (!videoPrompt) {
+      toast.error("Please enter a prompt to enhance");
+      return;
+    }
+    
+    setIsEnhancing(true);
+    try {
+      const result = await enhancePromptAction({
+        prompt: videoPrompt,
+        type: "video"
+      });
+      
+      if (result.success && result.content) {
+        setVideoPrompt(result.content);
+        toast.success("Prompt enhanced with AI magic!");
+      } else {
+        toast.error("Failed to enhance prompt");
+      }
+    } catch (error) {
+      toast.error("Failed to enhance prompt");
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  const handleStyleChange = (value: string) => {
+    setStylePreset(value);
+    if (value === "none") return;
+    
+    const styles: Record<string, string> = {
+      "cinematic": "Cinematic lighting, 8k resolution, photorealistic, anamorphic lens flares, shallow depth of field, hollywood color grading",
+      "anime": "Studio Ghibli style, vibrant colors, detailed background, cel shaded, high quality anime art",
+      "cyberpunk": "Neon lights, futuristic city, rain reflections, high contrast, cyan and magenta color palette, blade runner aesthetic",
+      "3d": "Unreal Engine 5 render, ray tracing, global illumination, highly detailed textures, 3D masterpiece",
+      "vintage": "16mm film grain, retro aesthetic, warm colors, vignette, dust and scratches, 1980s style"
+    };
+    
+    if (videoPrompt && !videoPrompt.includes(styles[value])) {
+      setVideoPrompt(prev => `${prev}, ${styles[value]}`);
+    } else if (!videoPrompt) {
+      setVideoPrompt(styles[value]);
+    }
+  };
 
   const handleGenerateVideo = async () => {
     if (!videoPrompt || !videoTitle) {
@@ -116,6 +164,23 @@ export function VideoStudio() {
             </p>
           </div>
 
+          <div className="space-y-2">
+            <Label>Style Preset</Label>
+            <Select value={stylePreset} onValueChange={handleStyleChange}>
+              <SelectTrigger className="bg-background/50">
+                <SelectValue placeholder="Select Style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No Preset</SelectItem>
+                <SelectItem value="cinematic">Cinematic</SelectItem>
+                <SelectItem value="anime">Anime / Animation</SelectItem>
+                <SelectItem value="cyberpunk">Cyberpunk / Sci-Fi</SelectItem>
+                <SelectItem value="3d">3D Render</SelectItem>
+                <SelectItem value="vintage">Vintage Film</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Aspect Ratio</Label>
@@ -160,11 +225,21 @@ export function VideoStudio() {
       {/* Prompt & Preview Panel */}
       <div className="lg:col-span-2 space-y-6">
         <Card className="border-primary/10 shadow-xl shadow-primary/5">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
               Prompt Engineering
             </CardTitle>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleEnhancePrompt}
+              disabled={isEnhancing || !videoPrompt}
+              className="gap-2 border-primary/20 hover:bg-primary/5 text-primary"
+            >
+              {isEnhancing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+              Magic Enhance
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <Textarea 

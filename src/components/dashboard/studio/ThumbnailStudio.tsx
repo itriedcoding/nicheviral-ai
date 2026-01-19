@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Image as ImageIcon, Download, Share2 } from "lucide-react";
+import { Loader2, Image as ImageIcon, Download, Share2, Wand2, Sparkles } from "lucide-react";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
@@ -12,14 +12,42 @@ import { useAuth } from "@/hooks/use-auth";
 
 export function ThumbnailStudio() {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
   const [imagePrompt, setImagePrompt] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState("dall-e-3");
 
   const { userId } = useAuth();
   const generateImageAction = useAction(api.aiFeatures.generateImage);
+  const enhancePromptAction = useAction(api.aiFeatures.enhancePrompt);
   const user = useQuery(api.users.getProfile, userId ? { userId } : "skip");
   const thumbnailModels = useQuery(api.aiModels.getModelsByType, { type: "thumbnail" });
+
+  const handleEnhancePrompt = async () => {
+    if (!imagePrompt) {
+      toast.error("Please enter a prompt to enhance");
+      return;
+    }
+    
+    setIsEnhancing(true);
+    try {
+      const result = await enhancePromptAction({
+        prompt: imagePrompt,
+        type: "image"
+      });
+      
+      if (result.success && result.content) {
+        setImagePrompt(result.content);
+        toast.success("Prompt enhanced with AI magic!");
+      } else {
+        toast.error("Failed to enhance prompt");
+      }
+    } catch (error) {
+      toast.error("Failed to enhance prompt");
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
 
   const handleGenerateImage = async () => {
     if (!imagePrompt) {
@@ -58,9 +86,21 @@ export function ThumbnailStudio() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <Card className="border-primary/10 shadow-xl shadow-primary/5">
-        <CardHeader>
-          <CardTitle>Thumbnail Generator</CardTitle>
-          <CardDescription>Create click-worthy thumbnails with AI</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Thumbnail Generator</CardTitle>
+            <CardDescription>Create click-worthy thumbnails with AI</CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleEnhancePrompt}
+            disabled={isEnhancing || !imagePrompt}
+            className="gap-2 border-primary/20 hover:bg-primary/5 text-primary"
+          >
+            {isEnhancing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+            Magic Enhance
+          </Button>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
