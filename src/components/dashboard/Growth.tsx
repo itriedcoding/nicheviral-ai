@@ -17,7 +17,8 @@ export function Growth() {
   const handleDiscover = async () => {
     setIsDiscovering(true);
     try {
-      await discoverNiches({ category: searchQuery || "all", count: 5 });
+      // The action doesn't take arguments in the current implementation
+      await discoverNiches({});
       toast.success("New niches discovered!");
     } catch (error) {
       toast.error("Failed to discover niches. Try again.");
@@ -94,17 +95,17 @@ export function Growth() {
                   <div key={niche._id} className="p-4 border rounded-lg hover:border-primary/50 transition-colors cursor-pointer group bg-card hover:shadow-md">
                     <div className="flex justify-between items-start mb-2">
                       <Badge variant={i === 0 ? "default" : "secondary"} className={i === 0 ? "bg-primary hover:bg-primary/90" : ""}>
-                        Score: {niche.trendScore}
+                        Score: {niche.score}
                       </Badge>
                       <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
-                    <h3 className="font-bold text-lg mb-1 line-clamp-1">{niche.title}</h3>
+                    <h3 className="font-bold text-lg mb-1 line-clamp-1">{niche.name}</h3>
                     <p className="text-xs text-muted-foreground mb-3 line-clamp-2 h-8">
                       {niche.description}
                     </p>
                     <div className="flex gap-2 text-xs text-muted-foreground mt-auto">
-                      <span className="bg-secondary px-2 py-1 rounded">Vol: {niche.searchVolume.toLocaleString()}</span>
-                      <span className="bg-secondary px-2 py-1 rounded">Comp: {niche.competitionLevel}</span>
+                      <span className="bg-secondary px-2 py-1 rounded">Pot: {niche.potential}</span>
+                      <span className="bg-secondary px-2 py-1 rounded">Comp: {niche.competition}</span>
                     </div>
                   </div>
                 ))}

@@ -20,7 +20,7 @@ export const getTrendingNiches = query({
     
     return await ctx.db
       .query("niches")
-      .withIndex("by_trend_score")
+      .withIndex("by_score")
       .order("desc")
       .take(limit);
   },

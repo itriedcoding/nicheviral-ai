@@ -45,18 +45,17 @@ const schema = defineSchema(
 
     // Trending niches discovered from YouTube API
     niches: defineTable({
-      title: v.string(),
+      name: v.string(),
       description: v.string(),
+      score: v.number(),
       category: v.string(),
-      trendScore: v.number(), // 0-100 trending score
-      searchVolume: v.number(),
-      competitionLevel: v.string(), // "low", "medium", "high"
-      keywords: v.array(v.string()),
-      thumbnailUrl: v.optional(v.string()),
-      youtubeData: v.optional(v.any()), // Raw YouTube API data
+      competition: v.string(),
+      potential: v.string(),
+      tags: v.array(v.string()),
+      updatedAt: v.number(),
     })
-      .index("by_category", ["category"])
-      .index("by_trend_score", ["trendScore"]),
+      .index("by_score", ["score"])
+      .index("by_category", ["category"]),
 
     // AI-generated videos
     videos: defineTable({

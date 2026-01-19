@@ -4,7 +4,7 @@ import { Footer } from "@/components/Footer";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Handshake, Mail, Rocket } from "lucide-react";
+import { Handshake, ArrowRight } from "lucide-react";
 
 export default function Partners() {
   return (
@@ -12,80 +12,86 @@ export default function Partners() {
       <AnimatedBackground />
       <Navigation />
 
-      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
+      <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
             <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
-              <Handshake className="w-3 h-3 mr-1" />
-              Partnership Program
+              Partnerships
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-red-500 bg-clip-text text-transparent">
-              Partner With Us
+            <h1 className="text-5xl font-bold mb-6">
+              Grow With <span className="text-primary">NicheViral AI</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Explore partnership opportunities with Neura AI
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Join our ecosystem of technology partners, agencies, and affiliates. Together, we're shaping the future of content creation.
             </p>
           </motion.div>
 
-          {/* Partnership Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="glass-card rounded-xl p-12 mb-12"
-          >
-            <h2 className="text-3xl font-bold mb-6">Partnership Opportunities</h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              We're interested in partnerships that help creators worldwide access powerful AI video creation tools. Whether you're a technology company, content platform, or creator-focused business, we'd love to explore collaboration opportunities.
-            </p>
-            <div className="space-y-4">
-              <div className="glass rounded-lg p-4">
-                <h3 className="font-bold mb-2">Technology Integration</h3>
-                <p className="text-sm text-muted-foreground">
-                  Integrate Neura AI capabilities into your platform via our API
-                </p>
+          {/* Partner Categories */}
+          <div className="grid md:grid-cols-2 gap-8 mb-20">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              className="glass-card p-10 rounded-3xl"
+            >
+              <h3 className="text-2xl font-bold mb-4">Technology Partners</h3>
+              <p className="text-muted-foreground mb-8">
+                We integrate with leading AI models and platforms. If you have an API or tool that can enhance our video generation pipeline, let's connect.
+              </p>
+              <div className="flex flex-wrap gap-4 mb-8">
+                {["OpenAI", "Anthropic", "Stability AI", "ElevenLabs", "Runway"].map((partner) => (
+                  <Badge key={partner} variant="secondary" className="text-sm py-1 px-3">
+                    {partner}
+                  </Badge>
+                ))}
               </div>
-              <div className="glass rounded-lg p-4">
-                <h3 className="font-bold mb-2">Reseller Programs</h3>
-                <p className="text-sm text-muted-foreground">
-                  Offer Neura AI to your customers with white-label options
-                </p>
-              </div>
-              <div className="glass rounded-lg p-4">
-                <h3 className="font-bold mb-2">Strategic Collaborations</h3>
-                <p className="text-sm text-muted-foreground">
-                  Co-develop solutions and expand our reach together
-                </p>
-              </div>
-            </div>
-          </motion.div>
+              <Button className="w-full">Become a Tech Partner</Button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              className="glass-card p-10 rounded-3xl"
+            >
+              <h3 className="text-2xl font-bold mb-4">Agency Partners</h3>
+              <p className="text-muted-foreground mb-8">
+                Agencies use NicheViral AI to scale content production for clients. Get access to bulk pricing, white-label options, and dedicated support.
+              </p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  Volume discounts up to 40%
+                </li>
+                <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  Priority rendering queue
+                </li>
+                <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  API access for custom workflows
+                </li>
+              </ul>
+              <Button variant="outline" className="w-full">Apply for Agency Program</Button>
+            </motion.div>
+          </div>
 
           {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="glass-card rounded-2xl p-12 text-center"
+            whileInView={{ opacity: 1, y: 0 }}
+            className="glass-card p-12 rounded-3xl text-center max-w-4xl mx-auto"
           >
-            <Rocket className="w-16 h-16 text-primary mx-auto mb-6" />
-            <h2 className="text-3xl font-bold mb-4">Interested in Partnering?</h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Let's explore how we can work together. Reach out to discuss partnership opportunities.
+            <Handshake className="w-16 h-16 text-primary mx-auto mb-6" />
+            <h2 className="text-3xl font-bold mb-4">Ready to Partner?</h2>
+            <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+              We're always looking for innovative ways to collaborate. Reach out to our partnerships team to discuss opportunities.
             </p>
-            <a href="mailto:partners@neuraai.cyou" className="inline-block">
-              <Button className="red-glow" size="lg">
-                <Mail className="w-4 h-4 mr-2" />
-                Contact Partnership Team
-              </Button>
-            </a>
-            <p className="text-sm text-muted-foreground mt-6">
-              Email: <span className="text-primary">partners@neuraai.cyou</span>
-            </p>
+            <Button size="lg" className="rounded-xl px-8">
+              Contact Partnerships <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
           </motion.div>
         </div>
       </div>

@@ -1,0 +1,12 @@
+    niches: defineTable({
+      name: v.string(),
+      description: v.string(),
+      score: v.number(),
+      category: v.string(),
+      competition: v.string(),
+      potential: v.string(),
+      tags: v.array(v.string()),
+      updatedAt: v.number(),
+    })
+      .index("by_score", ["score"])
+      .index("by_category", ["category"]),

@@ -133,9 +133,9 @@ export function Overview({ onNavigate }: { onNavigate: (page: string) => void })
                 trendingNiches.map((niche) => (
                   <div key={niche._id} className="p-4 border rounded-lg hover:border-primary/50 transition-colors">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-bold text-primary">{niche.title}</h4>
+                      <h4 className="font-bold text-primary">{niche.name}</h4>
                       <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                        Score: {niche.trendScore}
+                        Score: {niche.score}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">

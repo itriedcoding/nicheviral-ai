@@ -4,21 +4,20 @@ import { query, mutation, internalMutation } from "./_generated/server";
 // Store a niche in the database (internal for AI to call)
 export const storeNiche = internalMutation({
   args: {
-    title: v.string(),
+    name: v.string(),
     description: v.string(),
     category: v.string(),
-    trendScore: v.number(),
-    searchVolume: v.number(),
-    competitionLevel: v.string(),
-    keywords: v.array(v.string()),
-    thumbnailUrl: v.optional(v.string()),
-    youtubeData: v.optional(v.any()),
+    score: v.number(),
+    potential: v.string(),
+    competition: v.string(),
+    tags: v.array(v.string()),
+    updatedAt: v.number(),
   },
   handler: async (ctx, args) => {
-    // Check if niche already exists (by title)
+    // Check if niche already exists (by name)
     const existing = await ctx.db
       .query("niches")
-      .filter((q) => q.eq(q.field("title"), args.title))
+      .filter((q) => q.eq(q.field("name"), args.name))
       .first();
 
     if (existing) {
@@ -26,12 +25,11 @@ export const storeNiche = internalMutation({
       await ctx.db.patch(existing._id, {
         description: args.description,
         category: args.category,
-        trendScore: args.trendScore,
-        searchVolume: args.searchVolume,
-        competitionLevel: args.competitionLevel,
-        keywords: args.keywords,
-        thumbnailUrl: args.thumbnailUrl,
-        youtubeData: args.youtubeData,
+        score: args.score,
+        potential: args.potential,
+        competition: args.competition,
+        tags: args.tags,
+        updatedAt: args.updatedAt,
       });
       return existing._id;
     }
@@ -60,7 +58,7 @@ export const getNiches = query({
 
     return await ctx.db
       .query("niches")
-      .withIndex("by_trend_score")
+      .withIndex("by_score")
       .order("desc")
       .take(limit);
   },
