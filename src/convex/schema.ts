@@ -195,6 +195,17 @@ const schema = defineSchema(
       model: v.string(),
       createdAt: v.number(),
     }).index("by_user", ["userId"]),
+
+    // AI Generated Images (Thumbnails)
+    images: defineTable({
+      userId: v.string(),
+      prompt: v.string(),
+      imageUrl: v.string(),
+      model: v.string(),
+      status: v.union(v.literal("generating"), v.literal("completed"), v.literal("failed")),
+      aspectRatio: v.optional(v.string()),
+      createdAt: v.number(),
+    }).index("by_user", ["userId"]),
   },
   {
     schemaValidation: false,

@@ -199,3 +199,72 @@ export const generatePlaylistNames = action({
     }
   },
 });
+
+export const generateImage = action({
+  args: { 
+    prompt: v.string(),
+    size: v.optional(v.string()),
+    quality: v.optional(v.string()),
+    n: v.optional(v.number()),
+    userId: v.optional(v.string()),
+    model: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error("OpenAI API key not configured");
+    }
+
+    // Default to DALL-E 3 if not specified or if an unsupported model is requested
+    // In a real implementation, we would switch based on args.model to different providers
+    let modelToUse = "dall-e-3";
+    if (args.model === "dall-e-2") {
+      modelToUse = "dall-e-2";
+    }
+    
+    // Note: For other models like Midjourney, Stable Diffusion, etc., 
+    // we would need their respective API integrations here.
+    // For now, we fallback to DALL-E 3 for reliability if the selected model isn't supported directly via this endpoint.
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/images/generations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: modelToUse,
+          prompt: args.prompt,
+          size: args.size || "1024x1024",
+          quality: args.quality || "standard",
+          n: 1,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || "Image generation failed");
+      }
+
+      const data = await response.json();
+      const imageUrl = data.data[0].url;
+
+      // Save to database if userId is provided
+      if (args.userId) {
+        await ctx.runMutation(internal.images.internalSaveImage, {
+          userId: args.userId,
+          prompt: args.prompt,
+          imageUrl: imageUrl,
+          model: args.model || modelToUse,
+          aspectRatio: "1:1", // DALL-E 3 standard
+        });
+      }
+
+      return { success: true, imageUrl: imageUrl };
+    } catch (error: any) {
+      console.error("Image generation error:", error);
+      return { success: false, error: error.message };
+    }
+  },
+});

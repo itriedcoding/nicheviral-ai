@@ -24,6 +24,7 @@ import type * as debugAuth from "../debugAuth.js";
 import type * as extendedAIModels from "../extendedAIModels.js";
 import type * as fastGeneration from "../fastGeneration.js";
 import type * as http from "../http.js";
+import type * as images from "../images.js";
 import type * as initAdmin from "../initAdmin.js";
 import type * as modelCoordinator from "../modelCoordinator.js";
 import type * as neuraAIModel from "../neuraAIModel.js";
@@ -70,6 +71,7 @@ declare const fullApi: ApiFromModules<{
   extendedAIModels: typeof extendedAIModels;
   fastGeneration: typeof fastGeneration;
   http: typeof http;
+  images: typeof images;
   initAdmin: typeof initAdmin;
   modelCoordinator: typeof modelCoordinator;
   neuraAIModel: typeof neuraAIModel;
