@@ -30,6 +30,9 @@ const PressKit = lazy(() => import("./pages/PressKit.tsx"));
 const Partners = lazy(() => import("./pages/Partners.tsx"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy.tsx"));
 const GDPR = lazy(() => import("./pages/GDPR.tsx"));
+const Status = lazy(() => import("./pages/Status.tsx"));
+const Security = lazy(() => import("./pages/Security.tsx"));
+const Trust = lazy(() => import("./pages/Trust.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 // Simple loading fallback for route transitions
@@ -98,6 +101,9 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/partners" element={<Partners />} />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
               <Route path="/gdpr" element={<GDPR />} />
+              <Route path="/status" element={<Status />} />
+              <Route path="/security" element={<Security />} />
+              <Route path="/trust" element={<Trust />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
