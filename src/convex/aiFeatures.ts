@@ -2,7 +2,7 @@
 
 import { v } from "convex/values";
 import { action } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { vly } from "../lib/vly-integrations";
 
 // Helper to call AI using Vly Integrations
@@ -221,77 +221,66 @@ export const generateImage = action({
     userId: v.optional(v.string()),
     model: v.optional(v.string()),
   },
-  handler: async (ctx, args) => {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      // Return a helpful error message that the frontend can display nicely
-      throw new Error("OpenAI API key is missing. Please add it in the Integrations tab to enable image generation.");
-    }
+  handler: async (ctx, args): Promise<{ success: boolean; imageUrl?: string; error?: string }> => {
+    let result;
+    const modelId = args.model || "dall-e-3";
 
-    // Default to DALL-E 3 if not specified or if an unsupported model is requested
-    // In a real implementation, we would switch based on args.model to different providers
-    let modelToUse = "dall-e-3";
-    let promptModifier = "";
+    console.log(`🎨 Generating image with model: ${modelId}`);
 
-    // Handle model selection by adjusting prompt or model parameter
-    if (args.model === "dall-e-2") {
-      modelToUse = "dall-e-2";
-    } else if (args.model === "midjourney-v6") {
-      promptModifier = " --style raw --v 6.0 (Midjourney V6 style, highly detailed, artistic)";
-    } else if (args.model === "stable-diffusion-3") {
-      promptModifier = " (Stable Diffusion 3 style, realistic, cinematic lighting)";
-    } else if (args.model === "flux-pro") {
-      promptModifier = " (Flux Pro style, professional photography, sharp focus, 8k)";
-    } else if (args.model === "flux-schnell") {
-      promptModifier = " (Flux Schnell style, rapid render, sharp details, digital art)";
-    } else if (args.model === "stable-diffusion-xl-lightning") {
-      promptModifier = " (SDXL Lightning style, vibrant colors, high contrast, 4k)";
-    }
-    
-    // Note: For other models like Midjourney, Stable Diffusion, etc., 
-    // we would need their respective API integrations here.
-    // For now, we fallback to DALL-E 3 for reliability if the selected model isn't supported directly via this endpoint.
-
-    try {
-      const response = await fetch("https://api.openai.com/v1/images/generations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: modelToUse,
-          prompt: args.prompt + promptModifier,
-          size: args.size || "1024x1024",
-          quality: args.quality || "standard",
-          n: 1,
-        }),
+    // Route to specific model handlers
+    if (modelId === "flux-schnell") {
+      result = await ctx.runAction(api.imageModels.generateWithFluxSchnell, {
+        prompt: args.prompt
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || "Image generation failed");
+    } else if (modelId === "stable-diffusion-xl-lightning") {
+      result = await ctx.runAction(api.imageModels.generateWithSDXLLightning, {
+        prompt: args.prompt
+      });
+    } else if (modelId === "dall-e-2") {
+      result = await ctx.runAction(api.imageModels.generateWithDallE2, {
+        prompt: args.prompt,
+        size: args.size,
+        n: args.n
+      });
+    } else {
+      // Default to DALL-E 3 (handles "dall-e-3" and fallbacks)
+      // If user requested a model we don't have (like Midjourney), we fallback to DALL-E 3 
+      // but with style modifiers to approximate it, or we could throw an error.
+      // For now, we'll use DALL-E 3 as the premium fallback.
+      
+      let finalPrompt = args.prompt;
+      if (modelId === "midjourney-v6") {
+        finalPrompt += " --style raw --v 6.0 (Midjourney V6 style, highly detailed, artistic)";
+      } else if (modelId === "stable-diffusion-3") {
+        finalPrompt += " (Stable Diffusion 3 style, realistic, cinematic lighting)";
+      } else if (modelId === "flux-pro") {
+        finalPrompt += " (Flux Pro style, professional photography, sharp focus, 8k)";
       }
 
-      const data = await response.json();
-      const imageUrl = data.data[0].url;
-
-      // Save to database if userId is provided
-      if (args.userId) {
-        await ctx.runMutation(internal.images.internalSaveImage, {
-          userId: args.userId,
-          prompt: args.prompt,
-          imageUrl: imageUrl,
-          model: args.model || modelToUse,
-          aspectRatio: "1:1", // DALL-E 3 standard
-        });
-      }
-
-      return { success: true, imageUrl: imageUrl };
-    } catch (error: any) {
-      console.error("Image generation error:", error);
-      return { success: false, error: error.message };
+      result = await ctx.runAction(api.imageModels.generateWithDallE3, {
+        prompt: finalPrompt,
+        size: args.size,
+        quality: args.quality,
+        n: args.n
+      });
     }
+
+    if (!result.success || !result.imageUrl) {
+      throw new Error(result.error || "Image generation failed");
+    }
+
+    // Save to database if userId is provided
+    if (args.userId) {
+      await ctx.runMutation(internal.images.internalSaveImage, {
+        userId: args.userId,
+        prompt: args.prompt,
+        imageUrl: result.imageUrl,
+        model: modelId,
+        aspectRatio: "1:1", 
+      });
+    }
+
+    return { success: true, imageUrl: result.imageUrl };
   },
 });
 

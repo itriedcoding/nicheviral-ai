@@ -1,0 +1,3 @@
+- Verify that the TypeScript errors are resolved.
+- Confirm that image generation works with the separated models.
+- Check if any other models need separation (video models are already separated).
