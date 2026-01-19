@@ -108,3 +108,94 @@ export const generateThumbnailIdeas = action({
     }
   },
 });
+
+export const generateVideoIdeas = action({
+  args: { niche: v.string(), count: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const count = args.count || 5;
+    const systemPrompt = "You are a YouTube growth strategist. Generate unique, high-potential video ideas for the given niche. Return them as a numbered list.";
+    const prompt = `Niche: ${args.niche}\nCount: ${count}`;
+    
+    try {
+      const ideas = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content: ideas };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generateShortsScript = action({
+  args: { topic: v.string() },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are an expert at creating viral YouTube Shorts. Write a 60-second script (approx 150 words) that is fast-paced, engaging, and has a strong hook.";
+    const prompt = `Topic: ${args.topic}`;
+    
+    try {
+      const script = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content: script };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generateCommunityPost = action({
+  args: { topic: v.string(), type: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a YouTube community manager. Write an engaging Community Tab post to drive interaction (poll, question, or update).";
+    const prompt = `Topic: ${args.topic}\nType: ${args.type || "Engagement"}`;
+    
+    try {
+      const post = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content: post };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const repurposeContent = action({
+  args: { script: v.string(), platform: v.string() },
+  handler: async (ctx, args) => {
+    const systemPrompt = `You are a content repurposing expert. Rewrite the provided YouTube script into a format suitable for ${args.platform} (e.g., Twitter Thread, Blog Post, LinkedIn).`;
+    const prompt = `Script: ${args.script}\nTarget Platform: ${args.platform}`;
+    
+    try {
+      const content = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content: content };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generateChannelName = action({
+  args: { niche: v.string(), style: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a branding expert. Generate 10 catchy, memorable YouTube channel names based on the niche and style.";
+    const prompt = `Niche: ${args.niche}\nStyle: ${args.style || "Modern"}`;
+    
+    try {
+      const names = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content: names };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generatePlaylistNames = action({
+  args: { niche: v.string() },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a YouTube SEO expert. Generate 5 optimized playlist names that would encourage binge-watching for this niche.";
+    const prompt = `Niche: ${args.niche}`;
+    
+    try {
+      const names = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content: names };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});

@@ -15,17 +15,21 @@ import { Loader2, Youtube, CreditCard, User, Bell, Moon, Sun, Download } from "l
 export function Settings() {
   const user = useQuery(api.users.getProfile);
   const updateChannel = useMutation(api.users.updateChannel);
-  const userCredits = useQuery(api.billing.getUserPurchases, { userId: user?._id || "" }); // Using purchases as proxy for history
+  const userCredits = useQuery(api.billing.getUserPurchases, { userId: user?._id || "" });
   
   const [channelId, setChannelId] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleUpdateChannel = async () => {
-    if (!channelId) return;
+    if (!channelId) {
+      toast.error("Please enter a Channel ID");
+      return;
+    }
     setIsUpdating(true);
     try {
       await updateChannel({ channelId });
       toast.success("Channel connected successfully!");
+      setChannelId(""); // Clear input
     } catch (error) {
       toast.error("Failed to connect channel");
     } finally {
@@ -33,7 +37,7 @@ export function Settings() {
     }
   };
 
-  if (!user) return <div className="p-8">Loading settings...</div>;
+  if (!user) return <div className="p-8 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
@@ -193,18 +197,26 @@ export function Settings() {
                 {user.youtubeChannelId ? (
                   <Button variant="outline" onClick={() => updateChannel({ channelId: "" })}>Disconnect</Button>
                 ) : (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <Input 
-                      placeholder="Channel ID" 
+                      placeholder="Channel ID (e.g., UC...)" 
                       value={channelId} 
                       onChange={(e) => setChannelId(e.target.value)}
-                      className="w-40"
+                      className="w-48"
                     />
                     <Button onClick={handleUpdateChannel} disabled={isUpdating}>
                       {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Connect"}
                     </Button>
                   </div>
                 )}
+              </div>
+              <div className="text-sm text-muted-foreground bg-muted p-4 rounded-md">
+                <p className="font-medium mb-1">How to find your Channel ID:</p>
+                <ol className="list-decimal list-inside space-y-1">
+                  <li>Go to your YouTube channel page</li>
+                  <li>Click "About" or check the URL</li>
+                  <li>It usually starts with "UC" (e.g., UC1234567890)</li>
+                </ol>
               </div>
             </CardContent>
           </Card>

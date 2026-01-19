@@ -12,12 +12,15 @@ import { useAuth } from "@/hooks/use-auth";
 
 export default function Pricing() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const startTrial = useMutation(api.billing.startSubscriptionTrial);
 
   const handleStartTrial = async (planId: string) => {
+    if (isLoading) return;
+    
     if (!user) {
-      navigate("/auth");
+      // Redirect to auth with return path
+      navigate("/auth?redirect=/pricing");
       return;
     }
 
@@ -170,8 +173,9 @@ export default function Pricing() {
                   plan.popular ? "bg-primary hover:bg-primary/90" : "bg-secondary hover:bg-secondary/80 text-foreground"
                 }`}
                 onClick={() => handleStartTrial(plan.id)}
+                disabled={isLoading}
               >
-                Start 7-Day Free Trial
+                {isLoading ? "Loading..." : user ? "Start 7-Day Free Trial" : "Sign In to Start Trial"}
               </Button>
               <p className="text-xs text-center mt-3 text-muted-foreground">
                 {plan.price}/mo after trial. Cancel anytime.
