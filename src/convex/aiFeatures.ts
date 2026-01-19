@@ -224,7 +224,8 @@ export const generateImage = action({
   handler: async (ctx, args) => {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      throw new Error("OpenAI API key not configured. Please add OPENAI_API_KEY in the Integrations tab or API Keys settings to use Image Generation.");
+      // Return a helpful error message that the frontend can display nicely
+      throw new Error("OpenAI API key is missing. Please add it in the Integrations tab to enable image generation.");
     }
 
     // Default to DALL-E 3 if not specified or if an unsupported model is requested

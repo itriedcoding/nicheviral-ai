@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, ArrowUpRight, Sparkles, Bookmark, BarChart2, Target, Zap } from "lucide-react";
+import { Search, TrendingUp, ArrowUpRight, Sparkles, Bookmark, BarChart2, Target, Zap, Activity, PieChart } from "lucide-react";
 import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
@@ -16,6 +16,11 @@ export function Growth() {
   const saveNiche = useMutation(api.users.saveNiche);
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Calculate Market Sentiment
+  const sentimentScore = trendingNiches ? Math.round(trendingNiches.reduce((acc: number, curr: any) => acc + (curr.score || 0), 0) / (trendingNiches.length || 1)) : 0;
+  const sentimentLabel = sentimentScore > 75 ? "Bullish" : sentimentScore > 50 ? "Neutral" : "Bearish";
+  const sentimentColor = sentimentScore > 75 ? "text-green-500" : sentimentScore > 50 ? "text-yellow-500" : "text-red-500";
 
   const handleDiscover = async () => {
     setIsDiscovering(true);
@@ -57,50 +62,99 @@ export function Growth() {
       </div>
 
       <div className="grid gap-8">
-        {/* Discovery Engine */}
-        <Card className="bg-gradient-to-br from-card to-background border-primary/20 shadow-lg overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-          <CardHeader className="relative z-10">
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <Search className="h-6 w-6 text-primary" />
-              Niche Discovery Engine
-            </CardTitle>
-            <CardDescription className="text-base">
-              Analyze millions of data points to find high-potential, low-competition video topics.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Enter a category (e.g., 'AI automation', 'sustainable living', 'retro gaming')..." 
-                  className="h-12 pl-10 bg-background/50 border-primary/20 focus-visible:ring-primary/30 text-lg"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+        {/* Market Sentiment & Discovery Engine */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <Card className="lg:col-span-2 bg-gradient-to-br from-card to-background border-primary/20 shadow-lg overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+            <CardHeader className="relative z-10">
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <Search className="h-6 w-6 text-primary" />
+                Niche Discovery Engine
+              </CardTitle>
+              <CardDescription className="text-base">
+                Analyze millions of data points to find high-potential, low-competition video topics.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Enter a category (e.g., 'AI automation', 'sustainable living', 'retro gaming')..." 
+                    className="h-12 pl-10 bg-background/50 border-primary/20 focus-visible:ring-primary/30 text-lg"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Button 
+                  size="lg" 
+                  className="h-12 px-8 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-lg font-medium min-w-[200px]"
+                  onClick={handleDiscover}
+                  disabled={isDiscovering}
+                >
+                  {isDiscovering ? (
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 animate-spin" />
+                      <span>Analyzing...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-5 w-5" />
+                      <span>Run Analysis</span>
+                    </div>
+                  )}
+                </Button>
               </div>
-              <Button 
-                size="lg" 
-                className="h-12 px-8 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-lg font-medium min-w-[200px]"
-                onClick={handleDiscover}
-                disabled={isDiscovering}
-              >
-                {isDiscovering ? (
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 animate-spin" />
-                    <span>Analyzing...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Zap className="h-5 w-5" />
-                    <span>Run Analysis</span>
-                  </div>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 backdrop-blur-sm border-primary/20 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                Market Sentiment
+              </CardTitle>
+              <CardDescription>Real-time platform analysis</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center justify-center py-6">
+              <div className="relative w-32 h-32 flex items-center justify-center mb-4">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="56"
+                    stroke="currentColor"
+                    strokeWidth="12"
+                    fill="transparent"
+                    className="text-muted/20"
+                  />
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="56"
+                    stroke="currentColor"
+                    strokeWidth="12"
+                    fill="transparent"
+                    strokeDasharray={351.86}
+                    strokeDashoffset={351.86 - (351.86 * sentimentScore) / 100}
+                    className={`${sentimentColor} transition-all duration-1000 ease-out`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className={`text-3xl font-bold ${sentimentColor}`}>{sentimentScore}</span>
+                  <span className="text-xs text-muted-foreground">Score</span>
+                </div>
+              </div>
+              <div className="text-center">
+                <h4 className={`text-lg font-bold ${sentimentColor} mb-1`}>{sentimentLabel}</h4>
+                <p className="text-sm text-muted-foreground">
+                  Current market conditions are {sentimentLabel.toLowerCase()} for new content.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Results Grid */}
         <div className="space-y-4">
@@ -135,7 +189,7 @@ export function Growth() {
             </Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {trendingNiches.map((niche, i) => (
+              {trendingNiches.map((niche: any, i: number) => (
                 <Card key={niche._id} className="group hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 bg-card/50 backdrop-blur-sm flex flex-col">
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start mb-2">

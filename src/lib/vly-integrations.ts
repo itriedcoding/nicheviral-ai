@@ -1,16 +1,24 @@
-import { VlyIntegrations } from "@vly-ai/integrations";
+import { Vly } from "@vly-ai/integrations";
 
-// Initialize Vly Integrations lazily to prevent build-time errors
-// if the environment variable is missing.
-let vlyInstance: any = null;
-
-export const vly = new Proxy({}, {
-  get: (target, prop) => {
-    if (!vlyInstance) {
-      vlyInstance = new VlyIntegrations({
-        token: process.env.VLY_INTEGRATION_KEY || "dummy_token_for_build"
-      } as any);
+// Lazy initialization to prevent build errors if env vars are missing
+// and to ensure we don't initialize until needed
+const vlyHandler = {
+  get: (_target: any, prop: string) => {
+    // Initialize on first access
+    const vlyInstance = new Vly({
+      apiKey: process.env.VLY_INTEGRATION_KEY || process.env.VLY_API_KEY || "dummy_key_for_build",
+    });
+    
+    // Forward the property access
+    const value = (vlyInstance as any)[prop];
+    
+    // If it's a function, bind it to the instance
+    if (typeof value === 'function') {
+      return value.bind(vlyInstance);
     }
-    return vlyInstance[prop];
+    
+    return value;
   }
-}) as unknown as VlyIntegrations;
+};
+
+export const vly = new Proxy({}, vlyHandler) as Vly;
