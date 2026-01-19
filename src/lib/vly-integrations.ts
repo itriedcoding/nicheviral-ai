@@ -1,8 +1,5 @@
-// ... keep existing code
-// Initialize the Vly Integrations client
-// This is safe to use on the server side (Convex actions)
+import { createVlyIntegrations } from "@vly-ai/integrations";
+
 export const vly = createVlyIntegrations({
-  deploymentToken: process.env.VLY_API_KEY || "dummy_key_for_build",
-  debug: process.env.NODE_ENV === "development",
+  deploymentToken: process.env.VLY_INTEGRATION_KEY || "dummy_key_for_build",
 });
-// ... keep existing code

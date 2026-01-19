@@ -231,8 +231,17 @@ export const generateImage = action({
     // Default to DALL-E 3 if not specified or if an unsupported model is requested
     // In a real implementation, we would switch based on args.model to different providers
     let modelToUse = "dall-e-3";
+    let promptModifier = "";
+
+    // Handle model selection by adjusting prompt or model parameter
     if (args.model === "dall-e-2") {
       modelToUse = "dall-e-2";
+    } else if (args.model === "midjourney-v6") {
+      promptModifier = " --style raw --v 6.0 (Midjourney V6 style, highly detailed, artistic)";
+    } else if (args.model === "stable-diffusion-3") {
+      promptModifier = " (Stable Diffusion 3 style, realistic, cinematic lighting)";
+    } else if (args.model === "flux-pro") {
+      promptModifier = " (Flux Pro style, professional photography, sharp focus, 8k)";
     }
     
     // Note: For other models like Midjourney, Stable Diffusion, etc., 
@@ -248,7 +257,7 @@ export const generateImage = action({
         },
         body: JSON.stringify({
           model: modelToUse,
-          prompt: args.prompt,
+          prompt: args.prompt + promptModifier,
           size: args.size || "1024x1024",
           quality: args.quality || "standard",
           n: 1,
