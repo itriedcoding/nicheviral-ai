@@ -2,7 +2,7 @@
 
 import { v } from "convex/values";
 import { action } from "./_generated/server";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 
 /**
  * REAL VIDEO GENERATION - NO SLIDESHOWS
@@ -37,6 +37,80 @@ interface VideoGenerationResponse {
   };
   error?: string;
 }
+
+/**
+ * PROCESS VIDEO GENERATION
+ * Orchestrator that handles the generation process and updates the database
+ */
+export const processVideoGeneration = action({
+  args: {
+    videoId: v.id("videos"),
+    prompt: v.string(),
+    duration: v.optional(v.number()),
+    aiModel: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Update status to generating
+    await ctx.runMutation(internal.videos.internalUpdateVideoStatus, {
+      videoId: args.videoId,
+      status: "generating",
+    });
+
+    try {
+      console.log(`🚀 Starting video generation for ${args.videoId} with model ${args.aiModel}`);
+      
+      let result: VideoGenerationResponse;
+      
+      // Determine which model to use based on selection and availability
+      // If specific premium models are requested and keys exist, use them
+      if (args.aiModel.includes("runway") && process.env.RUNWAY_API_KEY) {
+         result = await ctx.runAction(api.realVideoGeneration.generateWithRunwayGen3, { 
+           prompt: args.prompt, 
+           duration: args.duration 
+         });
+      } else if (args.aiModel.includes("luma") && process.env.FAL_API_KEY) {
+         result = await ctx.runAction(api.realVideoGeneration.generateWithLumaDreamMachine, { 
+           prompt: args.prompt, 
+           duration: args.duration 
+         });
+      } else if (args.aiModel.includes("sora") && process.env.OPENAI_API_KEY) {
+         // Placeholder for Sora if it becomes available or mapped to something else
+         // For now, fallback to smart selector if Sora is selected but not implemented
+         result = await ctx.runAction(api.realVideoGeneration.generateRealVideo, { 
+           prompt: args.prompt, 
+           duration: args.duration 
+         });
+      } else {
+         // Fallback to smart selector which checks all available keys
+         // This handles the "Free" tier (HuggingFace) and auto-selection
+         result = await ctx.runAction(api.realVideoGeneration.generateRealVideo, { 
+           prompt: args.prompt, 
+           duration: args.duration 
+         });
+      }
+
+      if (result.success && result.videoUrl) {
+        console.log(`✅ Video generation successful for ${args.videoId}`);
+        await ctx.runMutation(internal.videos.internalUpdateVideoStatus, {
+          videoId: args.videoId,
+          status: "completed",
+          videoUrl: result.videoUrl,
+          metadata: result.metadata,
+          duration: result.metadata.duration,
+        });
+      } else {
+        throw new Error(result.error || "Generation failed with unknown error");
+      }
+    } catch (error: any) {
+      console.error(`❌ Video generation failed for ${args.videoId}:`, error);
+      await ctx.runMutation(internal.videos.internalUpdateVideoStatus, {
+        videoId: args.videoId,
+        status: "failed",
+        errorMessage: error.message || "Unknown error occurred during generation",
+      });
+    }
+  }
+});
 
 /**
  * FREE TIER: HuggingFace HunyuanVideo

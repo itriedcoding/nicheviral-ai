@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
+import { api, internal } from "./_generated/api";
 
 // Create video record
 export const createVideoRecord = mutation({
@@ -21,7 +22,7 @@ export const createVideoRecord = mutation({
     // For now, we'll prefer the identity.subject if not provided, or just use identity.subject to be safe.
     const userId = identity.subject;
 
-    return await ctx.db.insert("videos", {
+    const videoId = await ctx.db.insert("videos", {
       userId: userId,
       nicheId: args.nicheId,
       title: args.title,
@@ -31,6 +32,37 @@ export const createVideoRecord = mutation({
       aiModel: args.aiModel,
       voiceModel: args.voiceModel,
     });
+
+    // Schedule the actual video generation
+    await ctx.scheduler.runAfter(0, api.realVideoGeneration.processVideoGeneration, {
+      videoId,
+      prompt: args.prompt,
+      aiModel: args.aiModel,
+    });
+
+    return videoId;
+  },
+});
+
+// Internal mutation to update video status (safe for use by actions)
+export const internalUpdateVideoStatus = internalMutation({
+  args: {
+    videoId: v.id("videos"),
+    status: v.union(
+      v.literal("queued"),
+      v.literal("generating"),
+      v.literal("completed"),
+      v.literal("failed")
+    ),
+    videoUrl: v.optional(v.string()),
+    thumbnailUrl: v.optional(v.string()),
+    duration: v.optional(v.number()),
+    metadata: v.optional(v.any()),
+    errorMessage: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { videoId, ...updates } = args;
+    await ctx.db.patch(videoId, updates);
   },
 });
 
