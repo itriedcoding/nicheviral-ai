@@ -875,21 +875,33 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
               <div className="px-2 py-1.5 text-xs font-bold text-purple-500">
                 ⚡ FLUX MODELS (PREMIUM)
               </div>
+              <SelectItem value="flux-pro-ultra">
+                <div className="flex items-center justify-between w-full">
+                  <span>🔥 FLUX Pro v1.1 Ultra</span>
+                  <span className="text-xs text-purple-400 ml-4">4K+ • Ultra Quality</span>
+                </div>
+              </SelectItem>
               <SelectItem value="flux-pro">
                 <div className="flex items-center justify-between w-full">
-                  <span>FLUX Pro v1.1</span>
+                  <span>⚡ FLUX Pro v1.1</span>
                   <span className="text-xs text-purple-400 ml-4">Ultra High Quality</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="flux-realism">
+                <div className="flex items-center justify-between w-full">
+                  <span>📸 FLUX Realism</span>
+                  <span className="text-xs text-purple-400 ml-4">Photorealistic</span>
                 </div>
               </SelectItem>
               <SelectItem value="flux-schnell">
                 <div className="flex items-center justify-between w-full">
-                  <span>FLUX Schnell</span>
+                  <span>⚡ FLUX Schnell</span>
                   <span className="text-xs text-purple-400 ml-4">Fast High Quality</span>
                 </div>
               </SelectItem>
               <SelectItem value="flux-dev">
                 <div className="flex items-center justify-between w-full">
-                  <span>FLUX Dev</span>
+                  <span>🛠️ FLUX Dev</span>
                   <span className="text-xs text-purple-400 ml-4">Balanced</span>
                 </div>
               </SelectItem>
@@ -902,25 +914,31 @@ function ThumbnailGenerationSection({ userId }: { userId: string }) {
               </div>
               <SelectItem value="sd35-large">
                 <div className="flex items-center justify-between w-full">
-                  <span>SD 3.5 Large</span>
-                  <span className="text-xs text-blue-400 ml-4">Latest Version</span>
+                  <span>🌟 SD 3.5 Large</span>
+                  <span className="text-xs text-blue-400 ml-4">Latest • High Detail</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="sdxl-turbo">
+                <div className="flex items-center justify-between w-full">
+                  <span>⚡ SDXL Turbo</span>
+                  <span className="text-xs text-blue-400 ml-4">Ultra Fast • &lt;2s</span>
                 </div>
               </SelectItem>
               <SelectItem value="sdxl-lightning">
                 <div className="flex items-center justify-between w-full">
-                  <span>SDXL Lightning</span>
+                  <span>⚡ SDXL Lightning</span>
                   <span className="text-xs text-blue-400 ml-4">Ultra Fast</span>
                 </div>
               </SelectItem>
               <SelectItem value="sdxl">
                 <div className="flex items-center justify-between w-full">
-                  <span>Stable Diffusion XL</span>
+                  <span>🎨 Stable Diffusion XL</span>
                   <span className="text-xs text-blue-400 ml-4">1024x1024</span>
                 </div>
               </SelectItem>
               <SelectItem value="stable-cascade">
                 <div className="flex items-center justify-between w-full">
-                  <span>Stable Cascade</span>
+                  <span>🚀 Stable Cascade</span>
                   <span className="text-xs text-blue-400 ml-4">Fast Variant</span>
                 </div>
               </SelectItem>
@@ -1172,15 +1190,34 @@ function ImageEditingSection({ userId }: { userId: string }) {
             <SelectTrigger className="glass">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="glass-strong">
-              {/* BACKGROUND & OBJECT TOOLS */}
+            <SelectContent className="glass-strong max-h-[500px] overflow-y-auto">
+              {/* FLUX EDITING TOOLS (Premium) */}
               <div className="px-2 py-1.5 text-xs font-bold text-purple-500">
-                🎨 BACKGROUND & OBJECTS
+                ⚡ FLUX EDITING (PREMIUM)
+              </div>
+              <SelectItem value="flux-fill">
+                <div className="flex items-center justify-between w-full">
+                  <span>🎨 FLUX Fill (Inpainting)</span>
+                  <span className="text-xs text-purple-400 ml-4">Professional Inpainting</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="flux-redux">
+                <div className="flex items-center justify-between w-full">
+                  <span>🔄 FLUX Redux (Variations)</span>
+                  <span className="text-xs text-purple-400 ml-4">High Fidelity Variations</span>
+                </div>
+              </SelectItem>
+
+              <Separator className="my-2" />
+
+              {/* BACKGROUND & OBJECT TOOLS */}
+              <div className="px-2 py-1.5 text-xs font-bold text-blue-500">
+                🖼️ BACKGROUND & OBJECTS
               </div>
               <SelectItem value="background-removal">
                 <div className="flex items-center justify-between w-full">
-                  <span>Background Removal (Rembg)</span>
-                  <span className="text-xs text-purple-400 ml-4">Professional</span>
+                  <span>✂️ Background Removal (Rembg)</span>
+                  <span className="text-xs text-blue-400 ml-4">Professional</span>
                 </div>
               </SelectItem>
 
