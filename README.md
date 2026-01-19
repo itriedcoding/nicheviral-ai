@@ -2,6 +2,12 @@
 
 A professional AI-powered video generation platform with 50+ real AI models for video, image, audio, and text generation. Built with React, Vite, Convex, and integrated with multiple premium AI services.
 
+## 🚀 Deploy to Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/your-repo&env=VITE_CONVEX_URL,VITE_VLY_APP_ID,VITE_VLY_MONITORING_URL&envDescription=Required%20environment%20variables%20for%20AI%20Video%20Platform&envLink=https://github.com/your-username/your-repo#environment-variables&project-name=ai-video-platform&repository-name=ai-video-platform)
+
+Click the button above to deploy this project to Vercel in one click!
+
 ## 🚀 Tech Stack
 
 - **Frontend**: React 19, TypeScript, Vite
@@ -72,27 +78,21 @@ All models are connected to **REAL APIs** - no fake data, no mocks, no placehold
 
 ### Step 1: Set Up Convex Backend
 
-1. Install Convex CLI globally:
+**Your Convex Backend is Already Deployed!**
+
+Convex Deployment URL: `https://marvelous-bat-712.convex.cloud`
+
+1. If you need to redeploy Convex functions:
 ```bash
-npm install -g convex
+npx convex deploy
 ```
 
-2. Log in to Convex:
-```bash
-npx convex login
-```
+2. Your deployment is already linked to:
+   - Team: `vly`
+   - Project: `test-db5fd`
+   - Deployment: `dev:marvelous-bat-712`
 
-3. Create a new Convex project or link to existing:
-```bash
-npx convex dev
-```
-
-4. This will create a production deployment and give you a deployment URL like:
-```
-https://your-project-name.convex.cloud
-```
-
-5. Configure Convex environment variables in your Convex dashboard:
+3. Configure Convex environment variables in your Convex dashboard:
    - Go to [dashboard.convex.dev](https://dashboard.convex.dev)
    - Select your project
    - Go to Settings → Environment Variables
@@ -118,7 +118,7 @@ ELEVENLABS_API_KEY=your_elevenlabs_key
 RUNWAY_API_KEY=your_runway_key
 ```
 
-6. Deploy your Convex functions:
+4. After adding environment variables, redeploy:
 ```bash
 npx convex deploy
 ```
@@ -154,12 +154,17 @@ vercel
 ```bash
 vercel env add VITE_CONVEX_URL
 ```
-Enter your Convex deployment URL: `https://your-project-name.convex.cloud`
+Enter: `https://marvelous-bat-712.convex.cloud`
 
 ```bash
 vercel env add VITE_VLY_APP_ID
 ```
-Enter your VLY app ID (if applicable)
+Enter: `quick-mails-march`
+
+```bash
+vercel env add VITE_VLY_MONITORING_URL
+```
+Enter: `https://runtime-monitoring.vly.ai/runtime-error`
 
 6. Deploy to production:
 ```bash
@@ -183,8 +188,8 @@ vercel --prod
    - Add the following variables:
 
 ```env
-VITE_CONVEX_URL=https://your-project-name.convex.cloud
-VITE_VLY_APP_ID=your-vly-app-id
+VITE_CONVEX_URL=https://marvelous-bat-712.convex.cloud
+VITE_VLY_APP_ID=quick-mails-march
 VITE_VLY_MONITORING_URL=https://runtime-monitoring.vly.ai/runtime-error
 ```
 
@@ -241,9 +246,9 @@ pnpm install
 
 Create a `.env.local` file:
 ```env
-VITE_CONVEX_URL=https://your-convex-deployment.convex.cloud
-CONVEX_DEPLOYMENT=dev:your-deployment-name
-VITE_VLY_APP_ID=your-vly-app-id
+VITE_CONVEX_URL=https://marvelous-bat-712.convex.cloud
+CONVEX_DEPLOYMENT=dev:marvelous-bat-712
+VITE_VLY_APP_ID=quick-mails-march
 VITE_VLY_MONITORING_URL=https://runtime-monitoring.vly.ai/runtime-error
 ```
 

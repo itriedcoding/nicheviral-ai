@@ -1,5 +1,13 @@
 # 🚀 Vercel Deployment Guide
 
+## 🚀 One-Click Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/your-repo&env=VITE_CONVEX_URL,VITE_VLY_APP_ID,VITE_VLY_MONITORING_URL&envDescription=Required%20environment%20variables%20for%20AI%20Video%20Platform&envLink=https://github.com/your-username/your-repo#environment-variables&project-name=ai-video-platform&repository-name=ai-video-platform)
+
+Click the button above to deploy to Vercel instantly!
+
+---
+
 ## ✅ READY TO DEPLOY TO VERCEL
 
 Your AI Video Generation Platform is **production-ready** with:
@@ -16,17 +24,17 @@ Your AI Video Generation Platform is **production-ready** with:
 
 ## 🎯 Quick Start: Deploy in 5 Minutes
 
-### Step 1: Deploy Convex Backend (2 minutes)
+### Step 1: Convex Backend (Already Deployed!)
+
+**Your Convex backend is already live:**
+- URL: `https://marvelous-bat-712.convex.cloud`
+- Team: `vly`
+- Project: `test-db5fd`
 
 ```bash
-# Login to Convex
-npx convex login
-
-# Deploy Convex functions
+# To redeploy if needed:
 npx convex deploy
 ```
-
-**Result**: You'll get a production URL like `https://your-project.convex.cloud`
 
 ### Step 2: Configure Convex Environment Variables (1 minute)
 
@@ -62,8 +70,8 @@ JWT_PRIVATE_KEY=auto_generated
    - **Install Command**: `pnpm install`
 4. Add Environment Variables:
    ```env
-   VITE_CONVEX_URL=https://your-project.convex.cloud
-   VITE_VLY_APP_ID=your-vly-app-id
+   VITE_CONVEX_URL=https://marvelous-bat-712.convex.cloud
+   VITE_VLY_APP_ID=quick-mails-march
    VITE_VLY_MONITORING_URL=https://runtime-monitoring.vly.ai/runtime-error
    ```
 5. Click "Deploy"
@@ -82,10 +90,13 @@ vercel
 
 # Add environment variables
 vercel env add VITE_CONVEX_URL
-# Enter: https://your-project.convex.cloud
+# Enter: https://marvelous-bat-712.convex.cloud
 
 vercel env add VITE_VLY_APP_ID
-# Enter: your-vly-app-id
+# Enter: quick-mails-march
+
+vercel env add VITE_VLY_MONITORING_URL
+# Enter: https://runtime-monitoring.vly.ai/runtime-error
 
 # Deploy to production
 vercel --prod

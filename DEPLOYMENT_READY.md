@@ -1,8 +1,14 @@
 # ✅ DEPLOYMENT READY - VERCEL
 
+## 🚀 One-Click Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/your-repo&env=VITE_CONVEX_URL,VITE_VLY_APP_ID,VITE_VLY_MONITORING_URL&envDescription=Required%20environment%20variables%20for%20AI%20Video%20Platform&envLink=https://github.com/your-username/your-repo#environment-variables&project-name=ai-video-platform&repository-name=ai-video-platform)
+
 ## 🎉 Your Platform is Production-Ready!
 
 All systems verified and ready for Vercel deployment.
+
+**Convex Backend:** `https://marvelous-bat-712.convex.cloud` ✅
 
 ---
 
@@ -39,8 +45,9 @@ All systems verified and ready for Vercel deployment.
    - Output Directory: dist
    - Install Command: pnpm install
 4. Add Environment Variables:
-   - VITE_CONVEX_URL=https://your-project.convex.cloud
-   - VITE_VLY_APP_ID=your-vly-app-id
+   - VITE_CONVEX_URL=https://marvelous-bat-712.convex.cloud
+   - VITE_VLY_APP_ID=quick-mails-march
+   - VITE_VLY_MONITORING_URL=https://runtime-monitoring.vly.ai/runtime-error
 5. Click "Deploy"
 
 ### Method 2: Vercel CLI (5 minutes)
