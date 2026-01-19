@@ -26,6 +26,7 @@ import type * as initAdmin from "../initAdmin.js";
 import type * as modelCoordinator from "../modelCoordinator.js";
 import type * as neuraAIModel from "../neuraAIModel.js";
 import type * as nicheDiscovery from "../nicheDiscovery.js";
+import type * as niches from "../niches.js";
 import type * as passwordAuth from "../passwordAuth.js";
 import type * as paymentProcessor from "../paymentProcessor.js";
 import type * as premiumAI from "../premiumAI.js";
@@ -68,6 +69,7 @@ declare const fullApi: ApiFromModules<{
   modelCoordinator: typeof modelCoordinator;
   neuraAIModel: typeof neuraAIModel;
   nicheDiscovery: typeof nicheDiscovery;
+  niches: typeof niches;
   passwordAuth: typeof passwordAuth;
   paymentProcessor: typeof paymentProcessor;
   premiumAI: typeof premiumAI;
