@@ -26,6 +26,7 @@ import type * as fastGeneration from "../fastGeneration.js";
 import type * as http from "../http.js";
 import type * as images from "../images.js";
 import type * as initAdmin from "../initAdmin.js";
+import type * as migrations from "../migrations.js";
 import type * as modelCoordinator from "../modelCoordinator.js";
 import type * as neuraAIModel from "../neuraAIModel.js";
 import type * as nicheDiscovery from "../nicheDiscovery.js";
@@ -73,6 +74,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   images: typeof images;
   initAdmin: typeof initAdmin;
+  migrations: typeof migrations;
   modelCoordinator: typeof modelCoordinator;
   neuraAIModel: typeof neuraAIModel;
   nicheDiscovery: typeof nicheDiscovery;

@@ -45,6 +45,42 @@ export const getCurrentUser = async (ctx: QueryCtx) => {
   return null;
 };
 
+export const initializeCredits = mutation({
+  args: { userId: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    let userId = args.userId;
+    if (!userId) {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) return; // Not authenticated, can't init
+      userId = identity.subject; // Use subject as userId for Convex Auth
+      
+      // Double check if we can find the user by email to be sure
+      const user = await ctx.db
+        .query("users")
+        .withIndex("email", (q) => q.eq("email", identity.email!))
+        .first();
+        
+      if (user) userId = user._id;
+    }
+
+    if (!userId) return;
+
+    const existing = await ctx.db
+      .query("userCredits")
+      .withIndex("by_user", (q) => q.eq("userId", userId!))
+      .first();
+
+    if (!existing) {
+      await ctx.db.insert("userCredits", {
+        userId: userId,
+        credits: 200, // Start with 200 credits as requested
+        subscriptionTier: "free",
+        subscriptionStatus: "active",
+      });
+    }
+  },
+});
+
 export const updateChannel = mutation({
   args: { 
     channelId: v.string(),
@@ -71,10 +107,10 @@ export const updateChannel = mutation({
 
     if (!user) throw new Error("User not found");
 
-    // Validate channel ID format if needed, but for now just save it
+    // Validate channel ID format
+    // YouTube Channel IDs usually start with UC and are 24 characters long
     if (args.channelId && !args.channelId.startsWith("UC")) {
-        // Optional: could throw error here, but frontend handles it too.
-        // Allowing flexibility for now, but good to be aware.
+       throw new Error("Invalid YouTube Channel ID. It must start with 'UC'.");
     }
 
     await ctx.db.patch(user._id, {

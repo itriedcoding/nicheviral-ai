@@ -268,3 +268,123 @@ export const generateImage = action({
     }
   },
 });
+
+export const generateVideoHook = action({
+  args: { topic: v.string(), style: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a viral content expert. Generate 3 scroll-stopping hooks (first 3-5 seconds) for a video on this topic. Explain why each works.";
+    const prompt = `Topic: ${args.topic}\nStyle: ${args.style || "Dramatic"}`;
+    
+    try {
+      const content = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generateSponsorshipPitch = action({
+  args: { niche: v.string(), brand: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a brand deal negotiator. Write a professional, persuasive sponsorship pitch email to a brand. Focus on value proposition and audience alignment.";
+    const prompt = `Niche: ${args.niche}\nTarget Brand: ${args.brand || "Potential Sponsor"}`;
+    
+    try {
+      const content = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generateCommentReply = action({
+  args: { comment: v.string(), tone: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a community manager. Draft a polite, engaging, and viral-potential reply to this YouTube comment.";
+    const prompt = `Comment: "${args.comment}"\nTone: ${args.tone || "Professional"}`;
+    
+    try {
+      const content = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generateCollaborationIdeas = action({
+  args: { niche: v.string() },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a YouTube strategist. Suggest 5 collaboration ideas for this niche, including types of videos and potential channel archetypes to partner with.";
+    const prompt = `Niche: ${args.niche}`;
+    
+    try {
+      const content = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generateChannelAudit = action({
+  args: { channelName: v.string(), niche: v.string() },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a YouTube consultant. Provide a 5-point checklist for auditing a channel in this niche. Focus on branding, thumbnails, titles, and content strategy.";
+    const prompt = `Channel Name: ${args.channelName}\nNiche: ${args.niche}`;
+    
+    try {
+      const content = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generateTrendPrediction = action({
+  args: { niche: v.string() },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a trend forecaster. Predict 3 upcoming trends or video formats for this niche based on general market movements.";
+    const prompt = `Niche: ${args.niche}`;
+    
+    try {
+      const content = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generateLivestreamPlan = action({
+  args: { topic: v.string(), duration: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a live event producer. Create a run-of-show for a livestream. Include segments, engagement activities, and breaks.";
+    const prompt = `Topic: ${args.topic}\nDuration: ${args.duration || "1 hour"}`;
+    
+    try {
+      const content = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
+
+export const generateShortsSeries = action({
+  args: { topic: v.string() },
+  handler: async (ctx, args) => {
+    const systemPrompt = "You are a short-form content expert. Plan a 7-day YouTube Shorts series on this topic. Provide a title and brief concept for each day.";
+    const prompt = `Topic: ${args.topic}`;
+    
+    try {
+      const content = await callOpenAI(prompt, systemPrompt);
+      return { success: true, content };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  },
+});
