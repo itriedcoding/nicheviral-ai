@@ -478,7 +478,7 @@ function AIStudioSection({ userId }: { userId: string }) {
 }
 
 function VideoGenerationSection({ userId }: { userId: string }) {
-  const [model, setModel] = useState("sora");
+  const [model, setModel] = useState("cogvideox");
   const [prompt, setPrompt] = useState("");
   const [duration, setDuration] = useState([5]);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -546,7 +546,7 @@ function VideoGenerationSection({ userId }: { userId: string }) {
             Video Generation
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Create stunning videos with AI - Self-hosted or Cloud
+            Generate REAL videos from text prompts - No slideshows, actual MP4 videos
           </p>
         </div>
         <Badge className={`${model === 'selfhosted' || model === 'cogvideox' || model === 'flux' ? 'bg-green-500/20 text-green-500 border-green-500/30' : 'bg-primary/20 text-primary border-primary/30'}`}>
@@ -572,7 +572,7 @@ function VideoGenerationSection({ userId }: { userId: string }) {
               </SelectItem>
               <SelectItem value="cogvideox">
                 <div className="flex items-center justify-between w-full">
-                  <span>🤗 CogVideoX-5B (HuggingFace)</span>
+                  <span>🤗 CogVideoX-5B - REAL MP4 Videos</span>
                   <span className="text-xs text-green-500 ml-4 font-bold">FREE - Cloud</span>
                 </div>
               </SelectItem>
