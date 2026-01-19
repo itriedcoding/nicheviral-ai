@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Image as ImageIcon, Download, Share2, Wand2, Sparkles } from "lucide-react";
+import { Loader2, Image as ImageIcon, Download, Share2, Wand2, Sparkles, Upload, RefreshCw } from "lucide-react";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/use-auth";
+import { Input } from "@/components/ui/input";
 
 export function ThumbnailStudio() {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -16,6 +17,7 @@ export function ThumbnailStudio() {
   const [imagePrompt, setImagePrompt] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState("dall-e-3");
+  const [referenceImageUrl, setReferenceImageUrl] = useState("");
 
   const { userId } = useAuth();
   const generateImageAction = useAction(api.aiFeatures.generateImage);
@@ -32,13 +34,13 @@ export function ThumbnailStudio() {
     setIsEnhancing(true);
     try {
       const result = await enhancePromptAction({
-        prompt: imagePrompt,
+        prompt: `Roblox 3D game thumbnail style: ${imagePrompt}`,
         type: "image"
       });
       
       if (result.success && result.content) {
         setImagePrompt(result.content);
-        toast.success("Prompt enhanced with AI magic!");
+        toast.success("Prompt enhanced for Roblox style!");
       } else {
         toast.error("Failed to enhance prompt");
       }
@@ -62,8 +64,18 @@ export function ThumbnailStudio() {
 
     setIsGeneratingImage(true);
     try {
+      // Append Roblox style keywords if not present
+      let finalPrompt = imagePrompt;
+      if (!finalPrompt.toLowerCase().includes("roblox")) {
+        finalPrompt = `Roblox 3D game thumbnail, high quality render, ${finalPrompt}`;
+      }
+      
+      if (referenceImageUrl) {
+        finalPrompt += ` --reference_image ${referenceImageUrl} (Make it look like this style but fix/update)`;
+      }
+
       const result = await generateImageAction({
-        prompt: imagePrompt,
+        prompt: finalPrompt,
         size: "1024x1024",
         quality: "hd",
         userId: user._id,
@@ -72,7 +84,7 @@ export function ThumbnailStudio() {
 
       if (result.success && result.imageUrl) {
         setGeneratedImage(result.imageUrl);
-        toast.success("Thumbnail generated successfully!");
+        toast.success("Roblox thumbnail generated successfully!");
       } else {
         throw new Error(result.error || "Generation failed");
       }
@@ -88,8 +100,8 @@ export function ThumbnailStudio() {
       <Card className="border-primary/10 shadow-xl shadow-primary/5">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Thumbnail Generator</CardTitle>
-            <CardDescription>Create click-worthy thumbnails with AI</CardDescription>
+            <CardTitle>Roblox Thumbnail Studio</CardTitle>
+            <CardDescription>Create viral 3D game thumbnails with AI</CardDescription>
           </div>
           <Button 
             variant="outline" 
@@ -124,10 +136,28 @@ export function ThumbnailStudio() {
           </div>
 
           <div className="space-y-2">
-            <Label>Image Description</Label>
+            <Label>Reference Image URL (Optional)</Label>
+            <div className="flex gap-2">
+              <Input 
+                placeholder="Paste an image URL to fix or update..." 
+                value={referenceImageUrl}
+                onChange={(e) => setReferenceImageUrl(e.target.value)}
+                className="bg-background/50"
+              />
+              <Button variant="outline" size="icon" title="Upload Image (Coming Soon)">
+                <Upload className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Provide an example image URL and tell the AI how to fix or update it in the prompt below.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Image Description / Instructions</Label>
             <Textarea 
-              placeholder="A shocked YouTuber face pointing at a floating glowing orb, high contrast, saturated colors, 4k, youtube thumbnail style..."
-              className="min-h-[200px] text-base resize-none bg-background/50"
+              placeholder="Describe your Roblox game scene. E.g., 'A parkour obby in the sky with bright neon colors, character jumping over lava, 4k render' OR 'Fix the lighting in the reference image and make it more dramatic'..."
+              className="min-h-[150px] text-base resize-none bg-background/50"
               value={imagePrompt}
               onChange={(e) => setImagePrompt(e.target.value)}
             />
@@ -140,7 +170,7 @@ export function ThumbnailStudio() {
             {isGeneratingImage ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating Thumbnail...
+                Generating Asset...
               </>
             ) : (
               <>
@@ -171,12 +201,18 @@ export function ThumbnailStudio() {
                 <Button variant="secondary" size="icon">
                   <Share2 className="w-5 h-5" />
                 </Button>
+                <Button variant="secondary" size="icon" onClick={() => {
+                  setReferenceImageUrl(generatedImage);
+                  toast.success("Set as reference image");
+                }}>
+                  <RefreshCw className="w-5 h-5" />
+                </Button>
               </div>
             </div>
           ) : (
             <div className="text-center p-12">
               <ImageIcon className="w-16 h-16 text-muted-foreground/20 mx-auto mb-4" />
-              <p className="text-muted-foreground">Generated thumbnail will appear here</p>
+              <p className="text-muted-foreground">Generated Roblox thumbnail will appear here</p>
             </div>
           )}
         </CardContent>

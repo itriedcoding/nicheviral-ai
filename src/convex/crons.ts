@@ -3,12 +3,12 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
-// 1. Niche Discovery Cron
-// Run every 24 hours to discover new trending niches using Real YouTube Data
+// 1. Roblox Trending Games Cron
+// Run every 2 hours to discover new trending games using Official Roblox API
 crons.interval(
-  "discover-trending-niches",
-  { hours: 24 },
-  internal.youtube.internalFetchTrendingVideos,
+  "fetch-roblox-games",
+  { hours: 2 },
+  internal.roblox.fetchTrendingGames,
   {}
 );
 

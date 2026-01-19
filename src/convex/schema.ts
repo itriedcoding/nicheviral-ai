@@ -37,6 +37,7 @@ const schema = defineSchema(
       customerId: v.optional(v.string()), // Stripe/Square customer ID
       
       // New fields
+      robloxUsername: v.optional(v.string()),
       youtubeChannelId: v.optional(v.string()),
       preferences: v.optional(v.any()),
     }).index("email", ["email"]), // index for the email. do not remove or modify
@@ -51,7 +52,25 @@ const schema = defineSchema(
       used: v.boolean(),
     }).index("by_email", ["email"]),
 
-    // Trending niches discovered from YouTube API
+    // Trending Roblox Games
+    robloxGames: defineTable({
+      name: v.string(),
+      description: v.string(),
+      gameId: v.string(), // Roblox Place ID or Universe ID
+      creatorName: v.string(),
+      playing: v.number(),
+      visits: v.number(),
+      upVotes: v.number(),
+      downVotes: v.number(),
+      thumbnailUrl: v.string(),
+      updatedAt: v.number(),
+      rawStats: v.optional(v.any()),
+    })
+      .index("by_playing", ["playing"])
+      .index("by_visits", ["visits"])
+      .index("by_gameId", ["gameId"]),
+
+    // Trending niches discovered from YouTube API (Keeping for legacy/additional data if needed, but primary is Roblox)
     niches: defineTable({
       name: v.string(),
       description: v.string(),
@@ -182,7 +201,8 @@ const schema = defineSchema(
     // Saved Niches for alerts
     savedNiches: defineTable({
       userId: v.string(),
-      nicheId: v.id("niches"),
+      nicheId: v.optional(v.id("niches")),
+      robloxGameId: v.optional(v.id("robloxGames")),
       notes: v.optional(v.string()),
     }).index("by_user", ["userId"]),
 

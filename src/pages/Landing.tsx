@@ -2,7 +2,7 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Play, TrendingUp, Video, Globe, Sparkles, Zap, Shield, Cpu } from "lucide-react";
+import { ArrowRight, Play, TrendingUp, Gamepad2, Globe, Sparkles, Zap, Shield, Cpu, Box } from "lucide-react";
 import { Link } from "react-router";
 
 export default function Landing() {
@@ -27,8 +27,8 @@ export default function Landing() {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-8 backdrop-blur-md shadow-[0_0_15px_rgba(var(--primary),0.3)]"
           >
-            <Sparkles className="mr-2 h-4 w-4" />
-            <span>Next-Gen AI Video Platform</span>
+            <Gamepad2 className="mr-2 h-4 w-4" />
+            <span>#1 AI Tool for Roblox Developers</span>
           </motion.div>
           
           <motion.h1
@@ -37,8 +37,8 @@ export default function Landing() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-8 text-foreground"
           >
-            Viral Content <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-primary animate-pulse">Engineered by AI</span>
+            Scale Your <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-400 to-primary animate-pulse">Roblox Game</span>
           </motion.h1>
           
           <motion.p
@@ -47,7 +47,7 @@ export default function Landing() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed"
           >
-            Deploy autonomous content pipelines. Generate cinematic videos, identify breakout trends, and dominate algorithms with enterprise-grade AI models.
+            Dominate the Roblox algorithm with AI-powered analytics, 3D thumbnail generation, and trend intelligence. Built for serious developers.
           </motion.p>
           
           <motion.div
@@ -58,7 +58,7 @@ export default function Landing() {
           >
             <Link to="/auth">
               <Button size="lg" className="h-14 px-10 text-lg rounded-full shadow-[0_0_20px_rgba(var(--primary),0.4)] hover:shadow-[0_0_30px_rgba(var(--primary),0.6)] transition-all duration-300 border border-primary/20">
-                Start Creating
+                Start Growing
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -82,7 +82,7 @@ export default function Landing() {
               <div className="aspect-video rounded-lg bg-black overflow-hidden relative group">
                 {/* Abstract UI Representation */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-50 group-hover:opacity-70 transition-opacity duration-700" />
+                  <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1614294149010-950b698f72c0?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-50 group-hover:opacity-70 transition-opacity duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
                   
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -95,11 +95,11 @@ export default function Landing() {
                 {/* Floating UI Elements */}
                 <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between">
                   <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-lg p-4 flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center">
                       <Sparkles className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-white text-sm">Generating Scene 4...</p>
+                      <p className="font-medium text-white text-sm">Generating 3D Asset...</p>
                       <div className="h-1 w-32 bg-white/20 rounded-full mt-2 overflow-hidden">
                         <div className="h-full w-2/3 bg-primary rounded-full animate-pulse" />
                       </div>
@@ -108,10 +108,10 @@ export default function Landing() {
                   
                   <div className="hidden md:flex gap-2">
                     <div className="px-3 py-1 rounded-full bg-black/60 border border-white/10 text-xs text-white/80 backdrop-blur-md">
-                      Runway Gen-3
+                      Roblox API
                     </div>
                     <div className="px-3 py-1 rounded-full bg-black/60 border border-white/10 text-xs text-white/80 backdrop-blur-md">
-                      4K Resolution
+                      Trend Analysis
                     </div>
                   </div>
                 </div>
@@ -128,44 +128,44 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h2 className="text-3xl md:text-5xl font-bold mb-6 text-foreground">
-              Complete Creative <span className="text-primary">Dominance</span>
+              Complete Developer <span className="text-primary">Dominance</span>
             </h2>
             <p className="text-muted-foreground text-lg">
-              A unified suite of tools designed to automate the entire content lifecycle.
+              A unified suite of tools designed to automate your Roblox game growth.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                icon: Video,
-                title: "Multi-Model Synthesis",
-                desc: "Orchestrate generation across Sora, Runway, and Luma from a single interface."
+                icon: Box,
+                title: "3D Thumbnail Studio",
+                desc: "Generate high-CTR game thumbnails and icons using AI trained on top Roblox games."
               },
               {
                 icon: TrendingUp,
-                title: "Predictive Analytics",
-                desc: "Identify viral opportunities before they peak using real-time market data."
+                title: "Market Intelligence",
+                desc: "Track trending games in real-time with official Roblox API integration."
               },
               {
                 icon: Globe,
-                title: "Global Distribution",
-                desc: "Auto-format and optimize content for every major video platform instantly."
+                title: "Global Reach",
+                desc: "Optimize your game description and tags for maximum discovery."
               },
               {
                 icon: Zap,
                 title: "Instant Iteration",
-                desc: "Refine scripts, hooks, and visuals in real-time with zero latency."
+                desc: "Upload existing assets and let AI suggest improvements and fixes."
               },
               {
                 icon: Shield,
-                title: "Enterprise Security",
-                desc: "Bank-grade encryption and asset protection for your intellectual property."
+                title: "Asset Protection",
+                desc: "Secure your generated assets and prompts with enterprise-grade security."
               },
               {
                 icon: Cpu,
-                title: "Automated Workflows",
-                desc: "Set up set-and-forget pipelines that run 24/7 without intervention."
+                title: "Automated Analytics",
+                desc: "Get insights on player retention and engagement metrics automatically."
               }
             ].map((feature, i) => (
               <motion.div
@@ -196,10 +196,10 @@ export default function Landing() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-4 gap-12 text-center">
             {[
-              { label: "AI Models", value: "5+" },
-              { label: "Resolution", value: "4K" },
-              { label: "Uptime", value: "99.9%" },
-              { label: "Generation Speed", value: "<60s" }
+              { label: "Games Tracked", value: "10k+" },
+              { label: "Asset Quality", value: "4K" },
+              { label: "Data Updates", value: "2h" },
+              { label: "Generation Speed", value: "<30s" }
             ].map((stat, i) => (
               <div key={i}>
                 <div className="text-4xl md:text-5xl font-bold text-primary mb-2 tracking-tight">{stat.value}</div>
@@ -220,7 +220,7 @@ export default function Landing() {
             Ready to <span className="text-primary">Scale?</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
-            Join the next generation of creators using AI to build massive audiences.
+            Join the next generation of Roblox developers using AI to build massive player bases.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to="/auth">

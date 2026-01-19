@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query, QueryCtx } from "./_generated/server";
 import { auth } from "./auth";
+import { Doc, Id } from "./_generated/dataModel";
 
 /**
  * Get user by ID for custom authentication
@@ -11,12 +12,9 @@ export const getUserById = query({
   },
   handler: async (ctx, args) => {
     // Try to get user by the custom userId from localStorage
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("_id"), args.userId))
-      .first();
-
-    return user;
+    const userId = ctx.db.normalizeId("users", args.userId);
+    if (!userId) return null;
+    return await ctx.db.get(userId);
   },
 });
 
@@ -82,13 +80,13 @@ export const updateChannel = mutation({
   },
   handler: async (ctx, args) => {
     let userId = args.userId;
-    let user;
+    let user: Doc<"users"> | null = null;
 
     if (userId) {
-      user = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("_id"), userId))
-        .first();
+      const id = ctx.db.normalizeId("users", userId);
+      if (id) {
+        user = await ctx.db.get(id);
+      }
     } else {
       const identity = await ctx.auth.getUserIdentity();
       if (!identity) throw new Error("Not authenticated");
@@ -125,10 +123,9 @@ export const getProfile = query({
   args: { userId: v.optional(v.string()) },
   handler: async (ctx, args) => {
     if (args.userId) {
-      return await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("_id"), args.userId))
-        .first();
+      const id = ctx.db.normalizeId("users", args.userId);
+      if (!id) return null;
+      return await ctx.db.get(id);
     }
 
     const identity = await ctx.auth.getUserIdentity();
@@ -153,10 +150,10 @@ export const saveNiche = mutation({
     let user;
 
     if (userId) {
-      user = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("_id"), userId))
-        .first();
+      const id = ctx.db.normalizeId("users", userId);
+      if (id) {
+        user = await ctx.db.get(id);
+      }
     } else {
       const identity = await ctx.auth.getUserIdentity();
       if (!identity) throw new Error("Not authenticated");
@@ -194,10 +191,10 @@ export const getSavedNiches = query({
     let user;
 
     if (userId) {
-      user = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("_id"), userId))
-        .first();
+      const id = ctx.db.normalizeId("users", userId);
+      if (id) {
+        user = await ctx.db.get(id);
+      }
     } else {
       const identity = await ctx.auth.getUserIdentity();
       if (!identity) return [];
@@ -217,6 +214,7 @@ export const getSavedNiches = query({
 
     const niches = await Promise.all(
       saved.map(async (s) => {
+        if (!s.nicheId) return null;
         const niche = await ctx.db.get(s.nicheId);
         return niche;
       })

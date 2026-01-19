@@ -37,6 +37,8 @@ import type * as paymentProcessor from "../paymentProcessor.js";
 import type * as premiumAI from "../premiumAI.js";
 import type * as realAIGeneration from "../realAIGeneration.js";
 import type * as realVideoGeneration from "../realVideoGeneration.js";
+import type * as roblox from "../roblox.js";
+import type * as robloxData from "../robloxData.js";
 import type * as seedData from "../seedData.js";
 import type * as selfHostedAI from "../selfHostedAI.js";
 import type * as simpleAuth from "../simpleAuth.js";
@@ -86,6 +88,8 @@ declare const fullApi: ApiFromModules<{
   premiumAI: typeof premiumAI;
   realAIGeneration: typeof realAIGeneration;
   realVideoGeneration: typeof realVideoGeneration;
+  roblox: typeof roblox;
+  robloxData: typeof robloxData;
   seedData: typeof seedData;
   selfHostedAI: typeof selfHostedAI;
   simpleAuth: typeof simpleAuth;

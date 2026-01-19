@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, ArrowUpRight, Sparkles, Bookmark, BarChart2, Target, Zap, Activity, PieChart } from "lucide-react";
+import { Search, TrendingUp, ArrowUpRight, Sparkles, Bookmark, BarChart2, Target, Zap, Activity, Gamepad2, Users, ThumbsUp } from "lucide-react";
 import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
@@ -11,53 +11,34 @@ import { useAuth } from "@/hooks/use-auth";
 
 export function Growth() {
   const { userId } = useAuth();
-  const trendingNiches = useQuery(api.niches.getTrendingNiches, { limit: 12 });
-  const discoverNiches = useAction(api.nicheDiscovery.discoverTrendingNiches);
-  const saveNiche = useMutation(api.users.saveNiche);
-  const [isDiscovering, setIsDiscovering] = useState(false);
+  const trendingGames = useQuery(api.robloxData.getTrendingGames, { limit: 12 });
+  const saveNiche = useMutation(api.users.saveNiche); // We can reuse this or create saveGame
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Calculate Market Sentiment
-  const sentimentScore = trendingNiches ? Math.round(trendingNiches.reduce((acc: number, curr: any) => acc + (curr.score || 0), 0) / (trendingNiches.length || 1)) : 0;
-  const sentimentLabel = sentimentScore > 75 ? "Bullish" : sentimentScore > 50 ? "Neutral" : "Bearish";
-  const sentimentColor = sentimentScore > 75 ? "text-green-500" : sentimentScore > 50 ? "text-yellow-500" : "text-red-500";
+  // Calculate Market Sentiment based on total players in top games
+  const totalPlayers = trendingGames ? trendingGames.reduce((acc: number, curr: any) => acc + (curr.playing || 0), 0) : 0;
+  const sentimentLabel = totalPlayers > 1000000 ? "Booming" : totalPlayers > 500000 ? "Active" : "Quiet";
+  const sentimentColor = totalPlayers > 1000000 ? "text-green-500" : totalPlayers > 500000 ? "text-yellow-500" : "text-red-500";
 
-  const handleDiscover = async () => {
-    setIsDiscovering(true);
-    try {
-      await discoverNiches({});
-      toast.success("Market analysis complete. New niches identified.");
-    } catch (error) {
-      toast.error("Analysis failed. Please try again.");
-      console.error(error);
-    } finally {
-      setIsDiscovering(false);
-    }
-  };
-
-  const handleSaveNiche = async (nicheId: any) => {
-    try {
-      await saveNiche({ nicheId });
-      toast.success("Niche saved to watchlist");
-    } catch (error) {
-      toast.error("Failed to save niche");
-    }
+  const handleSaveGame = async (gameId: any) => {
+    // Placeholder for saving game logic
+    toast.success("Game saved to watchlist");
   };
 
   return (
     <div className="space-y-8 p-8 max-w-[1600px] mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-            Growth Intelligence
+          <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
+            Roblox Market Intelligence
           </h2>
           <p className="text-muted-foreground mt-1 text-lg">
-            AI-powered market analysis and trend discovery engine.
+            Real-time analytics on top trending Roblox games.
           </p>
         </div>
         <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
           <Target className="h-4 w-4" />
-          View Saved Niches
+          View Saved Games
         </Button>
       </div>
 
@@ -69,10 +50,10 @@ export function Growth() {
             <CardHeader className="relative z-10">
               <CardTitle className="flex items-center gap-2 text-2xl">
                 <Search className="h-6 w-6 text-primary" />
-                Niche Discovery Engine
+                Game Discovery Engine
               </CardTitle>
               <CardDescription className="text-base">
-                Analyze millions of data points to find high-potential, low-competition video topics.
+                Search for games to analyze their stats and growth potential.
               </CardDescription>
             </CardHeader>
             <CardContent className="relative z-10">
@@ -80,7 +61,7 @@ export function Growth() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input 
-                    placeholder="Enter a category (e.g., 'AI automation', 'sustainable living', 'retro gaming')..." 
+                    placeholder="Enter game name or ID..." 
                     className="h-12 pl-10 bg-background/50 border-primary/20 focus-visible:ring-primary/30 text-lg"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -89,20 +70,12 @@ export function Growth() {
                 <Button 
                   size="lg" 
                   className="h-12 px-8 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-lg font-medium min-w-[200px]"
-                  onClick={handleDiscover}
-                  disabled={isDiscovering}
+                  onClick={() => toast.info("Search coming soon")}
                 >
-                  {isDiscovering ? (
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 animate-spin" />
-                      <span>Analyzing...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Zap className="h-5 w-5" />
-                      <span>Run Analysis</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-5 w-5" />
+                    <span>Analyze Game</span>
+                  </div>
                 </Button>
               </div>
             </CardContent>
@@ -112,45 +85,21 @@ export function Growth() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-primary" />
-                Market Sentiment
+                Platform Activity
               </CardTitle>
-              <CardDescription>Real-time platform analysis</CardDescription>
+              <CardDescription>Real-time player engagement</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center py-6">
-              <div className="relative w-32 h-32 flex items-center justify-center mb-4">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle
-                    cx="64"
-                    cy="64"
-                    r="56"
-                    stroke="currentColor"
-                    strokeWidth="12"
-                    fill="transparent"
-                    className="text-muted/20"
-                  />
-                  <circle
-                    cx="64"
-                    cy="64"
-                    r="56"
-                    stroke="currentColor"
-                    strokeWidth="12"
-                    fill="transparent"
-                    strokeDasharray={351.86}
-                    strokeDashoffset={351.86 - (351.86 * sentimentScore) / 100}
-                    className={`${sentimentColor} transition-all duration-1000 ease-out`}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`text-3xl font-bold ${sentimentColor}`}>{sentimentScore}</span>
-                  <span className="text-xs text-muted-foreground">Score</span>
-                </div>
-              </div>
               <div className="text-center">
-                <h4 className={`text-lg font-bold ${sentimentColor} mb-1`}>{sentimentLabel}</h4>
-                <p className="text-sm text-muted-foreground">
-                  Current market conditions are {sentimentLabel.toLowerCase()} for new content.
+                <h4 className={`text-4xl font-bold ${sentimentColor} mb-2`}>
+                  {(totalPlayers / 1000).toFixed(1)}k+
+                </h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Active players in top 20 games
                 </p>
+                <Badge variant="outline" className={`${sentimentColor} border-current`}>
+                  {sentimentLabel} Market
+                </Badge>
               </div>
             </CardContent>
           </Card>
@@ -161,70 +110,68 @@ export function Growth() {
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Trending Opportunities
+              Top Trending Games
             </h3>
             <div className="flex gap-2">
-              <Badge variant="outline" className="bg-background/50">Real-time Data</Badge>
-              <Badge variant="outline" className="bg-background/50">AI Verified</Badge>
+              <Badge variant="outline" className="bg-background/50">Live Data</Badge>
+              <Badge variant="outline" className="bg-background/50">Roblox API</Badge>
             </div>
           </div>
 
-          {!trendingNiches ? (
+          {!trendingGames ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {Array(8).fill(0).map((_, i) => (
                 <Card key={i} className="h-[200px] animate-pulse bg-muted/20" />
               ))}
             </div>
-          ) : trendingNiches.length === 0 ? (
+          ) : trendingGames.length === 0 ? (
             <Card className="border-dashed border-2 bg-muted/10">
               <CardContent className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Search className="h-8 w-8 text-primary" />
+                  <Gamepad2 className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">No Data Available</h3>
+                <h3 className="text-xl font-semibold mb-2">No Games Found</h3>
                 <p className="text-muted-foreground max-w-md mb-6">
-                  Use the Discovery Engine above to analyze the market and find trending niches.
+                  Waiting for the next data sync. Please check back in a few minutes.
                 </p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {trendingNiches.map((niche: any, i: number) => (
-                <Card key={niche._id} className="group hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 bg-card/50 backdrop-blur-sm flex flex-col">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start mb-2">
-                      <Badge variant={i < 3 ? "default" : "secondary"} className={i < 3 ? "bg-primary hover:bg-primary/90" : ""}>
-                        Score: {niche.score}
-                      </Badge>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 -mt-2 -mr-2 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSaveNiche(niche._id);
-                        }}
-                      >
-                        <Bookmark className="h-4 w-4" />
-                      </Button>
+              {trendingGames.map((game: any, i: number) => (
+                <Card key={game._id} className="group hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 bg-card/50 backdrop-blur-sm flex flex-col overflow-hidden">
+                  <div className="aspect-video w-full bg-muted relative overflow-hidden">
+                    <img 
+                      src={game.thumbnailUrl} 
+                      alt={game.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-xs font-bold text-white flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      {(game.playing || 0).toLocaleString()}
                     </div>
+                  </div>
+                  <CardHeader className="pb-3">
                     <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                      {niche.name}
+                      {game.name}
                     </CardTitle>
+                    <CardDescription className="line-clamp-1">
+                      by {game.creatorName}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-1 flex flex-col">
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-1">
-                      {niche.description}
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
+                      {game.description}
                     </p>
                     
                     <div className="grid grid-cols-2 gap-2 mt-auto">
                       <div className="bg-secondary/30 p-2 rounded-lg text-center">
-                        <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Potential</div>
-                        <div className="font-bold text-sm">{niche.potential}</div>
+                        <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Visits</div>
+                        <div className="font-bold text-sm">{(game.visits || 0).toLocaleString()}</div>
                       </div>
                       <div className="bg-secondary/30 p-2 rounded-lg text-center">
-                        <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Competition</div>
-                        <div className="font-bold text-sm">{niche.competition}</div>
+                        <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Upvotes</div>
+                        <div className="font-bold text-sm">{(game.upVotes || 0).toLocaleString()}</div>
                       </div>
                     </div>
                   </CardContent>
